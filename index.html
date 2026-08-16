@@ -149,6 +149,8 @@
 
   /* — settings — */
   .settings-block { display: flex; flex-direction: column; gap: 22px; padding-bottom: 24px; }
+  .settings-columns { display: flex; flex-direction: column; gap: 22px; }
+  .settings-col { display: flex; flex-direction: column; gap: 22px; }
   .settings-section-label { font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--color-muted); margin-bottom: 8px; }
   .profile-row { display: flex; align-items: center; gap: 12px; }
   .avatar { width: 48px; height: 48px; border-radius: 50%; background: var(--color-surface); display: flex; align-items: center; justify-content: center; font-weight: 800; font-family: var(--font-heading); font-size: 18px; flex-shrink: 0; object-fit: cover; }
@@ -221,22 +223,16 @@
     .screen, .app-header { background: var(--color-bg); }
   }
 
-  /* — desktop: sidebar nav instead of a bottom bar, wider content — */
+  /* — desktop: same bottom bar, just a wider stage with multi-column screens — */
   @media (min-width: 880px) {
-    .tabbar-wrap {
-      left: 0; right: auto; top: 0; bottom: 0; width: 176px;
-      border-top: none; border-right: 2px solid var(--color-divider); padding-top: 12px;
-    }
-    .tabbar { flex-direction: column; width: 100%; max-width: none; gap: 2px; padding: 0 10px; }
-    .tabbar button {
-      flex-direction: row; justify-content: flex-start; gap: 10px;
-      padding: 10px; border-radius: 0;
-    }
-    .tabbar button span { font-size: 13px; }
-    .tabbar button.active { background: color-mix(in srgb, var(--color-accent) 10%, transparent); }
-    .app-header, .screen { max-width: 960px; margin-left: 208px; margin-right: auto; }
-    .screen { padding-bottom: 60px; }
-    .toast { left: calc(50% + 88px); }
+    .app-header, .screen { max-width: 1120px; }
+    .add-form { max-width: 480px; }
+    .scheme-opt { flex: 1 1 18%; }
+    .home-columns { display: grid; grid-template-columns: 1.4fr 1fr; gap: 32px; align-items: start; }
+    .breakdown-columns { display: grid; grid-template-columns: 260px 1fr; gap: 32px; align-items: start; }
+    .breakdown-columns svg { transform: scale(1.3); }
+    .insight-cards { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; }
+    .settings-columns { display: grid; grid-template-columns: 1fr 1fr; gap: 0 32px; align-items: start; }
   }
 </style>
 </head>
@@ -906,38 +902,44 @@
           <div><div class="lbl">${escapeHtml(l.expenseLabel)}</div><div class="val">${fmtMoney(expense)}</div></div>
         </div>
       </div>
-      ${dueSoon.length ? `
-      <div class="section-head" style="margin-top:0">
-        <h3>${escapeHtml(l.upcomingBillsSection)}</h3>
-      </div>
-      <div class="bills-list">
-        ${dueSoon.map((b) => `
-          <div class="manage-row">
-            <div class="info">
-              <div class="name">${escapeHtml(b.name)}</div>
-              <div class="sub">${escapeHtml(dueSoonLabel(b.daysUntil))}</div>
-            </div>
-            <div class="amt">${fmtMoney(b.amount)}</div>
-            <button type="button" class="btn btn-secondary" data-mark-paid="${b.id}">${escapeHtml(l.markPaidBtn)}</button>
-          </div>`).join("")}
-      </div>` : ""}
-      <div class="section-head">
-        <h3>${escapeHtml(l.recentTx)}</h3>
-        <button type="button" class="btn btn-ghost" id="goAddBtn">${escapeHtml(l.addShort)}</button>
-      </div>
-      <div class="tx-list">
-        ${recent.map((t) => txRowHtml(t, false)).join("") || `<div class="empty-note">${escapeHtml(l.noResults)}</div>`}
-      </div>
-      <div class="section-head">
-        <h3>${escapeHtml(l.budgetsThisMonth)}</h3>
-        <button type="button" class="btn btn-ghost" id="goBudgetsBtn">${escapeHtml(l.seeAll)}</button>
-      </div>
-      <div class="budgets-list">
-        ${budgetsPreview.map((b) => `
-          <div class="budget-item">
-            <div class="row1"><span>${escapeHtml(b.category)}</span><span class="right">${b.spentFmt} / ${b.limitFmt}</span></div>
-            <div class="bar-track"><div class="bar-fill" style="width:${b.pct}%;background:${b.barColor}"></div></div>
-          </div>`).join("")}
+      <div class="home-columns">
+        <div class="home-col-main">
+          <div class="section-head" style="margin-top:0">
+            <h3>${escapeHtml(l.recentTx)}</h3>
+            <button type="button" class="btn btn-ghost" id="goAddBtn">${escapeHtml(l.addShort)}</button>
+          </div>
+          <div class="tx-list">
+            ${recent.map((t) => txRowHtml(t, false)).join("") || `<div class="empty-note">${escapeHtml(l.noResults)}</div>`}
+          </div>
+        </div>
+        <div class="home-col-side">
+          ${dueSoon.length ? `
+          <div class="section-head" style="margin-top:0">
+            <h3>${escapeHtml(l.upcomingBillsSection)}</h3>
+          </div>
+          <div class="bills-list">
+            ${dueSoon.map((b) => `
+              <div class="manage-row">
+                <div class="info">
+                  <div class="name">${escapeHtml(b.name)}</div>
+                  <div class="sub">${escapeHtml(dueSoonLabel(b.daysUntil))}</div>
+                </div>
+                <div class="amt">${fmtMoney(b.amount)}</div>
+                <button type="button" class="btn btn-secondary" data-mark-paid="${b.id}">${escapeHtml(l.markPaidBtn)}</button>
+              </div>`).join("")}
+          </div>` : ""}
+          <div class="section-head" style="${dueSoon.length ? "" : "margin-top:0"}">
+            <h3>${escapeHtml(l.budgetsThisMonth)}</h3>
+            <button type="button" class="btn btn-ghost" id="goBudgetsBtn">${escapeHtml(l.seeAll)}</button>
+          </div>
+          <div class="budgets-list">
+            ${budgetsPreview.map((b) => `
+              <div class="budget-item">
+                <div class="row1"><span>${escapeHtml(b.category)}</span><span class="right">${b.spentFmt} / ${b.limitFmt}</span></div>
+                <div class="bar-track"><div class="bar-fill" style="width:${b.pct}%;background:${b.barColor}"></div></div>
+              </div>`).join("")}
+          </div>
+        </div>
       </div>
     `;
     $("goAddBtn").addEventListener("click", () => { resetForm(); setTab("add"); });
@@ -1192,14 +1194,18 @@
     } else if (state.insightsTab === "breakdown") {
       const rows = computeBreakdown(state.insightsMonth);
       const monthLbl = monthLabel(state.insightsMonth);
-      body.innerHTML = `
-        <div style="font-size:12px;color:var(--color-muted);margin-bottom:12px">${escapeHtml(l.expenseByCategory)} — ${escapeHtml(monthLbl)}</div>
-        ${rows.length ? `<div style="display:flex;justify-content:center;margin-bottom:16px">${pieChartSvg(rows)}</div>` : ""}
-        ${rows.map((d) => `
+      const listHtml = rows.map((d) => `
           <div class="breakdown-row">
             <div class="row1"><span><span class="legend-dot" style="background:${d.color}"></span>${escapeHtml(d.category)}</span><span class="right">${d.totalFmt} · ${Math.round(d.sharePct)}%</span></div>
             <div class="breakdown-bar-track"><div class="bar-fill" style="width:${d.pct}%;background:${d.color}"></div></div>
-          </div>`).join("") || `<div class="empty-note">${escapeHtml(l.noExpensesMonth)}</div>`}
+          </div>`).join("") || `<div class="empty-note">${escapeHtml(l.noExpensesMonth)}</div>`;
+      body.innerHTML = `
+        <div style="font-size:12px;color:var(--color-muted);margin-bottom:12px">${escapeHtml(l.expenseByCategory)} — ${escapeHtml(monthLbl)}</div>
+        ${rows.length ? `
+        <div class="breakdown-columns">
+          <div style="display:flex;justify-content:center;margin-bottom:16px">${pieChartSvg(rows)}</div>
+          <div>${listHtml}</div>
+        </div>` : listHtml}
       `;
     } else {
       const trend = computeTrend();
@@ -1512,72 +1518,78 @@
       <h2 style="font-size:22px;margin-bottom:22px">${escapeHtml(l.settingsTitle)}</h2>
       <div class="settings-block">
 
-        <div class="profile-row">
-          ${avatarUrl ? `<img class="avatar" src="${escapeHtml(avatarUrl)}" alt="">` : `<div class="avatar">${escapeHtml((name || "?").slice(0, 1).toUpperCase())}</div>`}
-          <div>
-            <div class="profile-name">${escapeHtml(name)}</div>
-            <div class="profile-sub">${escapeHtml(currentUser ? l.personalAccount : "")}</div>
-          </div>
-          <button type="button" class="btn btn-secondary" id="authBtn">${escapeHtml(currentUser ? l.signOutBtn : l.signInGoogle)}</button>
-        </div>
+        <div class="settings-columns">
+          <div class="settings-col">
+            <div class="profile-row">
+              ${avatarUrl ? `<img class="avatar" src="${escapeHtml(avatarUrl)}" alt="">` : `<div class="avatar">${escapeHtml((name || "?").slice(0, 1).toUpperCase())}</div>`}
+              <div>
+                <div class="profile-name">${escapeHtml(name)}</div>
+                <div class="profile-sub">${escapeHtml(currentUser ? l.personalAccount : "")}</div>
+              </div>
+              <button type="button" class="btn btn-secondary" id="authBtn">${escapeHtml(currentUser ? l.signOutBtn : l.signInGoogle)}</button>
+            </div>
 
-        <div>
-          <div class="settings-section-label">${escapeHtml(l.languageSection)}</div>
-          <div class="seg" role="radiogroup">
-            <label class="seg-opt"><input type="radio" name="lang-switch" value="th" ${state.lang === "th" ? "checked" : ""}>ไทย</label>
-            <label class="seg-opt"><input type="radio" name="lang-switch" value="en" ${state.lang === "en" ? "checked" : ""}>English</label>
-          </div>
-        </div>
+            <div>
+              <div class="settings-section-label">${escapeHtml(l.languageSection)}</div>
+              <div class="seg" role="radiogroup">
+                <label class="seg-opt"><input type="radio" name="lang-switch" value="th" ${state.lang === "th" ? "checked" : ""}>ไทย</label>
+                <label class="seg-opt"><input type="radio" name="lang-switch" value="en" ${state.lang === "en" ? "checked" : ""}>English</label>
+              </div>
+            </div>
 
-        <div>
-          <div class="settings-section-label">${escapeHtml(l.displaySection)}</div>
-          <div class="toggle-row">
-            <span style="font-size:14px">${escapeHtml(l.darkModeBtn)}</span>
-            <button type="button" class="toggle-switch ${state.dark ? "on" : ""}" id="darkSwitch"><span class="thumb"></span></button>
+            <div>
+              <div class="settings-section-label">${escapeHtml(l.displaySection)}</div>
+              <div class="toggle-row">
+                <span style="font-size:14px">${escapeHtml(l.darkModeBtn)}</span>
+                <button type="button" class="toggle-switch ${state.dark ? "on" : ""}" id="darkSwitch"><span class="thumb"></span></button>
+              </div>
+              <div class="scheme-grid">
+                ${SCHEME_ORDER.map((s) => `
+                  <label class="scheme-opt ${state.scheme === s ? "active" : ""}" style="--swatch:${SCHEMES[s][0]}">
+                    <input type="radio" name="color-scheme" value="${s}" ${state.scheme === s ? "checked" : ""}>
+                    <span class="dot"></span>
+                    <span class="lbl">${escapeHtml(l["color" + s.charAt(0).toUpperCase() + s.slice(1)])}</span>
+                  </label>`).join("")}
+                <label class="scheme-opt ${state.scheme === "custom" ? "active" : ""}" style="--swatch:${state.customColor}">
+                  <input type="color" id="customColorPicker" value="${state.customColor}">
+                  <span class="dot"></span>
+                  <span class="lbl">${escapeHtml(l.colorCustom)}</span>
+                </label>
+              </div>
+            </div>
           </div>
-          <div class="scheme-grid">
-            ${SCHEME_ORDER.map((s) => `
-              <label class="scheme-opt ${state.scheme === s ? "active" : ""}" style="--swatch:${SCHEMES[s][0]}">
-                <input type="radio" name="color-scheme" value="${s}" ${state.scheme === s ? "checked" : ""}>
-                <span class="dot"></span>
-                <span class="lbl">${escapeHtml(l["color" + s.charAt(0).toUpperCase() + s.slice(1)])}</span>
-              </label>`).join("")}
-            <label class="scheme-opt ${state.scheme === "custom" ? "active" : ""}" style="--swatch:${state.customColor}">
-              <input type="color" id="customColorPicker" value="${state.customColor}">
-              <span class="dot"></span>
-              <span class="lbl">${escapeHtml(l.colorCustom)}</span>
-            </label>
-          </div>
-        </div>
 
-        <div>
-          <div class="settings-section-label">${escapeHtml(l.syncSection)}</div>
-          <div class="sync-box">
-            <span id="syncStatus" class="${lastSyncStatus.ok === true ? "ok" : (lastSyncStatus.ok === false ? "err" : "")}"><span class="sync-dot"></span><span>${escapeHtml(currentUser ? lastSyncStatus.text : l.syncSignedOut)}</span></span>
-            <div style="font-size:11.5px;color:var(--color-muted)">${escapeHtml(l.syncHelp)}</div>
-            <button type="button" class="btn btn-secondary" id="syncNowBtn" ${currentUser ? "" : "disabled"}>${escapeHtml(l.syncNowBtn)}</button>
-          </div>
-        </div>
+          <div class="settings-col">
+            <div>
+              <div class="settings-section-label">${escapeHtml(l.syncSection)}</div>
+              <div class="sync-box">
+                <span id="syncStatus" class="${lastSyncStatus.ok === true ? "ok" : (lastSyncStatus.ok === false ? "err" : "")}"><span class="sync-dot"></span><span>${escapeHtml(currentUser ? lastSyncStatus.text : l.syncSignedOut)}</span></span>
+                <div style="font-size:11.5px;color:var(--color-muted)">${escapeHtml(l.syncHelp)}</div>
+                <button type="button" class="btn btn-secondary" id="syncNowBtn" ${currentUser ? "" : "disabled"}>${escapeHtml(l.syncNowBtn)}</button>
+              </div>
+            </div>
 
-        ${deferredInstallPrompt ? `
-        <div>
-          <button type="button" class="btn btn-primary btn-block" id="installAppBtn">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right:6px"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
-            ${escapeHtml(l.installAppBtn)}
-          </button>
-        </div>` : ""}
+            ${deferredInstallPrompt ? `
+            <div>
+              <button type="button" class="btn btn-primary btn-block" id="installAppBtn">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right:6px"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                ${escapeHtml(l.installAppBtn)}
+              </button>
+            </div>` : ""}
 
-        <div>
-          <div class="settings-section-label">${escapeHtml(l.dataSection)}</div>
-          <div style="display:flex;flex-direction:column;gap:8px">
-            <button type="button" class="btn btn-secondary btn-block" id="exportCsvBtn">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
-              ${escapeHtml(l.exportCsvBtn)}
-            </button>
-            <button type="button" class="btn btn-secondary btn-block" id="exportJsonBtn">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
-              ${escapeHtml(l.exportJsonBtn)}
-            </button>
+            <div>
+              <div class="settings-section-label">${escapeHtml(l.dataSection)}</div>
+              <div style="display:flex;flex-direction:column;gap:8px">
+                <button type="button" class="btn btn-secondary btn-block" id="exportCsvBtn">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                  ${escapeHtml(l.exportCsvBtn)}
+                </button>
+                <button type="button" class="btn btn-secondary btn-block" id="exportJsonBtn">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                  ${escapeHtml(l.exportJsonBtn)}
+                </button>
+              </div>
+            </div>
           </div>
         </div>
 
