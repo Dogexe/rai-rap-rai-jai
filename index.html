@@ -213,7 +213,6 @@
   <header class="app-header">
     <h1 id="appTitle"></h1>
     <p id="appSubtitle"></p>
-    <button type="button" class="btn btn-secondary" id="darkToggleBtn" style="margin-top:4px"></button>
   </header>
 
   <main class="screen" id="screen"></main>
@@ -363,7 +362,7 @@
   const $ = (id) => document.getElementById(id);
   const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
   const monthKey = (iso) => iso.slice(0, 7);
-  function fmtMoney(n) { return "฿" + Math.round(n).toLocaleString(state.lang === "en" ? "en-US" : "th-TH"); }
+  function fmtMoney(n) { return "฿" + Number(n).toLocaleString(state.lang === "en" ? "en-US" : "th-TH", { minimumFractionDigits: 2, maximumFractionDigits: 2 }); }
   function dateLabel(iso) { return new Date(iso + "T00:00:00").toLocaleDateString(state.lang === "en" ? "en-US" : "th-TH", { day: "numeric", month: "short" }); }
   function monthLabel(key) { return new Date(key + "-01T00:00:00").toLocaleDateString(state.lang === "en" ? "en-US" : "th-TH", { month: "short", year: "2-digit" }); }
   function escapeHtml(s) { return String(s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c])); }
@@ -588,12 +587,16 @@
     }
     syncInFlight = true;
     setSyncStatus(L().syncSyncing, null);
-    const pushTxOk = await pushRows("transactions", transactions.map((t) => txToRow(t, false)));
-    const pushBudgetOk = await pushRows("budgets", budgets.map((b) => budgetToRow(b, false)));
-    const pushBillOk = await pushRows("bills", bills.map((b) => billToRow(b, false)));
+    // Pull first: a device/session that hasn't yet learned about a deletion
+    // made elsewhere still holds the old (or hardcoded default) row locally.
+    // Pushing that stale copy before pulling would re-upload it with a fresh
+    // timestamp and silently resurrect it in the cloud (and everywhere else).
     const pullTxOk = await pullTransactions();
     const pullBudgetOk = await pullBudgets();
     const pullBillOk = await pullBills();
+    const pushTxOk = await pushRows("transactions", transactions.map((t) => txToRow(t, false)));
+    const pushBudgetOk = await pushRows("budgets", budgets.map((b) => budgetToRow(b, false)));
+    const pushBillOk = await pushRows("bills", bills.map((b) => billToRow(b, false)));
     if (pushTxOk && pushBudgetOk && pushBillOk && pullTxOk && pullBudgetOk && pullBillOk) {
       setSyncStatus(L().syncLatest + new Date().toLocaleTimeString(state.lang === "en" ? "en-US" : "th-TH"), true);
       if (!hasLiveInputRisk()) renderScreen();
@@ -670,11 +673,6 @@
     $("appSubtitle").textContent = L().appSubtitle;
     document.title = L().appTitle;
     document.documentElement.lang = state.lang;
-    const dt = $("darkToggleBtn");
-    dt.innerHTML = (state.dark
-      ? '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>'
-      : '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>'
-    ) + " " + escapeHtml(L().darkModeBtn);
     document.querySelectorAll("#tabbar span[data-l]").forEach((el) => { el.textContent = L()[el.getAttribute("data-l")]; });
     document.querySelectorAll("#tabbar button").forEach((btn) => btn.classList.toggle("active", btn.getAttribute("data-tab") === state.tab));
   }
@@ -1261,7 +1259,6 @@
     if (btn.getAttribute("data-tab") === "add") resetForm();
     setTab(btn.getAttribute("data-tab"));
   }));
-  $("darkToggleBtn").addEventListener("click", () => { state.dark = !state.dark; saveSettings(); applyTheme(); renderChrome(); if (state.tab === "settings") renderSettings(); });
 
   window.addEventListener("online", syncNow);
   window.addEventListener("offline", () => setSyncStatus(L().syncOffline, false));
