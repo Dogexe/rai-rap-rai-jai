@@ -1,0 +1,37 @@
+<div align="center">
+
+<img src="icons/icon-512.png" width="84" height="84" alt="App icon" />
+
+# รายรับ-รายจ่าย · Income & Expenses
+
+Personal income & expense tracker with Google sign-in, cross-device sync, budgets, recurring bills, and savings goals — installable as a PWA.
+
+**[Open the app →](https://dogexe.github.io/rai-rap-rai-jai/)**
+
+![Made with JavaScript](https://img.shields.io/badge/JavaScript-F7DF1E?style=flat-square&logo=javascript&logoColor=black)
+![Supabase](https://img.shields.io/badge/Supabase-3ECF8E?style=flat-square&logo=supabase&logoColor=white)
+![PWA](https://img.shields.io/badge/PWA-installable-5A0FC8?style=flat-square&logo=pwa&logoColor=white)
+![No build step](https://img.shields.io/badge/build%20step-none-333333?style=flat-square)
+
+</div>
+
+## Features
+
+- **Google sign-in** — data syncs automatically across every device you're signed into, scoped privately to your account (Postgres row-level security)
+- **Transactions** — add, edit, delete; category is auto-guessed from what you type in the note
+- **Budgets** — per-category monthly limits, with a warning as you approach or go over
+- **Recurring bills** — see what's due in the next 7 days on the home screen and mark it paid in one tap, which logs the transaction for you
+- **Savings goals** — set a target, add funds over time, watch the progress bar fill
+- **Insights** — budget progress, a category breakdown with a donut chart, and a 6-month income/expense trend
+- **10 accent colors + a custom color picker**, light/dark mode
+- **Thai / English** interface
+- **Installable PWA** — add to your home screen, keeps working offline
+- **Responsive** — mobile-first bottom nav, wider multi-column layout on desktop
+
+## Tech
+
+Plain HTML/CSS/JavaScript, no framework, no build step, no bundler — one file. Data and auth run on [Supabase](https://supabase.com/) (Postgres + Google OAuth); hosting is [GitHub Pages](https://pages.github.com/); offline/installability comes from a small hand-written service worker and web manifest.
+
+---
+
+<sub>Built with <a href="https://claude.com/claude-code">Claude Code</a>.</sub>
