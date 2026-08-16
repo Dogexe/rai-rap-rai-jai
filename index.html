@@ -342,6 +342,11 @@
       toastBudgetOver: "เกินงบ {cat} แล้ว", toastBudgetNear: "ใกล้ถึงงบ {cat} แล้ว (เกิน 80%)",
       upcomingBillsSection: "รายการที่ใกล้ถึงกำหนด", markPaidBtn: "จ่ายแล้ว",
       dueToday: "ถึงกำหนดวันนี้", dueTomorrow: "ถึงกำหนดพรุ่งนี้", dueInDays: "อีก {n} วัน",
+      goalsSection: "เป้าหมายการออม", addGoalBtn: "+ เพิ่มเป้าหมาย", goalNameLabel: "ชื่อเป้าหมาย",
+      targetLabel: "จำนวนเงินเป้าหมาย (บาท)", savedLabel: "จำนวนที่ออมแล้ว (บาท)", saveGoalBtn: "บันทึกเป้าหมาย",
+      noGoals: "ยังไม่มีเป้าหมายการออม", toastGoalSaved: "บันทึกเป้าหมายแล้ว", toastGoalDeleted: "ลบเป้าหมายแล้ว",
+      contributeAria: "เพิ่มเงินออม", contributeAmountLabel: "จำนวนเงินที่เพิ่ม (บาท)", addFundsBtn: "เพิ่มเงิน",
+      goalComplete: "ถึงเป้าหมายแล้ว!", toastFundsAdded: "เพิ่มเงินออมแล้ว",
       notSignedIn: "ยังไม่ได้เข้าสู่ระบบ", signInGoogle: "เข้าสู่ระบบด้วย Google", signOutBtn: "ออกจากระบบ",
       syncNowBtn: "ซิงค์เดี๋ยวนี้", syncHelp: "เข้าสู่ระบบด้วย Google ด้านบนเพื่อซิงค์ข้อมูลข้ามอุปกรณ์โดยอัตโนมัติ — ไม่ต้องใช้รหัสอีกต่อไป",
       syncSignedOut: "เข้าสู่ระบบด้วย Google เพื่อซิงค์ข้อมูลข้ามอุปกรณ์", syncSyncing: "กำลังซิงค์...",
@@ -377,6 +382,11 @@
       toastBudgetOver: "Over budget for {cat}", toastBudgetNear: "Nearing budget for {cat} (80%+)",
       upcomingBillsSection: "Upcoming bills", markPaidBtn: "Mark paid",
       dueToday: "Due today", dueTomorrow: "Due tomorrow", dueInDays: "Due in {n} days",
+      goalsSection: "Savings goals", addGoalBtn: "+ Add goal", goalNameLabel: "Goal name",
+      targetLabel: "Target amount (THB)", savedLabel: "Saved so far (THB)", saveGoalBtn: "Save goal",
+      noGoals: "No savings goals yet", toastGoalSaved: "Goal saved", toastGoalDeleted: "Goal deleted",
+      contributeAria: "Add funds", contributeAmountLabel: "Amount to add (THB)", addFundsBtn: "Add",
+      goalComplete: "Goal reached!", toastFundsAdded: "Funds added",
       notSignedIn: "Not signed in", signInGoogle: "Sign in with Google", signOutBtn: "Sign out",
       syncNowBtn: "Sync now", syncHelp: "Sign in with Google above to sync your data across devices automatically — no code needed.",
       syncSignedOut: "Sign in with Google to sync across devices", syncSyncing: "Syncing...",
@@ -416,6 +426,7 @@
   function escapeHtml(s) { return String(s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c])); }
   const EDIT_ICON = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"></path></svg>';
   const DELETE_ICON = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>';
+  const PLUS_ICON = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>';
 
   // ---------- state ----------
   const state = {
@@ -424,7 +435,7 @@
     txFilterType: "all", txFilterMonth: "all", txFilterCategory: "all", txSearch: "",
     formType: "expense", formDate: new Date().toISOString().slice(0, 10),
     formCategory: CATEGORIES.expense[0], editingId: null, categoryManual: false,
-    budgetEditId: null, billEditId: null
+    budgetEditId: null, billEditId: null, goalEditId: null, goalContributeId: null
   };
   let transactions = [];
   let budgets = [
@@ -439,6 +450,7 @@
     { id: "bl2", name: "ประกันสุขภาพ", amount: 1200, day: 15, category: "สุขภาพ" },
     { id: "bl3", name: "Netflix", amount: 349, day: 20, category: "บันเทิง" }
   ];
+  let goals = [];
 
   // ---------- persistence (localStorage) ----------
   const STORAGE_KEY = "expense_tracker_transactions_v1";
@@ -473,6 +485,7 @@
         if (s.scheme === "custom" || SCHEME_ORDER.includes(s.scheme)) state.scheme = s.scheme;
         if (Array.isArray(s.budgets) && s.budgets.length) budgets = s.budgets;
         if (Array.isArray(s.bills) && s.bills.length) bills = s.bills;
+        if (Array.isArray(s.goals)) goals = s.goals;
       }
     } catch (e) { /* ignore */ }
     SCHEMES.custom = computeCustomScheme(state.customColor);
@@ -483,7 +496,7 @@
   }
   function saveSettings() {
     if (!storageAvailable) return;
-    try { window.localStorage.setItem(SETTINGS_KEY, JSON.stringify({ lang: state.lang, dark: state.dark, scheme: state.scheme, customColor: state.customColor, budgets, bills })); } catch (e) { /* quota */ }
+    try { window.localStorage.setItem(SETTINGS_KEY, JSON.stringify({ lang: state.lang, dark: state.dark, scheme: state.scheme, customColor: state.customColor, budgets, bills, goals })); } catch (e) { /* quota */ }
   }
 
   // ---------- theming ----------
@@ -553,6 +566,13 @@
       deleted: !!deleted, updated_at: new Date(b.updatedAt || Date.now()).toISOString()
     };
   }
+  function rowToGoal(r) { return { id: r.id, name: r.name, target: Number(r.target_amount), saved: Number(r.saved_amount), updatedAt: new Date(r.updated_at).getTime() }; }
+  function goalToRow(g, deleted) {
+    return {
+      id: g.id, user_id: currentUser ? currentUser.id : null, name: g.name, target_amount: g.target, saved_amount: g.saved,
+      deleted: !!deleted, updated_at: new Date(g.updatedAt || Date.now()).toISOString()
+    };
+  }
 
   async function pushRows(table, rows) {
     if (!sb || !currentUser || !rows.length) return true;
@@ -615,13 +635,30 @@
       return true;
     } catch (e) { return false; }
   }
+  async function pullGoals() {
+    if (!sb || !currentUser) return false;
+    try {
+      const { data, error } = await sb.from("goals").select("*").eq("user_id", currentUser.id);
+      if (error) throw error;
+      const byId = new Map(goals.map((g) => [g.id, g]));
+      (data || []).forEach((r) => {
+        const rTime = new Date(r.updated_at).getTime();
+        if (r.deleted) { byId.delete(r.id); return; }
+        const local = byId.get(r.id);
+        if (!local || (local.updatedAt || 0) < rTime) byId.set(r.id, rowToGoal(r));
+      });
+      goals = Array.from(byId.values());
+      saveSettings();
+      return true;
+    } catch (e) { return false; }
+  }
 
   // True while the user has an uncontrolled form open/focused that a full
   // screen re-render would silently reset mid-edit (Add screen, budget/bill
   // inline forms, or any focused field in the current screen).
   function hasLiveInputRisk() {
     if (state.tab === "add") return true;
-    if (state.budgetEditId || state.billEditId) return true;
+    if (state.budgetEditId || state.billEditId || state.goalEditId || state.goalContributeId) return true;
     const active = document.activeElement;
     const screenEl = $("screen");
     if (active && screenEl && screenEl.contains(active) && /^(INPUT|SELECT|TEXTAREA)$/.test(active.tagName)) return true;
@@ -646,10 +683,12 @@
     const pullTxOk = await pullTransactions();
     const pullBudgetOk = await pullBudgets();
     const pullBillOk = await pullBills();
+    const pullGoalOk = await pullGoals();
     const pushTxOk = await pushRows("transactions", transactions.map((t) => txToRow(t, false)));
     const pushBudgetOk = await pushRows("budgets", budgets.map((b) => budgetToRow(b, false)));
     const pushBillOk = await pushRows("bills", bills.map((b) => billToRow(b, false)));
-    if (pushTxOk && pushBudgetOk && pushBillOk && pullTxOk && pullBudgetOk && pullBillOk) {
+    const pushGoalOk = await pushRows("goals", goals.map((g) => goalToRow(g, false)));
+    if (pushTxOk && pushBudgetOk && pushBillOk && pushGoalOk && pullTxOk && pullBudgetOk && pullBillOk && pullGoalOk) {
       setSyncStatus(L().syncLatest + new Date().toLocaleTimeString(state.lang === "en" ? "en-US" : "th-TH"), true);
       if (!hasLiveInputRisk()) renderScreen();
     } else {
@@ -1325,6 +1364,118 @@
     });
   }
 
+  // ---------- Savings goals management ----------
+  function goalCardHtml(g) {
+    const l = L();
+    const pct = Math.min(100, Math.round((g.saved / g.target) * 100));
+    const complete = g.saved >= g.target;
+    return `
+      <div class="insight-card">
+        <div class="head">
+          <span class="cat">${escapeHtml(g.name)}</span>
+          <div class="row-actions">
+            <button type="button" class="btn btn-icon" data-contribute-goal="${g.id}" aria-label="${escapeHtml(l.contributeAria)}">${PLUS_ICON}</button>
+            <button type="button" class="btn btn-icon" data-edit-goal="${g.id}" aria-label="${escapeHtml(l.editAria)}">${EDIT_ICON}</button>
+            <button type="button" class="btn btn-icon" style="color:var(--color-accent-700)" data-delete-goal="${g.id}" aria-label="${escapeHtml(l.deleteAria)}">${DELETE_ICON}</button>
+          </div>
+        </div>
+        <div class="bar-track"><div class="bar-fill" style="width:${pct}%;background:${complete ? "var(--color-income)" : "var(--color-accent)"}"></div></div>
+        <div class="foot"><span>${fmtMoney(g.saved)} / ${fmtMoney(g.target)}</span><span>${complete ? escapeHtml(l.goalComplete) : pct + "%"}</span></div>
+        ${state.goalContributeId === g.id ? goalContributeFormHtml(g) : ""}
+      </div>`;
+  }
+  function goalContributeFormHtml() {
+    const l = L();
+    return `
+      <div class="inline-form" style="margin:12px 0 0">
+        <div class="field">
+          <label>${escapeHtml(l.contributeAmountLabel)}</label>
+          <input class="input" type="number" id="goalContributeInput" min="0" step="0.01">
+        </div>
+        <div class="actions-row">
+          <button type="button" class="btn btn-primary" id="saveContributeBtn">${escapeHtml(l.addFundsBtn)}</button>
+          <button type="button" class="btn btn-secondary" id="cancelContributeBtn">${escapeHtml(l.cancelBtn)}</button>
+        </div>
+      </div>`;
+  }
+  function goalFormHtml() {
+    const l = L();
+    if (!state.goalEditId) return "";
+    const isNew = state.goalEditId === "new";
+    const editing = !isNew ? goals.find((g) => g.id === state.goalEditId) : null;
+    if (!isNew && !editing) return "";
+    return `
+      <div class="inline-form">
+        <div class="field">
+          <label>${escapeHtml(l.goalNameLabel)}</label>
+          <input class="input" type="text" id="goalNameInput" value="${isNew ? "" : escapeHtml(editing.name)}">
+        </div>
+        <div class="field">
+          <label>${escapeHtml(l.targetLabel)}</label>
+          <input class="input" type="number" id="goalTargetInput" min="0" step="0.01" value="${isNew ? "" : editing.target}">
+        </div>
+        <div class="field">
+          <label>${escapeHtml(l.savedLabel)}</label>
+          <input class="input" type="number" id="goalSavedInput" min="0" step="0.01" value="${isNew ? "0" : editing.saved}">
+        </div>
+        <div class="actions-row">
+          <button type="button" class="btn btn-primary" id="saveGoalFormBtn">${escapeHtml(l.saveGoalBtn)}</button>
+          <button type="button" class="btn btn-secondary" id="cancelGoalFormBtn">${escapeHtml(l.cancelBtn)}</button>
+        </div>
+      </div>`;
+  }
+  function saveGoalForm() {
+    const isNew = state.goalEditId === "new";
+    const name = ($("goalNameInput") || {}).value ? $("goalNameInput").value.trim() : "";
+    const target = parseFloat(($("goalTargetInput") || {}).value);
+    const saved = parseFloat(($("goalSavedInput") || {}).value) || 0;
+    if (!name || !target || target <= 0 || saved < 0) { showToast(L().toastInvalidAmount); return; }
+    let savedGoal;
+    if (isNew) {
+      savedGoal = { id: uid(), name, target, saved, updatedAt: Date.now() };
+      goals.push(savedGoal);
+    } else {
+      const g = goals.find((x) => x.id === state.goalEditId);
+      if (!g) return;
+      g.name = name; g.target = target; g.saved = saved; g.updatedAt = Date.now();
+      savedGoal = g;
+    }
+    saveSettings();
+    state.goalEditId = null;
+    showToast(L().toastGoalSaved);
+    renderSettings();
+    pushRows("goals", [goalToRow(savedGoal, false)]).then(() => syncNow());
+  }
+  function deleteGoal(id) {
+    const g = goals.find((x) => x.id === id);
+    if (!g) return;
+    goals = goals.filter((x) => x.id !== id);
+    saveSettings();
+    if (state.goalEditId === id) state.goalEditId = null;
+    renderSettings();
+    g.updatedAt = Date.now();
+    pushRows("goals", [goalToRow(g, true)]).then(() => syncNow());
+    showToast(L().toastGoalDeleted, () => {
+      const restored = Object.assign({}, g, { updatedAt: Date.now() });
+      goals.push(restored);
+      saveSettings();
+      renderSettings();
+      pushRows("goals", [goalToRow(restored, false)]).then(() => syncNow());
+    });
+  }
+  function saveContribution() {
+    const g = goals.find((x) => x.id === state.goalContributeId);
+    const amount = parseFloat(($("goalContributeInput") || {}).value);
+    if (!g || !amount || amount <= 0) { showToast(L().toastInvalidAmount); return; }
+    g.saved += amount;
+    g.updatedAt = Date.now();
+    saveSettings();
+    state.goalContributeId = null;
+    showToast(L().toastFundsAdded);
+    renderSettings();
+    pushRows("goals", [goalToRow(g, false)]).then(() => syncNow());
+  }
+
   // ---------- Settings ----------
   function renderSettings() {
     const l = L();
@@ -1419,6 +1570,17 @@
           </div>
         </div>
 
+        <div>
+          <div class="section-add-row">
+            <div class="settings-section-label" style="margin:0">${escapeHtml(l.goalsSection)}</div>
+            <button type="button" class="btn btn-ghost" id="addGoalBtn" style="padding:0;font-size:12px">${escapeHtml(l.addGoalBtn)}</button>
+          </div>
+          <div id="goalFormSlot">${state.goalEditId ? goalFormHtml() : ""}</div>
+          <div class="insight-cards" style="padding-bottom:0">
+            ${goals.map(goalCardHtml).join("") || `<div class="empty-note">${escapeHtml(l.noGoals)}</div>`}
+          </div>
+        </div>
+
         <p class="footer-note">${escapeHtml(l.footerNote)}</p>
       </div>
     `;
@@ -1463,6 +1625,15 @@
     document.querySelectorAll("[data-delete-bill]").forEach((btn) => btn.addEventListener("click", () => deleteBill(btn.getAttribute("data-delete-bill"))));
     if ($("saveBillFormBtn")) $("saveBillFormBtn").addEventListener("click", saveBillForm);
     if ($("cancelBillFormBtn")) $("cancelBillFormBtn").addEventListener("click", () => { state.billEditId = null; renderSettings(); });
+
+    $("addGoalBtn").addEventListener("click", () => { state.goalEditId = "new"; state.goalContributeId = null; renderSettings(); });
+    document.querySelectorAll("[data-edit-goal]").forEach((btn) => btn.addEventListener("click", () => { state.goalEditId = btn.getAttribute("data-edit-goal"); state.goalContributeId = null; renderSettings(); }));
+    document.querySelectorAll("[data-delete-goal]").forEach((btn) => btn.addEventListener("click", () => deleteGoal(btn.getAttribute("data-delete-goal"))));
+    document.querySelectorAll("[data-contribute-goal]").forEach((btn) => btn.addEventListener("click", () => { state.goalContributeId = btn.getAttribute("data-contribute-goal"); state.goalEditId = null; renderSettings(); }));
+    if ($("saveGoalFormBtn")) $("saveGoalFormBtn").addEventListener("click", saveGoalForm);
+    if ($("cancelGoalFormBtn")) $("cancelGoalFormBtn").addEventListener("click", () => { state.goalEditId = null; renderSettings(); });
+    if ($("saveContributeBtn")) $("saveContributeBtn").addEventListener("click", saveContribution);
+    if ($("cancelContributeBtn")) $("cancelContributeBtn").addEventListener("click", () => { state.goalContributeId = null; renderSettings(); });
   }
 
   // ---------- tab routing ----------
