@@ -4,6 +4,10 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>รายรับ-รายจ่าย</title>
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+<meta name="theme-color" content="#ec3013" id="themeColorMeta">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;600;800&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -346,7 +350,7 @@
       targetLabel: "จำนวนเงินเป้าหมาย (บาท)", savedLabel: "จำนวนที่ออมแล้ว (บาท)", saveGoalBtn: "บันทึกเป้าหมาย",
       noGoals: "ยังไม่มีเป้าหมายการออม", toastGoalSaved: "บันทึกเป้าหมายแล้ว", toastGoalDeleted: "ลบเป้าหมายแล้ว",
       contributeAria: "เพิ่มเงินออม", contributeAmountLabel: "จำนวนเงินที่เพิ่ม (บาท)", addFundsBtn: "เพิ่มเงิน",
-      goalComplete: "ถึงเป้าหมายแล้ว!", toastFundsAdded: "เพิ่มเงินออมแล้ว",
+      goalComplete: "ถึงเป้าหมายแล้ว!", toastFundsAdded: "เพิ่มเงินออมแล้ว", installAppBtn: "ติดตั้งแอปลงเครื่อง",
       notSignedIn: "ยังไม่ได้เข้าสู่ระบบ", signInGoogle: "เข้าสู่ระบบด้วย Google", signOutBtn: "ออกจากระบบ",
       syncNowBtn: "ซิงค์เดี๋ยวนี้", syncHelp: "เข้าสู่ระบบด้วย Google ด้านบนเพื่อซิงค์ข้อมูลข้ามอุปกรณ์โดยอัตโนมัติ — ไม่ต้องใช้รหัสอีกต่อไป",
       syncSignedOut: "เข้าสู่ระบบด้วย Google เพื่อซิงค์ข้อมูลข้ามอุปกรณ์", syncSyncing: "กำลังซิงค์...",
@@ -386,7 +390,7 @@
       targetLabel: "Target amount (THB)", savedLabel: "Saved so far (THB)", saveGoalBtn: "Save goal",
       noGoals: "No savings goals yet", toastGoalSaved: "Goal saved", toastGoalDeleted: "Goal deleted",
       contributeAria: "Add funds", contributeAmountLabel: "Amount to add (THB)", addFundsBtn: "Add",
-      goalComplete: "Goal reached!", toastFundsAdded: "Funds added",
+      goalComplete: "Goal reached!", toastFundsAdded: "Funds added", installAppBtn: "Install app",
       notSignedIn: "Not signed in", signInGoogle: "Sign in with Google", signOutBtn: "Sign out",
       syncNowBtn: "Sync now", syncHelp: "Sign in with Google above to sync your data across devices automatically — no code needed.",
       syncSignedOut: "Sign in with Google to sync across devices", syncSyncing: "Syncing...",
@@ -518,6 +522,8 @@
     root.setProperty("--color-income", mono ? t.text : (state.dark ? "#5fae74" : "#2f6b3f"));
     root.setProperty("--color-expense", mono ? t.text : (state.dark ? "#ef7a63" : "#ae1800"));
     root.setProperty("--color-warning", mono ? t.text : (state.dark ? "#e0a030" : "#a66a1f"));
+    const themeColorMeta = $("themeColorMeta");
+    if (themeColorMeta) themeColorMeta.setAttribute("content", t.bg);
   }
 
   // ---------- cloud sync (Supabase) ----------
@@ -531,6 +537,7 @@
   } catch (e) { sb = null; }
 
   let currentUser = null;
+  let deferredInstallPrompt = null;
   let lastSyncStatus = { text: "", ok: null };
 
   function setSyncStatus(text, ok) {
@@ -1534,6 +1541,14 @@
           </div>
         </div>
 
+        ${deferredInstallPrompt ? `
+        <div>
+          <button type="button" class="btn btn-primary btn-block" id="installAppBtn">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right:6px"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+            ${escapeHtml(l.installAppBtn)}
+          </button>
+        </div>` : ""}
+
         <div>
           <div class="settings-section-label">${escapeHtml(l.dataSection)}</div>
           <div style="display:flex;flex-direction:column;gap:8px">
@@ -1598,6 +1613,14 @@
       renderScreen();
     });
     $("syncNowBtn").addEventListener("click", syncNow);
+    if ($("installAppBtn")) $("installAppBtn").addEventListener("click", function () {
+      if (!deferredInstallPrompt) return;
+      deferredInstallPrompt.prompt();
+      deferredInstallPrompt.userChoice.finally(() => {
+        deferredInstallPrompt = null;
+        renderSettings();
+      });
+    });
     $("exportCsvBtn").addEventListener("click", function () {
       const header = ["วันที่", "ประเภท", "หมวดหมู่", "รายละเอียด", "จำนวนเงิน"];
       const rows = transactions.slice().sort((a, b) => a.date.localeCompare(b.date)).map((t) =>
@@ -1675,6 +1698,19 @@
       if (currentUser) syncNow();
     });
   }
+
+  if ("serviceWorker" in navigator) {
+    window.addEventListener("load", () => { navigator.serviceWorker.register("sw.js").catch(() => {}); });
+  }
+  window.addEventListener("beforeinstallprompt", (e) => {
+    e.preventDefault();
+    deferredInstallPrompt = e;
+    if (state.tab === "settings" && !hasLiveInputRisk()) renderSettings();
+  });
+  window.addEventListener("appinstalled", () => {
+    deferredInstallPrompt = null;
+    if (state.tab === "settings" && !hasLiveInputRisk()) renderSettings();
+  });
 })();
 </script>
 </body>
