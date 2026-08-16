@@ -150,13 +150,20 @@
   .sync-row { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
   .sync-row label.inline { font-size: 12.5px; color: var(--text-secondary); font-weight: 600; min-width: 150px; }
   .sync-row input[type=text] { width: auto; flex: 1 1 160px; min-width: 140px; font-variant-numeric: tabular-nums; letter-spacing: .03em; }
-  #syncCodeDisplay { font-weight: 700; text-align: center; background: var(--page); }
   #syncStatus { font-size: 12.5px; color: var(--text-secondary); }
   #syncStatus.ok { color: var(--good); }
   #syncStatus.err { color: var(--critical); }
   .sync-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 6px; vertical-align: middle; background: var(--text-muted); }
   .sync-dot.ok { background: var(--good); }
   .sync-dot.err { background: var(--critical); }
+  .btn-google {
+    display: inline-flex; align-items: center; gap: 10px;
+    background: var(--surface-1); color: var(--text-primary);
+    border: 1px solid var(--border); font-weight: 600;
+  }
+  .btn-google:hover { filter: brightness(0.97); }
+  .account-avatar { width: 28px; height: 28px; border-radius: 50%; background: var(--grid); flex-shrink: 0; }
+  .account-name { font-size: 13.5px; font-weight: 600; }
 
   table.tx-table { width: 100%; border-collapse: collapse; font-size: 13.5px; }
   table.tx-table th {
@@ -197,16 +204,17 @@
   </header>
 
   <section class="card sync-card">
-    <h2>ซิงค์ข้อมูลข้ามอุปกรณ์ <small>ใช้รหัสเดียวกันในทุกอุปกรณ์เพื่อดูข้อมูลชุดเดียวกัน</small></h2>
-    <div class="sync-row">
-      <label class="inline" for="syncCodeDisplay">รหัสซิงค์ของคุณ</label>
-      <input type="text" id="syncCodeDisplay" readonly>
-      <button type="button" class="ghost" id="copySyncCodeBtn">คัดลอกรหัส</button>
+    <h2>ซิงค์ข้อมูลข้ามอุปกรณ์ <small>เข้าสู่ระบบด้วยบัญชี Google เพื่อซิงค์ข้อมูลชุดเดียวกันในทุกอุปกรณ์โดยอัตโนมัติ</small></h2>
+    <div class="sync-row" id="signedOutRow">
+      <button type="button" class="btn-google" id="googleSignInBtn">
+        <svg width="18" height="18" viewBox="0 0 18 18" aria-hidden="true"><path fill="#4285F4" d="M17.64 9.2c0-.64-.06-1.25-.16-1.84H9v3.48h4.84a4.14 4.14 0 0 1-1.8 2.72v2.26h2.9c1.7-1.57 2.7-3.88 2.7-6.62z"/><path fill="#34A853" d="M9 18c2.43 0 4.47-.8 5.96-2.18l-2.9-2.26c-.8.54-1.84.86-3.06.86-2.35 0-4.34-1.59-5.05-3.72H.98v2.33A9 9 0 0 0 9 18z"/><path fill="#FBBC05" d="M3.95 10.7A5.4 5.4 0 0 1 3.67 9c0-.59.1-1.17.28-1.7V4.97H.98A9 9 0 0 0 0 9c0 1.45.35 2.83.98 4.03l2.97-2.33z"/><path fill="#EA4335" d="M9 3.58c1.32 0 2.51.45 3.44 1.35l2.58-2.58C13.46.89 11.43 0 9 0A9 9 0 0 0 .98 4.97l2.97 2.33C4.66 5.17 6.65 3.58 9 3.58z"/></svg>
+        เข้าสู่ระบบด้วย Google
+      </button>
     </div>
-    <div class="sync-row">
-      <label class="inline" for="syncCodeInput">เชื่อมกับอุปกรณ์อื่น (ป้อนรหัสจากเครื่องนั้น)</label>
-      <input type="text" id="syncCodeInput" placeholder="เช่น AB12-CD34">
-      <button type="button" class="ghost" id="linkSyncCodeBtn">เชื่อมรหัสนี้</button>
+    <div class="sync-row" id="signedInRow" style="display:none;">
+      <img id="accountAvatar" class="account-avatar" alt="">
+      <span id="accountName" class="account-name"></span>
+      <button type="button" class="ghost" id="signOutBtn" style="margin-left:auto;">ออกจากระบบ</button>
     </div>
     <div class="sync-row">
       <span id="syncStatus"><span class="sync-dot"></span>กำลังตรวจสอบสถานะซิงค์...</span>
@@ -325,8 +333,8 @@
   </section>
 
   <footer class="note">
-    ข้อมูลจะถูกบันทึกไว้ในเบราว์เซอร์นี้เสมอ และซิงค์ขึ้นคลาวด์อัตโนมัติตาม "รหัสซิงค์" ด้านบน — เปิดแอปนี้ในอุปกรณ์อื่นแล้วป้อนรหัสเดียวกันในช่อง
-    "เชื่อมกับอุปกรณ์อื่น" เพื่อดูข้อมูลชุดเดียวกันบนทุกเครื่อง (รหัสนี้เปรียบเสมือนรหัสผ่านของข้อมูลคุณ อย่าแชร์ให้คนอื่นถ้าไม่ต้องการให้เห็นข้อมูล)
+    ข้อมูลจะถูกบันทึกไว้ในเบราว์เซอร์นี้เสมอ ถ้าเข้าสู่ระบบด้วย Google ข้อมูลจะซิงค์ขึ้นคลาวด์อัตโนมัติและผูกกับบัญชีของคุณ — เปิดแอปนี้ในอุปกรณ์อื่นแล้วเข้าสู่ระบบด้วยบัญชี Google เดียวกัน
+    เพื่อดูข้อมูลชุดเดียวกันบนทุกเครื่อง (ไม่ต้องใช้รหัสอีกต่อไป)
     ถึงจะมีการซิงค์แล้ว ก็ยังแนะนำให้กด "ส่งออกข้อมูล (JSON)" เก็บเป็นไฟล์สำรองไว้เป็นระยะ หรือกด "ส่งออก CSV" เพื่อเปิดดูใน Excel / Google Sheets
   </footer>
 
@@ -350,7 +358,6 @@
   const SUPABASE_URL = "https://kbpnolgucodpiglarsoj.supabase.co";
   const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImticG5vbGd1Y29kcGlnbGFyc29qIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODY4NDkzOTYsImV4cCI6MjEwMjQyNTM5Nn0.mDSJ8msVCVpWRntJTm6hN3etKKm1cq2R3AGhRlX-V0A";
   const SYNC_TABLE = "transactions";
-  const SYNC_CODE_KEY = "expense_tracker_sync_code_v1";
   let sb = null;
   try {
     if (window.supabase && window.supabase.createClient) {
@@ -358,18 +365,7 @@
     }
   } catch (e) { sb = null; }
 
-  function genSyncCode() {
-    const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"; // no 0/O/1/I to avoid confusion
-    let s = "";
-    for (let i = 0; i < 8; i++) s += chars[Math.floor(Math.random() * chars.length)];
-    return s.slice(0, 4) + "-" + s.slice(4);
-  }
-  let syncCode = null;
-  try { syncCode = window.localStorage.getItem(SYNC_CODE_KEY); } catch (e) { /* ignore */ }
-  if (!syncCode) {
-    syncCode = genSyncCode();
-    try { window.localStorage.setItem(SYNC_CODE_KEY, syncCode); } catch (e) { /* ignore */ }
-  }
+  let currentUser = null;
 
   function setSyncStatus(text, ok) {
     const el = $("syncStatus");
@@ -378,9 +374,20 @@
     el.className = ok === true ? "ok" : (ok === false ? "err" : "");
     el.innerHTML = '<span class="sync-dot ' + dotClass + '"></span>' + text;
   }
-  function renderSyncCodeUI() {
-    const disp = $("syncCodeDisplay");
-    if (disp) disp.value = syncCode;
+  function renderAuthUI() {
+    const signedOut = $("signedOutRow");
+    const signedIn = $("signedInRow");
+    if (currentUser) {
+      signedOut.style.display = "none";
+      signedIn.style.display = "flex";
+      const meta = currentUser.user_metadata || {};
+      $("accountAvatar").src = meta.avatar_url || meta.picture || "";
+      $("accountName").textContent = meta.full_name || meta.name || currentUser.email || "";
+    } else {
+      signedOut.style.display = "flex";
+      signedIn.style.display = "none";
+      setSyncStatus("เข้าสู่ระบบด้วย Google เพื่อซิงค์ข้อมูลข้ามอุปกรณ์", null);
+    }
   }
 
   function rowToTx(r) {
@@ -388,14 +395,14 @@
   }
   function txToRow(t, deleted) {
     return {
-      id: t.id, sync_code: syncCode, type: t.type, tx_date: t.date, category: t.category,
+      id: t.id, user_id: currentUser ? currentUser.id : null, type: t.type, tx_date: t.date, category: t.category,
       amount: t.amount, note: t.note || "", deleted: !!deleted,
       updated_at: new Date(t.updatedAt || Date.now()).toISOString()
     };
   }
 
   async function pushRows(rows) {
-    if (!sb || !rows.length) return true;
+    if (!sb || !currentUser || !rows.length) return true;
     try {
       const { error } = await sb.from(SYNC_TABLE).upsert(rows);
       if (error) throw error;
@@ -406,9 +413,9 @@
   async function pushDeleteTx(t) { return pushRows([txToRow(t, true)]); }
 
   async function pullFromCloud() {
-    if (!sb) return false;
+    if (!sb || !currentUser) return false;
     try {
-      const { data, error } = await sb.from(SYNC_TABLE).select("*").eq("sync_code", syncCode);
+      const { data, error } = await sb.from(SYNC_TABLE).select("*").eq("user_id", currentUser.id);
       if (error) throw error;
       const byId = new Map(transactions.map((t) => [t.id, t]));
       (data || []).forEach((r) => {
@@ -427,6 +434,7 @@
   let syncInFlight = false;
   async function syncNow() {
     if (!sb) { setSyncStatus("ไม่พร้อมใช้งานซิงค์คลาวด์ในเบราว์เซอร์นี้", false); return; }
+    if (!currentUser) { setSyncStatus("เข้าสู่ระบบด้วย Google เพื่อซิงค์ข้อมูลข้ามอุปกรณ์", null); return; }
     if (syncInFlight) return;
     if (typeof navigator !== "undefined" && navigator.onLine === false) {
       setSyncStatus("ออฟไลน์อยู่ — จะซิงค์อัตโนมัติเมื่อกลับมามีเน็ต", false);
@@ -442,6 +450,15 @@
       setSyncStatus("ซิงค์ไม่สำเร็จบางส่วน — จะลองใหม่อัตโนมัติ", false);
     }
     syncInFlight = false;
+  }
+
+  async function signInWithGoogle() {
+    if (!sb) { setSyncStatus("ไม่พร้อมใช้งานเข้าสู่ระบบในเบราว์เซอร์นี้", false); return; }
+    await sb.auth.signInWithOAuth({ provider: "google", options: { redirectTo: window.location.href } });
+  }
+  async function signOutUser() {
+    if (!sb) return;
+    await sb.auth.signOut();
   }
 
   // ---------- persistence (localStorage) ----------
@@ -886,36 +903,27 @@
     renderCharts();
   }
 
+  loadFromStorage();
+  updateStorageStatus();
+  renderAll();
+
   // ---------- sync UI wiring ----------
-  renderSyncCodeUI();
-  $("copySyncCodeBtn").addEventListener("click", function () {
-    const done = () => { this.textContent = "คัดลอกแล้ว ✓"; setTimeout(() => { this.textContent = "คัดลอกรหัส"; }, 1500); };
-    if (navigator.clipboard && navigator.clipboard.writeText) {
-      navigator.clipboard.writeText(syncCode).then(done).catch(() => { $("syncCodeDisplay").select(); document.execCommand("copy"); done(); });
-    } else {
-      $("syncCodeDisplay").select(); document.execCommand("copy"); done();
-    }
-  });
-  $("linkSyncCodeBtn").addEventListener("click", async function () {
-    const val = $("syncCodeInput").value.trim().toUpperCase();
-    if (!val) return;
-    if (!confirm('เชื่อมกับรหัส "' + val + '" ใช่หรือไม่? เครื่องนี้จะรวมข้อมูลกับรหัสนั้น (ข้อมูลเดิมในเครื่องนี้จะไม่หาย แต่จะถูกอัปโหลดรวมเข้าไปในรหัสใหม่ด้วย)')) return;
-    syncCode = val;
-    try { window.localStorage.setItem(SYNC_CODE_KEY, syncCode); } catch (e) { /* ignore */ }
-    renderSyncCodeUI();
-    $("syncCodeInput").value = "";
-    await syncNow();
-  });
+  renderAuthUI();
+  $("googleSignInBtn").addEventListener("click", signInWithGoogle);
+  $("signOutBtn").addEventListener("click", signOutUser);
   $("syncNowBtn").addEventListener("click", syncNow);
   window.addEventListener("online", syncNow);
   window.addEventListener("offline", () => setSyncStatus("ออฟไลน์อยู่ — จะซิงค์อัตโนมัติเมื่อกลับมามีเน็ต", false));
   document.addEventListener("visibilitychange", function () { if (document.visibilityState === "visible") syncNow(); });
   setInterval(syncNow, 25000);
 
-  loadFromStorage();
-  updateStorageStatus();
-  renderAll();
-  syncNow();
+  if (sb) {
+    sb.auth.onAuthStateChange(function (event, session) {
+      currentUser = session ? session.user : null;
+      renderAuthUI();
+      if (currentUser) syncNow();
+    });
+  }
 })();
 </script>
 </body>
