@@ -3,529 +3,253 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>บันทึกรายรับ-รายจ่าย</title>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.4/chart.umd.min.js"></script>
+<title>รายรับ-รายจ่าย</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;600;800&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
-  .viz-root {
-    color-scheme: light;
-    --surface-1:      #fcfcfb;
-    --page:           #f9f9f7;
-    --text-primary:   #0b0b0b;
-    --text-secondary: #52514e;
-    --text-muted:     #898781;
-    --grid:           #e1e0d9;
-    --baseline:       #c3c2b7;
-    --border:         rgba(11,11,11,0.10);
-    --good:           #006300;
-    --critical:       #d03b3b;
-    --series-1:       #2a78d6; /* blue - income */
-    --series-1-soft:  #cde2fb;
-    --series-8:       #e34948; /* red - expense */
-    --card-shadow:    0 1px 2px rgba(11,11,11,0.04), 0 1px 8px rgba(11,11,11,0.05);
+  :root {
+    --color-bg: #f3f2f2;
+    --color-surface: #eae9e9;
+    --color-text: #201e1d;
+    --color-muted: color-mix(in srgb, #201e1d 55%, transparent);
+    --color-divider: color-mix(in srgb, #201e1d 40%, transparent);
+    --color-accent: #ec3013;
+    --color-accent-600: #dd2b0f;
+    --color-accent-700: #ae1800;
+    --color-income: #2f6b3f;
+    --color-expense: #ae1800;
+    --font-heading: "Archivo", system-ui, sans-serif;
+    --font-body: "Archivo", system-ui, sans-serif;
   }
-  @media (prefers-color-scheme: dark) {
-    :root:where(:not([data-theme="light"])) .viz-root {
-      color-scheme: dark;
-      --surface-1:      #1a1a19;
-      --page:           #0d0d0d;
-      --text-primary:   #ffffff;
-      --text-secondary: #c3c2b7;
-      --text-muted:     #898781;
-      --grid:           #2c2c2a;
-      --baseline:       #383835;
-      --border:         rgba(255,255,255,0.10);
-      --good:           #0ca30c;
-      --critical:       #e66767;
-      --series-1:       #3987e5;
-      --series-1-soft:  #16324f;
-      --series-8:       #e66767;
-      --card-shadow:    0 1px 2px rgba(0,0,0,0.3), 0 1px 8px rgba(0,0,0,0.3);
-    }
-  }
-  :root[data-theme="dark"] .viz-root {
-    color-scheme: dark;
-    --surface-1:      #1a1a19;
-    --page:           #0d0d0d;
-    --text-primary:   #ffffff;
-    --text-secondary: #c3c2b7;
-    --text-muted:     #898781;
-    --grid:           #2c2c2a;
-    --baseline:       #383835;
-    --border:         rgba(255,255,255,0.10);
-    --good:           #0ca30c;
-    --critical:       #e66767;
-    --series-1:       #3987e5;
-    --series-1-soft:  #16324f;
-    --series-8:       #e66767;
-    --card-shadow:    0 1px 2px rgba(0,0,0,0.3), 0 1px 8px rgba(0,0,0,0.3);
-  }
-
   * { box-sizing: border-box; }
   html, body { margin: 0; min-height: 100%; }
-  body { font-family: system-ui, -apple-system, "Segoe UI", sans-serif; }
-  .viz-root {
-    display: block;
-    min-height: 100vh;
-    background: var(--page);
-    color: var(--text-primary);
+  body {
+    background: var(--color-bg); color: var(--color-text); font-family: var(--font-body);
+    font-size: 15px; line-height: 1.5;
   }
-  .wrap { max-width: 1120px; margin: 0 auto; padding: 20px 16px 64px; }
+  h1, h2, h3, h4 { font-family: var(--font-heading); font-weight: 800; margin: 0; letter-spacing: -0.015em; }
+  a { color: var(--color-accent); }
 
-  header.top {
-    display: flex; align-items: flex-start; justify-content: space-between;
-    gap: 12px; flex-wrap: wrap; margin-bottom: 20px;
+  .app { display: flex; flex-direction: column; min-height: 100vh; }
+  .app-header {
+    text-align: center; display: flex; flex-direction: column; gap: 10px; align-items: center;
+    max-width: 480px; margin: 0 auto; width: 100%; padding: 28px 20px 8px;
   }
-  header.top h1 { font-size: 22px; margin: 0 0 4px; }
-  header.top p { margin: 0; color: var(--text-secondary); font-size: 13.5px; }
-  .top-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+  .app-header h1 { font-size: 26px; }
+  .app-header p { margin: 0; color: var(--color-muted); font-size: 13px; line-height: 1.5; max-width: 380px; }
 
-  button, .btn {
-    font-family: inherit; font-size: 13.5px; font-weight: 600;
-    border-radius: 8px; border: 1px solid var(--border);
-    background: var(--surface-1); color: var(--text-primary);
-    padding: 10px 14px; min-height: 40px; cursor: pointer; white-space: nowrap;
+  .screen { flex: 1; max-width: 480px; margin: 0 auto; width: 100%; padding: 4px 20px 96px; box-sizing: border-box; }
+
+  /* — buttons — */
+  .btn {
+    display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+    cursor: pointer; text-decoration: none;
+    font-family: var(--font-heading); font-weight: 800; font-size: 14px; line-height: 1.2;
+    color: var(--color-text); background: transparent; border: 1px solid transparent;
+    padding: 9px 15px; border-radius: 0;
   }
-  button:hover { filter: brightness(0.97); }
-  :root[data-theme="dark"] button:hover, .viz-root button:hover { filter: brightness(1.15); }
-  button.primary { background: var(--series-1); color: #fff; border-color: transparent; }
-  button.danger-text { color: var(--critical); background: transparent; border: none; padding: 4px 8px; font-weight: 600; }
-  button.edit-text { color: var(--series-1); background: transparent; border: none; padding: 4px 8px; font-weight: 600; }
-  button.ghost { background: transparent; }
+  .btn svg { display: block; flex-shrink: 0; }
+  .btn:disabled { opacity: 0.45; cursor: not-allowed; }
+  .btn-primary { background: var(--color-accent); color: #fff; }
+  .btn-primary:hover { background: var(--color-accent-600); }
+  .btn-primary:active { background: var(--color-accent-700); }
+  .btn-secondary { border-color: var(--color-divider); }
+  .btn-secondary:hover { background: color-mix(in srgb, var(--color-text) 7%, transparent); }
+  .btn-ghost { color: var(--color-accent); padding-inline: 4px; }
+  .btn-ghost:hover { background: color-mix(in srgb, var(--color-accent) 10%, transparent); }
+  .btn-icon { width: 30px; height: 30px; padding: 0; }
+  .btn-block { width: 100%; margin-top: 8px; }
 
-  .card {
-    background: var(--surface-1); border: 1px solid var(--border);
-    border-radius: 12px; box-shadow: var(--card-shadow);
-    padding: 18px; margin-bottom: 16px;
+  /* — forms — */
+  .field { display: flex; flex-direction: column; gap: 5px; }
+  .field > label { font-size: 12px; color: color-mix(in srgb, var(--color-text) 70%, transparent); }
+  .input {
+    width: 100%; min-height: 38px; padding: 7px 10px; font: inherit; font-size: 15px;
+    color: var(--color-text); background: var(--color-surface);
+    border: 1px solid var(--color-divider); border-radius: 0;
   }
-  .card h2 { font-size: 15px; margin: 0 0 14px; }
-  .card h2 small { color: var(--text-muted); font-weight: 500; font-size: 12px; display:block; margin-top:2px;}
-
-  .stat-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 16px; }
-  @media (max-width: 640px) { .stat-row { grid-template-columns: 1fr; } }
-  .stat-tile {
-    background: var(--surface-1); border: 1px solid var(--border); border-radius: 12px;
-    padding: 16px 18px; box-shadow: var(--card-shadow); position: relative; overflow: hidden;
+  .input:focus-visible { outline: 2px solid var(--color-accent); outline-offset: 0; }
+  .seg { display: inline-flex; overflow: hidden; border: 1px solid var(--color-divider); width: 100%; }
+  .seg-opt {
+    display: inline-flex; align-items: center; justify-content: center; gap: 6px; flex: 1;
+    padding: 8px 10px; font-size: 13px; cursor: pointer;
   }
-  .stat-tile::before { content:""; position:absolute; top:0; left:0; right:0; height:3px; }
-  .stat-tile.income::before { background: var(--series-1); }
-  .stat-tile.expense::before { background: var(--series-8); }
-  .stat-tile.balance::before { background: var(--text-muted); }
-  .stat-label { font-size: 12.5px; color: var(--text-secondary); margin-bottom: 6px; }
-  .stat-value { font-size: 26px; font-weight: 700; }
-  .stat-value.good { color: var(--good); }
-  .stat-value.bad { color: var(--critical); }
+  .seg-opt + .seg-opt { border-left: 1px solid var(--color-divider); }
+  .seg-opt input { position: absolute; opacity: 0; width: 0; height: 0; pointer-events: none; }
+  .seg-opt:has(input:checked) { background: var(--color-accent); color: #fff; }
+  .seg-opt:not(:has(input:checked)):hover { background: color-mix(in srgb, var(--color-text) 7%, transparent); }
 
-  form.add-form { display: grid; grid-template-columns: repeat(6, 1fr); gap: 10px; align-items: end; }
-  @media (max-width: 900px) { form.add-form { grid-template-columns: repeat(2, 1fr); } }
-  form.add-form .field { display: flex; flex-direction: column; gap: 4px; }
-  form.add-form .field.wide { grid-column: span 2; }
-  @media (max-width: 900px) { form.add-form .field.wide { grid-column: span 2; } }
-  label { font-size: 12px; color: var(--text-secondary); font-weight: 600; }
-  input, select {
-    font-family: inherit; font-size: 16px; padding: 10px 9px; min-height: 42px;
-    border-radius: 7px; border: 1px solid var(--border); background: var(--page);
-    color: var(--text-primary); width: 100%; -webkit-appearance: auto; appearance: auto;
+  /* — home — */
+  .today-label { font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--color-muted); }
+  .balance-card { margin: 12px 0 20px; background: var(--color-accent); color: #fff; padding: 20px; }
+  .balance-card .kicker { font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; opacity: 0.85; }
+  .balance-card .amount { font-size: 34px; font-weight: 800; font-family: var(--font-heading); margin-top: 4px; }
+  .balance-card .rule { height: 2px; background: rgba(255,255,255,0.35); margin: 16px 0; }
+  .balance-card .split { display: flex; gap: 24px; }
+  .balance-card .split .lbl { font-size: 11px; opacity: 0.85; }
+  .balance-card .split .val { font-size: 16px; font-weight: 600; margin-top: 2px; }
+
+  .section-head { margin: 20px 0 6px; display: flex; align-items: center; justify-content: space-between; }
+  .section-head h3 { font-size: 15px; font-weight: 800; }
+  .section-head:first-of-type { margin-top: 0; }
+
+  .tx-list { border-top: 2px solid var(--color-divider); }
+  .tx-row { display: flex; align-items: center; justify-content: space-between; padding: 11px 0; border-bottom: 1px solid var(--color-divider); gap: 10px; }
+  .tx-row .info { min-width: 0; flex: 1; }
+  .tx-row .cat { font-size: 14px; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .tx-row .meta { font-size: 11.5px; color: var(--color-muted); }
+  .tx-row .amt { font-size: 14px; font-weight: 700; flex-shrink: 0; }
+  .tx-row .actions { display: flex; gap: 2px; flex-shrink: 0; }
+  .empty-note { padding: 36px 0; text-align: center; color: var(--color-muted); font-size: 13px; }
+
+  .budget-item .row1 { display: flex; justify-content: space-between; font-size: 12.5px; margin-bottom: 5px; }
+  .budget-item .row1 .right { color: var(--color-muted); }
+  .bar-track { height: 6px; background: var(--color-surface); }
+  .bar-fill { height: 100%; }
+  .budgets-list { display: flex; flex-direction: column; gap: 12px; }
+
+  /* — transactions filters — */
+  .filter-row { display: flex; gap: 8px; margin-bottom: 10px; }
+  .filter-row .input { flex: 1; }
+
+  /* — add form — */
+  .add-form { display: flex; flex-direction: column; gap: 14px; }
+
+  /* — insights — */
+  .insight-card { border: 1px solid var(--color-divider); padding: 14px; }
+  .insight-card .head { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 8px; }
+  .insight-card .head .cat { font-weight: 600; font-size: 14px; }
+  .insight-card .head .status { font-size: 11.5px; }
+  .insight-card .foot { display: flex; justify-content: space-between; font-size: 12px; color: var(--color-muted); margin-top: 8px; }
+  .insight-cards { display: flex; flex-direction: column; gap: 16px; padding-bottom: 16px; }
+
+  .breakdown-row { margin-bottom: 12px; }
+  .breakdown-row .row1 { display: flex; justify-content: space-between; font-size: 12.5px; margin-bottom: 5px; }
+  .breakdown-row .row1 .right { color: var(--color-muted); }
+  .breakdown-bar-track { height: 14px; background: var(--color-surface); }
+
+  .trend-legend { display: flex; gap: 14px; font-size: 11.5px; color: var(--color-muted); margin-bottom: 14px; }
+  .trend-legend .swatch { display: inline-block; width: 8px; height: 8px; margin-right: 5px; vertical-align: middle; }
+  .trend-chart { display: flex; align-items: flex-end; gap: 10px; height: 150px; border-bottom: 2px solid var(--color-divider); padding-bottom: 2px; }
+  .trend-col { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 4px; height: 100%; justify-content: flex-end; }
+  .trend-bars { display: flex; gap: 3px; align-items: flex-end; height: 100%; }
+  .trend-bars .bar { width: 9px; }
+  .trend-labels { display: flex; gap: 10px; margin-top: 6px; }
+  .trend-labels div { flex: 1; text-align: center; font-size: 10.5px; color: var(--color-muted); }
+
+  /* — settings — */
+  .settings-block { display: flex; flex-direction: column; gap: 22px; padding-bottom: 24px; }
+  .settings-section-label { font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--color-muted); margin-bottom: 8px; }
+  .profile-row { display: flex; align-items: center; gap: 12px; }
+  .avatar { width: 48px; height: 48px; border-radius: 50%; background: var(--color-surface); display: flex; align-items: center; justify-content: center; font-weight: 800; font-family: var(--font-heading); font-size: 18px; flex-shrink: 0; object-fit: cover; }
+  .profile-name { font-weight: 600; font-size: 15px; }
+  .profile-sub { font-size: 12px; color: var(--color-muted); }
+  .profile-row .btn { margin-left: auto; }
+
+  .toggle-row { display: flex; align-items: center; justify-content: space-between; border: 1px solid var(--color-divider); padding: 12px 14px; margin-bottom: 8px; }
+  .toggle-switch { width: 44px; height: 24px; background: var(--color-surface); border: none; padding: 2px; cursor: pointer; position: relative; box-sizing: border-box; }
+  .toggle-switch.on { background: var(--color-accent); }
+  .toggle-switch .thumb { display: block; width: 18px; height: 18px; background: #fff; transition: transform 0.15s; }
+  .toggle-switch.on .thumb { transform: translateX(20px); }
+
+  .scheme-grid { display: flex; flex-wrap: wrap; gap: 8px; }
+  .scheme-opt { flex: 1 1 30%; min-width: 96px; display: flex; align-items: center; gap: 7px; border: 1px solid var(--color-divider); padding: 10px; cursor: pointer; }
+  .scheme-opt.active { border-color: var(--swatch); }
+  .scheme-opt input { position: absolute; opacity: 0; width: 0; height: 0; pointer-events: none; }
+  .scheme-opt .dot { width: 14px; height: 14px; background: var(--swatch); flex-shrink: 0; }
+  .scheme-opt .lbl { font-size: 12.5px; }
+
+  .sync-box { border: 1px solid var(--color-divider); padding: 14px; display: flex; flex-direction: column; gap: 10px; }
+  #syncStatus { font-size: 12.5px; color: var(--color-muted); display: flex; align-items: center; gap: 6px; }
+  #syncStatus.ok { color: var(--color-income); }
+  #syncStatus.err { color: var(--color-expense); }
+  .sync-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: var(--color-muted); flex-shrink: 0; }
+  #syncStatus.ok .sync-dot { background: var(--color-income); }
+  #syncStatus.err .sync-dot { background: var(--color-expense); }
+
+  .bills-list { border-top: 2px solid var(--color-divider); }
+  .bill-row { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid var(--color-divider); }
+  .bill-row .name { font-size: 14px; font-weight: 600; }
+  .bill-row .day { font-size: 11.5px; color: var(--color-muted); }
+  .bill-row .amt { font-size: 14px; font-weight: 700; }
+
+  .footer-note { font-size: 11px; line-height: 1.6; color: var(--color-muted); margin: 4px 0 0; }
+
+  /* — tab bar — */
+  .tabbar-wrap { position: fixed; left: 0; right: 0; bottom: 0; display: flex; justify-content: center; background: var(--color-bg); border-top: 2px solid var(--color-divider); z-index: 30; }
+  .tabbar { display: flex; width: 100%; max-width: 480px; }
+  .tabbar button {
+    flex: 1; display: flex; flex-direction: column; align-items: center; gap: 3px;
+    padding: 9px 0 8px; background: none; border: none; cursor: pointer; color: var(--color-muted);
+    font-family: var(--font-body);
   }
-  select { cursor: pointer; }
-  .type-toggle { display: flex; gap: 6px; }
-  .type-toggle button { flex: 1; padding: 10px; min-height: 42px; font-size: 14px; }
-  .type-toggle button.active.income { background: var(--series-1); color: #fff; border-color: transparent; }
-  .type-toggle button.active.expense { background: var(--series-8); color: #fff; border-color: transparent; }
+  .tabbar button.active { color: var(--color-accent); }
+  .tabbar button span { font-size: 10px; font-weight: 600; }
 
-  .charts-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
-  @media (max-width: 900px) { .charts-row { grid-template-columns: 1fr; } }
-  .chart-head { display: flex; justify-content: space-between; align-items: center; gap: 8px; margin-bottom: 10px; flex-wrap: wrap; }
-  .chart-box { position: relative; height: 260px; }
-  .empty-state { color: var(--text-muted); font-size: 13px; text-align: center; padding: 40px 10px; }
-  details.table-toggle { margin-top: 10px; font-size: 12.5px; }
-  details.table-toggle summary { cursor: pointer; color: var(--text-secondary); font-weight: 600; }
-  .mini-table { width: 100%; border-collapse: collapse; margin-top: 8px; font-size: 12.5px; }
-  .mini-table td, .mini-table th { padding: 4px 6px; border-bottom: 1px solid var(--grid); text-align: left; font-variant-numeric: tabular-nums; }
-
-  .filters { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 12px; }
-  .filters select, .filters input[type=text] { min-width: 120px; }
-
-  .sync-card { display: flex; flex-direction: column; gap: 10px; }
-  .sync-row { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
-  .sync-row label.inline { font-size: 12.5px; color: var(--text-secondary); font-weight: 600; min-width: 150px; }
-  .sync-row input[type=text] { width: auto; flex: 1 1 160px; min-width: 140px; font-variant-numeric: tabular-nums; letter-spacing: .03em; }
-  #syncStatus { font-size: 12.5px; color: var(--text-secondary); }
-  #syncStatus.ok { color: var(--good); }
-  #syncStatus.err { color: var(--critical); }
-  .sync-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 6px; vertical-align: middle; background: var(--text-muted); }
-  .sync-dot.ok { background: var(--good); }
-  .sync-dot.err { background: var(--critical); }
-  .btn-google {
-    display: inline-flex; align-items: center; gap: 10px;
-    background: var(--surface-1); color: var(--text-primary);
-    border: 1px solid var(--border); font-weight: 600;
+  .toast {
+    position: fixed; left: 50%; bottom: 78px; transform: translateX(-50%);
+    background: var(--color-text); color: var(--color-bg); padding: 10px 16px; font-size: 12.5px;
+    text-align: center; z-index: 40; max-width: 420px; width: calc(100% - 40px);
   }
-  .btn-google:hover { filter: brightness(0.97); }
-  .account-avatar { width: 28px; height: 28px; border-radius: 50%; background: var(--grid); flex-shrink: 0; }
-  .account-name { font-size: 13.5px; font-weight: 600; }
+  .toast[hidden] { display: none; }
 
-  table.tx-table { width: 100%; border-collapse: collapse; font-size: 13.5px; }
-  table.tx-table th {
-    text-align: left; font-size: 11.5px; text-transform: uppercase; letter-spacing: .02em;
-    color: var(--text-muted); font-weight: 600; padding: 8px 8px; border-bottom: 1px solid var(--baseline);
+  @media (min-width: 560px) {
+    .app-header, .screen, .tabbar { max-width: 480px; }
+    .app { background: var(--color-surface); }
+    .screen, .app-header { background: var(--color-bg); }
   }
-  table.tx-table td { padding: 9px 8px; border-bottom: 1px solid var(--grid); font-variant-numeric: tabular-nums; }
-  table.tx-table tr:hover td { background: var(--page); }
-  .pill { display: inline-block; padding: 2px 8px; border-radius: 999px; font-size: 11.5px; font-weight: 600; }
-  .pill.income { background: var(--series-1-soft); color: var(--series-1); }
-  .pill.expense { background: color-mix(in srgb, var(--series-8) 18%, transparent); color: var(--series-8); }
-  .amt.income { color: var(--good); font-weight: 700; }
-  .amt.expense { color: var(--critical); font-weight: 700; }
-
-  footer.note { color: var(--text-muted); font-size: 12px; margin-top: 20px; line-height: 1.6; }
-  .legend-swatch { display:inline-block; width:10px; height:10px; border-radius:3px; margin-right:5px; vertical-align:middle; }
 </style>
 </head>
 <body>
-<div class="viz-root">
-<div class="wrap">
+<div class="app">
 
-  <header class="top">
-    <div>
-      <h1>บันทึกรายรับ-รายจ่าย</h1>
-      <p id="storageStatus">กำลังตรวจสอบการบันทึกอัตโนมัติ...</p>
-    </div>
-    <div class="top-actions">
-      <button class="ghost" id="themeToggle" type="button">🌓 โหมดมืด/สว่าง</button>
-      <button class="ghost" id="loadSampleBtn" type="button">โหลดตัวอย่างข้อมูล</button>
-      <button class="ghost" id="exportCsvBtn" type="button">ส่งออก CSV</button>
-      <button class="ghost" id="exportJsonBtn" type="button">ส่งออกข้อมูล (JSON)</button>
-      <label class="btn ghost" style="margin:0; display:inline-flex; align-items:center;">
-        นำเข้าข้อมูล
-        <input type="file" id="importInput" accept="application/json" style="display:none;">
-      </label>
-    </div>
+  <header class="app-header">
+    <h1 id="appTitle"></h1>
+    <p id="appSubtitle"></p>
+    <button type="button" class="btn btn-secondary" id="darkToggleBtn" style="margin-top:4px"></button>
   </header>
 
-  <section class="card sync-card">
-    <h2>ซิงค์ข้อมูลข้ามอุปกรณ์ <small>เข้าสู่ระบบด้วยบัญชี Google เพื่อซิงค์ข้อมูลชุดเดียวกันในทุกอุปกรณ์โดยอัตโนมัติ</small></h2>
-    <div class="sync-row" id="signedOutRow">
-      <button type="button" class="btn-google" id="googleSignInBtn">
-        <svg width="18" height="18" viewBox="0 0 18 18" aria-hidden="true"><path fill="#4285F4" d="M17.64 9.2c0-.64-.06-1.25-.16-1.84H9v3.48h4.84a4.14 4.14 0 0 1-1.8 2.72v2.26h2.9c1.7-1.57 2.7-3.88 2.7-6.62z"/><path fill="#34A853" d="M9 18c2.43 0 4.47-.8 5.96-2.18l-2.9-2.26c-.8.54-1.84.86-3.06.86-2.35 0-4.34-1.59-5.05-3.72H.98v2.33A9 9 0 0 0 9 18z"/><path fill="#FBBC05" d="M3.95 10.7A5.4 5.4 0 0 1 3.67 9c0-.59.1-1.17.28-1.7V4.97H.98A9 9 0 0 0 0 9c0 1.45.35 2.83.98 4.03l2.97-2.33z"/><path fill="#EA4335" d="M9 3.58c1.32 0 2.51.45 3.44 1.35l2.58-2.58C13.46.89 11.43 0 9 0A9 9 0 0 0 .98 4.97l2.97 2.33C4.66 5.17 6.65 3.58 9 3.58z"/></svg>
-        เข้าสู่ระบบด้วย Google
+  <main class="screen" id="screen"></main>
+
+  <div class="toast" id="toast" hidden></div>
+
+  <div class="tabbar-wrap">
+    <nav class="tabbar" id="tabbar">
+      <button type="button" data-tab="home">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
+        <span data-l="tabHome"></span>
       </button>
-    </div>
-    <div class="sync-row" id="signedInRow" style="display:none;">
-      <img id="accountAvatar" class="account-avatar" alt="">
-      <span id="accountName" class="account-name"></span>
-      <button type="button" class="ghost" id="signOutBtn" style="margin-left:auto;">ออกจากระบบ</button>
-    </div>
-    <div class="sync-row">
-      <span id="syncStatus"><span class="sync-dot"></span>กำลังตรวจสอบสถานะซิงค์...</span>
-      <button type="button" class="ghost" id="syncNowBtn" style="margin-left:auto;">ซิงค์เดี๋ยวนี้</button>
-    </div>
-  </section>
+      <button type="button" data-tab="transactions">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"></line><line x1="8" y1="12" x2="21" y2="12"></line><line x1="8" y1="18" x2="21" y2="18"></line><line x1="3" y1="6" x2="3.01" y2="6"></line><line x1="3" y1="12" x2="3.01" y2="12"></line><line x1="3" y1="18" x2="3.01" y2="18"></line></svg>
+        <span data-l="tabTx"></span>
+      </button>
+      <button type="button" data-tab="add">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+        <span data-l="tabAdd"></span>
+      </button>
+      <button type="button" data-tab="insights">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg>
+        <span data-l="tabInsights"></span>
+      </button>
+      <button type="button" data-tab="settings">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" y1="21" x2="4" y2="14"></line><line x1="4" y1="10" x2="4" y2="3"></line><line x1="12" y1="21" x2="12" y2="12"></line><line x1="12" y1="8" x2="12" y2="3"></line><line x1="20" y1="21" x2="20" y2="16"></line><line x1="20" y1="12" x2="20" y2="3"></line><line x1="1" y1="14" x2="7" y2="14"></line><line x1="9" y1="8" x2="15" y2="8"></line><line x1="17" y1="16" x2="23" y2="16"></line></svg>
+        <span data-l="tabSettings"></span>
+      </button>
+    </nav>
+  </div>
 
-  <section class="stat-row">
-    <div class="stat-tile income">
-      <div class="stat-label">รายรับรวม</div>
-      <div class="stat-value" id="statIncome">฿0</div>
-    </div>
-    <div class="stat-tile expense">
-      <div class="stat-label">รายจ่ายรวม</div>
-      <div class="stat-value" id="statExpense">฿0</div>
-    </div>
-    <div class="stat-tile balance">
-      <div class="stat-label">คงเหลือ</div>
-      <div class="stat-value" id="statBalance">฿0</div>
-    </div>
-  </section>
-
-  <section class="card">
-    <h2 id="formTitle">เพิ่มรายการ</h2>
-    <form class="add-form" id="addForm">
-      <div class="field wide">
-        <label>ประเภท</label>
-        <div class="type-toggle">
-          <button type="button" class="active expense" data-type="expense" id="typeExpenseBtn">รายจ่าย</button>
-          <button type="button" class="income" data-type="income" id="typeIncomeBtn">รายรับ</button>
-        </div>
-      </div>
-      <div class="field">
-        <label for="txDate">วันที่</label>
-        <input type="date" id="txDate" required>
-      </div>
-      <div class="field wide">
-        <label for="txCategory">หมวดหมู่</label>
-        <select id="txCategory" required></select>
-      </div>
-      <div class="field">
-        <label for="txAmount">จำนวนเงิน (บาท)</label>
-        <input type="number" id="txAmount" min="0" step="0.01" placeholder="0.00" required>
-      </div>
-      <div class="field wide">
-        <label for="txNote">รายละเอียด (ถ้ามี)</label>
-        <input type="text" id="txNote" placeholder="เช่น ค่าข้าวกลางวัน">
-      </div>
-      <div class="field" style="display:flex; gap:8px;">
-        <button type="submit" class="primary" id="formSubmitBtn">บันทึกรายการ</button>
-        <button type="button" class="ghost" id="cancelEditBtn" style="display:none;">ยกเลิก</button>
-      </div>
-    </form>
-  </section>
-
-  <section class="charts-row">
-    <div class="card">
-      <div class="chart-head">
-        <h2 style="margin:0;">รายจ่ายตามหมวดหมู่</h2>
-        <select id="chartPeriod">
-          <option value="all">ทั้งหมด</option>
-          <option value="thisMonth" selected>เดือนนี้</option>
-          <option value="last3">3 เดือนล่าสุด</option>
-          <option value="last6">6 เดือนล่าสุด</option>
-        </select>
-      </div>
-      <div class="chart-box"><canvas id="categoryChart"></canvas></div>
-      <div class="empty-state" id="categoryEmpty" style="display:none;">ยังไม่มีข้อมูลรายจ่ายในช่วงนี้</div>
-      <details class="table-toggle">
-        <summary>แสดงข้อมูลเป็นตาราง</summary>
-        <table class="mini-table" id="categoryTable"></table>
-      </details>
-    </div>
-    <div class="card">
-      <div class="chart-head">
-        <h2 style="margin:0;">แนวโน้มรายเดือน</h2>
-        <span style="font-size:12px; color: var(--text-secondary);">
-          <span class="legend-swatch" style="background: var(--series-1);"></span>รายรับ
-          &nbsp;&nbsp;<span class="legend-swatch" style="background: var(--series-8);"></span>รายจ่าย
-        </span>
-      </div>
-      <div class="chart-box"><canvas id="trendChart"></canvas></div>
-      <div class="empty-state" id="trendEmpty" style="display:none;">ยังไม่มีข้อมูล</div>
-      <details class="table-toggle">
-        <summary>แสดงข้อมูลเป็นตาราง</summary>
-        <table class="mini-table" id="trendTable"></table>
-      </details>
-    </div>
-  </section>
-
-  <section class="card">
-    <h2>รายการทั้งหมด</h2>
-    <div class="filters">
-      <select id="filterType">
-        <option value="all">ทุกประเภท</option>
-        <option value="income">รายรับ</option>
-        <option value="expense">รายจ่าย</option>
-      </select>
-      <select id="filterMonth">
-        <option value="all">ทุกเดือน</option>
-      </select>
-      <select id="filterCategory">
-        <option value="all">ทุกหมวดหมู่</option>
-      </select>
-      <input type="text" id="filterSearch" placeholder="ค้นหารายละเอียด...">
-    </div>
-    <div style="overflow-x:auto;">
-      <table class="tx-table">
-        <thead>
-          <tr><th>วันที่</th><th>ประเภท</th><th>หมวดหมู่</th><th>รายละเอียด</th><th style="text-align:right;">จำนวนเงิน</th><th></th></tr>
-        </thead>
-        <tbody id="txTableBody"></tbody>
-      </table>
-    </div>
-    <div class="empty-state" id="tableEmpty" style="display:none;">ยังไม่มีรายการ — เพิ่มรายการแรกของคุณด้านบน</div>
-  </section>
-
-  <footer class="note">
-    ข้อมูลจะถูกบันทึกไว้ในเบราว์เซอร์นี้เสมอ ถ้าเข้าสู่ระบบด้วย Google ข้อมูลจะซิงค์ขึ้นคลาวด์อัตโนมัติและผูกกับบัญชีของคุณ — เปิดแอปนี้ในอุปกรณ์อื่นแล้วเข้าสู่ระบบด้วยบัญชี Google เดียวกัน
-    เพื่อดูข้อมูลชุดเดียวกันบนทุกเครื่อง (ไม่ต้องใช้รหัสอีกต่อไป)
-    ถึงจะมีการซิงค์แล้ว ก็ยังแนะนำให้กด "ส่งออกข้อมูล (JSON)" เก็บเป็นไฟล์สำรองไว้เป็นระยะ หรือกด "ส่งออก CSV" เพื่อเปิดดูใน Excel / Google Sheets
-  </footer>
-
-</div>
 </div>
 
 <script>
 (function () {
   "use strict";
 
+  // ---------- categories & keyword auto-categorize ----------
   const CATEGORIES = {
     income: ["เงินเดือน", "โบนัส/รายได้พิเศษ", "ธุรกิจ/ฟรีแลนซ์", "ดอกเบี้ย/เงินลงทุน", "อื่นๆ (รายรับ)"],
     expense: ["อาหารและเครื่องดื่ม", "การเดินทาง", "ที่อยู่อาศัย/ค่าเช่า", "สาธารณูปโภค (ไฟ/น้ำ/เน็ต)", "ช้อปปิ้ง", "บันเทิง", "สุขภาพ", "การศึกษา", "ผ่อนชำระ/หนี้สิน", "ออมเงิน/ลงทุน", "อื่นๆ (รายจ่าย)"]
   };
-
-  let transactions = [];
-  let categoryChart = null;
-  let trendChart = null;
-
-  // ---------- cloud sync (Supabase) ----------
-  const SUPABASE_URL = "https://kbpnolgucodpiglarsoj.supabase.co";
-  const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImticG5vbGd1Y29kcGlnbGFyc29qIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODY4NDkzOTYsImV4cCI6MjEwMjQyNTM5Nn0.mDSJ8msVCVpWRntJTm6hN3etKKm1cq2R3AGhRlX-V0A";
-  const SYNC_TABLE = "transactions";
-  let sb = null;
-  try {
-    if (window.supabase && window.supabase.createClient) {
-      sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-    }
-  } catch (e) { sb = null; }
-
-  let currentUser = null;
-
-  function setSyncStatus(text, ok) {
-    const el = $("syncStatus");
-    if (!el) return;
-    const dotClass = ok === true ? "ok" : (ok === false ? "err" : "");
-    el.className = ok === true ? "ok" : (ok === false ? "err" : "");
-    el.innerHTML = '<span class="sync-dot ' + dotClass + '"></span>' + text;
-  }
-  function renderAuthUI() {
-    const signedOut = $("signedOutRow");
-    const signedIn = $("signedInRow");
-    if (currentUser) {
-      signedOut.style.display = "none";
-      signedIn.style.display = "flex";
-      const meta = currentUser.user_metadata || {};
-      $("accountAvatar").src = meta.avatar_url || meta.picture || "";
-      $("accountName").textContent = meta.full_name || meta.name || currentUser.email || "";
-    } else {
-      signedOut.style.display = "flex";
-      signedIn.style.display = "none";
-      setSyncStatus("เข้าสู่ระบบด้วย Google เพื่อซิงค์ข้อมูลข้ามอุปกรณ์", null);
-    }
-  }
-
-  function rowToTx(r) {
-    return { id: r.id, type: r.type, date: r.tx_date, category: r.category, amount: Number(r.amount), note: r.note || "", updatedAt: new Date(r.updated_at).getTime() };
-  }
-  function txToRow(t, deleted) {
-    return {
-      id: t.id, user_id: currentUser ? currentUser.id : null, type: t.type, tx_date: t.date, category: t.category,
-      amount: t.amount, note: t.note || "", deleted: !!deleted,
-      updated_at: new Date(t.updatedAt || Date.now()).toISOString()
-    };
-  }
-
-  async function pushRows(rows) {
-    if (!sb || !currentUser || !rows.length) return true;
-    try {
-      const { error } = await sb.from(SYNC_TABLE).upsert(rows);
-      if (error) throw error;
-      return true;
-    } catch (e) { return false; }
-  }
-  async function pushTx(t) { return pushRows([txToRow(t, false)]); }
-  async function pushDeleteTx(t) { return pushRows([txToRow(t, true)]); }
-
-  async function pullFromCloud() {
-    if (!sb || !currentUser) return false;
-    try {
-      const { data, error } = await sb.from(SYNC_TABLE).select("*").eq("user_id", currentUser.id);
-      if (error) throw error;
-      const byId = new Map(transactions.map((t) => [t.id, t]));
-      (data || []).forEach((r) => {
-        const rTime = new Date(r.updated_at).getTime();
-        if (r.deleted) { byId.delete(r.id); return; }
-        const local = byId.get(r.id);
-        if (!local || (local.updatedAt || 0) < rTime) byId.set(r.id, rowToTx(r));
-      });
-      transactions = Array.from(byId.values());
-      saveToStorage();
-      populateFilterOptions(); renderSummary(); renderTable(); renderCharts();
-      return true;
-    } catch (e) { return false; }
-  }
-
-  let syncInFlight = false;
-  async function syncNow() {
-    if (!sb) { setSyncStatus("ไม่พร้อมใช้งานซิงค์คลาวด์ในเบราว์เซอร์นี้", false); return; }
-    if (!currentUser) { setSyncStatus("เข้าสู่ระบบด้วย Google เพื่อซิงค์ข้อมูลข้ามอุปกรณ์", null); return; }
-    if (syncInFlight) return;
-    if (typeof navigator !== "undefined" && navigator.onLine === false) {
-      setSyncStatus("ออฟไลน์อยู่ — จะซิงค์อัตโนมัติเมื่อกลับมามีเน็ต", false);
-      return;
-    }
-    syncInFlight = true;
-    setSyncStatus("กำลังซิงค์...", null);
-    const pushOk = await pushRows(transactions.map((t) => txToRow(t, false)));
-    const pullOk = await pullFromCloud();
-    if (pushOk && pullOk) {
-      setSyncStatus("ซิงค์ล่าสุด: " + new Date().toLocaleTimeString("th-TH"), true);
-    } else {
-      setSyncStatus("ซิงค์ไม่สำเร็จบางส่วน — จะลองใหม่อัตโนมัติ", false);
-    }
-    syncInFlight = false;
-  }
-
-  async function signInWithGoogle() {
-    if (!sb) { setSyncStatus("ไม่พร้อมใช้งานเข้าสู่ระบบในเบราว์เซอร์นี้", false); return; }
-    await sb.auth.signInWithOAuth({ provider: "google", options: { redirectTo: window.location.href } });
-  }
-  async function signOutUser() {
-    if (!sb) return;
-    await sb.auth.signOut();
-  }
-
-  // ---------- persistence (localStorage) ----------
-  // Works when this file is opened as a normal page in a real browser tab.
-  // If it's blocked (private/incognito mode, or an in-app preview pane that
-  // sandboxes storage), we fail silently and fall back to in-memory only —
-  // the export/import buttons remain the reliable backup either way.
-  const STORAGE_KEY = "expense_tracker_transactions_v1";
-  let storageAvailable = false;
-  (function testStorage() {
-    try {
-      const k = "__storage_test__";
-      window.localStorage.setItem(k, "1");
-      window.localStorage.removeItem(k);
-      storageAvailable = true;
-    } catch (e) {
-      storageAvailable = false;
-    }
-  })();
-  function loadFromStorage() {
-    if (!storageAvailable) return;
-    try {
-      const raw = window.localStorage.getItem(STORAGE_KEY);
-      if (raw) {
-        const data = JSON.parse(raw);
-        if (Array.isArray(data)) {
-          transactions = data;
-          transactions.forEach((t) => { if (!t.updatedAt) t.updatedAt = Date.now(); });
-        }
-      }
-    } catch (e) { /* ignore corrupt data, start empty */ }
-  }
-  function saveToStorage() {
-    if (!storageAvailable) return;
-    try { window.localStorage.setItem(STORAGE_KEY, JSON.stringify(transactions)); } catch (e) { /* quota exceeded etc. */ }
-  }
-  function updateStorageStatus() {
-    const el = $("storageStatus");
-    if (!el) return;
-    if (storageAvailable) {
-      el.textContent = "✓ บันทึกอัตโนมัติเปิดอยู่ — ข้อมูลจะถูกจำไว้ในเบราว์เซอร์นี้แม้ปิดหน้าแล้วเปิดใหม่ (กด \"ส่งออกข้อมูล\" เป็นครั้งคราวไว้เป็นไฟล์สำรองด้วยก็ดี)";
-      el.style.color = "var(--good)";
-    } else {
-      el.textContent = "⚠ เบราว์เซอร์/หน้าต่างนี้ไม่รองรับการบันทึกอัตโนมัติ — ข้อมูลจะหายเมื่อปิดหน้า กด \"ส่งออกข้อมูล (JSON)\" ก่อนปิดเสมอ (ลองเปิดไฟล์นี้ในแอปเบราว์เซอร์จริง เช่น Chrome หรือ Safari)";
-      el.style.color = "var(--critical)";
-    }
-  }
-
-  const $ = (id) => document.getElementById(id);
-  const fmtMoney = (n, decimals) => "฿" + Number(n).toLocaleString("th-TH", { minimumFractionDigits: decimals ?? 0, maximumFractionDigits: decimals ?? 2 });
-  const fmtDateShort = (iso) => new Date(iso + "T00:00:00").toLocaleDateString("th-TH", { day: "numeric", month: "short", year: "2-digit" });
-  const monthKey = (iso) => iso.slice(0, 7);
-  const monthLabel = (key) => new Date(key + "-01T00:00:00").toLocaleDateString("th-TH", { month: "short", year: "2-digit" });
-
-  function uid() { return Date.now().toString(36) + Math.random().toString(36).slice(2, 7); }
-
-  function isDark() {
-    const t = document.documentElement.getAttribute("data-theme");
-    if (t === "dark") return true;
-    if (t === "light") return false;
-    return window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
-  }
-  function cssVar(name) {
-    return getComputedStyle(document.querySelector(".viz-root")).getPropertyValue(name).trim();
-  }
-
-  // ---------- auto-categorize from the note text ----------
   const CATEGORY_KEYWORDS = {
     expense: [
       ["อาหารและเครื่องดื่ม", ["ข้าว", "กาแฟ", "อาหาร", "กิน", "ก๋วยเตี๋ยว", "ชานม", "เครื่องดื่ม", "สตาร์บัค", "บุฟเฟ่ต์", "ร้านอาหาร", "ของกิน", "ขนม", "ก๋วยจั๊บ", "ส้มตำ"]],
@@ -554,373 +278,769 @@
     }
     return null;
   }
-  let categoryManuallySet = false;
-  $("txCategory").addEventListener("change", () => { categoryManuallySet = true; });
-  $("txNote").addEventListener("input", function () {
-    if (categoryManuallySet) return;
-    const guess = guessCategory(this.value, currentType);
-    if (guess) $("txCategory").value = guess;
-  });
 
-  // ---------- form: type toggle + category options ----------
-  let currentType = "expense";
-  let editingId = null;
-  function setType(type, preselectCategory) {
-    currentType = type;
-    $("typeExpenseBtn").classList.toggle("active", type === "expense");
-    $("typeIncomeBtn").classList.toggle("active", type === "income");
-    const sel = $("txCategory");
-    sel.innerHTML = "";
-    CATEGORIES[type].forEach((c) => {
-      const opt = document.createElement("option");
-      opt.value = c; opt.textContent = c;
-      sel.appendChild(opt);
-    });
-    const guess = preselectCategory || guessCategory($("txNote").value, type);
-    if (guess && CATEGORIES[type].includes(guess)) {
-      sel.value = guess;
+  const SCHEMES = {
+    red: ["#ec3013", "#dd2b0f", "#ae1800"],
+    orange: ["#c56a1f", "#a8591a", "#7c4110"],
+    green: ["#3d7a3f", "#336636", "#254a27"],
+    blue: ["#3763b5", "#2e5399", "#213c70"],
+    mono: ["#2d2b2b", "#201e1d", "#201e1d"]
+  };
+  const SCHEME_ORDER = ["red", "orange", "green", "blue", "mono"];
+
+  const LANGS = {
+    th: {
+      appTitle: "รายรับ-รายจ่าย", appSubtitle: "แอปติดตามรายรับ-รายจ่ายส่วนบุคคล",
+      darkModeBtn: "โหมดมืด", overview: "ภาพรวม", balanceLabel: "คงเหลือ", incomeLabel: "รายรับ", expenseLabel: "รายจ่าย",
+      recentTx: "รายการล่าสุด", addShort: "+ เพิ่มรายการ", budgetsThisMonth: "งบประมาณเดือนนี้", seeAll: "ดูทั้งหมด",
+      allTransactions: "รายการทั้งหมด", filterAll: "ทั้งหมด", allMonths: "ทุกเดือน", allCategories: "ทุกหมวดหมู่",
+      searchPlaceholder: "ค้นหารายละเอียด...", noResults: "ไม่พบรายการ", editAria: "แก้ไข", deleteAria: "ลบ",
+      addTitle: "เพิ่มรายการ", editTitle: "แก้ไขรายการ", saveBtn: "บันทึกรายการ", saveEditBtn: "บันทึกการแก้ไข",
+      typeLabel: "ประเภท", dateLabel: "วันที่", categoryLabel: "หมวดหมู่", amountLabel: "จำนวนเงิน (บาท)",
+      noteLabel: "รายละเอียด (ถ้ามี)", notePlaceholder: "เช่น ค่าข้าวกลางวัน", cancelEditBtn: "ยกเลิกการแก้ไข",
+      financialOverview: "ภาพรวมการเงิน", budgetsTab: "งบประมาณ", categoryTab: "หมวดหมู่", trendTab: "แนวโน้ม",
+      spentSoFar: "ใช้ไปแล้ว", budgetOf: "งบ", overBudget: "เกินงบ", expenseByCategory: "รายจ่ายตามหมวดหมู่",
+      noExpensesMonth: "ยังไม่มีรายจ่ายในเดือนนี้", settingsTitle: "ตั้งค่า",
+      personalAccount: "บัญชีส่วนตัว", languageSection: "ภาษา", displaySection: "การแสดงผล",
+      colorRed: "แดง", colorOrange: "ส้ม", colorGreen: "เขียว", colorBlue: "น้ำเงิน", colorMono: "โมโนโครม",
+      syncSection: "ซิงค์ข้ามอุปกรณ์", dataSection: "ข้อมูล",
+      exportCsvBtn: "ส่งออก CSV", exportJsonBtn: "ส่งออกข้อมูล (JSON)", billsSection: "รายการที่ต้องจ่ายประจำ",
+      dueOn: "ทุกวันที่ ", footerNote: "ข้อมูลจะถูกบันทึกไว้ในอุปกรณ์นี้เสมอ เข้าสู่ระบบด้วย Google เพื่อซิงค์ข้ามอุปกรณ์โดยอัตโนมัติ แนะนำให้ส่งออกข้อมูลเก็บเป็นไฟล์สำรองเป็นระยะ",
+      tabHome: "หน้าแรก", tabTx: "รายการ", tabAdd: "เพิ่ม", tabInsights: "ภาพรวม", tabSettings: "ตั้งค่า",
+      toastInvalidAmount: "กรุณากรอกจำนวนเงินให้ถูกต้อง", toastEdited: "บันทึกการแก้ไขแล้ว", toastAdded: "เพิ่มรายการแล้ว",
+      toastDeleted: "ลบรายการแล้ว", toastCsv: "ส่งออก CSV แล้ว", toastJson: "ส่งออกข้อมูลแล้ว",
+      notSignedIn: "ยังไม่ได้เข้าสู่ระบบ", signInGoogle: "เข้าสู่ระบบด้วย Google", signOutBtn: "ออกจากระบบ",
+      syncNowBtn: "ซิงค์เดี๋ยวนี้", syncHelp: "เข้าสู่ระบบด้วย Google ด้านบนเพื่อซิงค์ข้อมูลข้ามอุปกรณ์โดยอัตโนมัติ — ไม่ต้องใช้รหัสอีกต่อไป",
+      syncSignedOut: "เข้าสู่ระบบด้วย Google เพื่อซิงค์ข้อมูลข้ามอุปกรณ์", syncSyncing: "กำลังซิงค์...",
+      syncOffline: "ออฟไลน์อยู่ — จะซิงค์อัตโนมัติเมื่อกลับมามีเน็ต", syncPartial: "ซิงค์ไม่สำเร็จบางส่วน — จะลองใหม่อัตโนมัติ",
+      syncLatest: "ซิงค์ล่าสุด: "
+    },
+    en: {
+      appTitle: "Income & Expenses", appSubtitle: "Personal income & expense tracker",
+      darkModeBtn: "Dark mode", overview: "Overview", balanceLabel: "Balance", incomeLabel: "Income", expenseLabel: "Expense",
+      recentTx: "Recent activity", addShort: "+ Add transaction", budgetsThisMonth: "This month's budgets", seeAll: "See all",
+      allTransactions: "All Transactions", filterAll: "All", allMonths: "All months", allCategories: "All categories",
+      searchPlaceholder: "Search notes...", noResults: "No transactions found", editAria: "Edit", deleteAria: "Delete",
+      addTitle: "Add transaction", editTitle: "Edit transaction", saveBtn: "Save transaction", saveEditBtn: "Save changes",
+      typeLabel: "Type", dateLabel: "Date", categoryLabel: "Category", amountLabel: "Amount (THB)",
+      noteLabel: "Note (optional)", notePlaceholder: "e.g. Lunch", cancelEditBtn: "Cancel edit",
+      financialOverview: "Insights", budgetsTab: "Budgets", categoryTab: "Categories", trendTab: "Trend",
+      spentSoFar: "spent", budgetOf: "Budget", overBudget: "Over", expenseByCategory: "Expenses by category",
+      noExpensesMonth: "No expenses yet this month", settingsTitle: "Settings",
+      personalAccount: "Personal account", languageSection: "Language", displaySection: "Display",
+      colorRed: "Red", colorOrange: "Orange", colorGreen: "Green", colorBlue: "Blue", colorMono: "Monochrome",
+      syncSection: "Cross-device sync", dataSection: "Data",
+      exportCsvBtn: "Export CSV", exportJsonBtn: "Export data (JSON)", billsSection: "Recurring bills",
+      dueOn: "Due on day ", footerNote: "Data always stays on this device. Sign in with Google to sync across devices automatically. Export a backup periodically.",
+      tabHome: "Home", tabTx: "Transactions", tabAdd: "Add", tabInsights: "Insights", tabSettings: "Settings",
+      toastInvalidAmount: "Please enter a valid amount", toastEdited: "Changes saved", toastAdded: "Transaction added",
+      toastDeleted: "Transaction deleted", toastCsv: "CSV exported", toastJson: "Data exported",
+      notSignedIn: "Not signed in", signInGoogle: "Sign in with Google", signOutBtn: "Sign out",
+      syncNowBtn: "Sync now", syncHelp: "Sign in with Google above to sync your data across devices automatically — no code needed.",
+      syncSignedOut: "Sign in with Google to sync across devices", syncSyncing: "Syncing...",
+      syncOffline: "Offline — will sync automatically when back online", syncPartial: "Sync partially failed — will retry automatically",
+      syncLatest: "Last synced: "
     }
-    categoryManuallySet = !!preselectCategory;
-  }
-  $("typeExpenseBtn").addEventListener("click", () => setType("expense"));
-  $("typeIncomeBtn").addEventListener("click", () => setType("income"));
+  };
+  function L() { return LANGS[state.lang]; }
 
-  $("txDate").value = new Date().toISOString().slice(0, 10);
-  setType("expense");
+  const $ = (id) => document.getElementById(id);
+  const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
+  const monthKey = (iso) => iso.slice(0, 7);
+  function fmtMoney(n) { return "฿" + Math.round(n).toLocaleString(state.lang === "en" ? "en-US" : "th-TH"); }
+  function dateLabel(iso) { return new Date(iso + "T00:00:00").toLocaleDateString(state.lang === "en" ? "en-US" : "th-TH", { day: "numeric", month: "short" }); }
+  function monthLabel(key) { return new Date(key + "-01T00:00:00").toLocaleDateString(state.lang === "en" ? "en-US" : "th-TH", { month: "short", year: "2-digit" }); }
+  function escapeHtml(s) { return String(s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c])); }
 
-  // ---------- add / edit / delete ----------
-  $("addForm").addEventListener("submit", function (e) {
-    e.preventDefault();
-    const date = $("txDate").value;
-    const amount = parseFloat($("txAmount").value);
-    if (!date || !amount || amount <= 0) return;
-    let savedTx = null;
-    if (editingId) {
-      const tx = transactions.find((t) => t.id === editingId);
-      if (tx) {
-        tx.type = currentType; tx.date = date; tx.category = $("txCategory").value;
-        tx.amount = amount; tx.note = $("txNote").value.trim(); tx.updatedAt = Date.now();
-        savedTx = tx;
+  // ---------- state ----------
+  const state = {
+    lang: "th", dark: false, scheme: "red",
+    tab: "home", insightsTab: "budgets",
+    txFilterType: "all", txFilterMonth: "all", txFilterCategory: "all", txSearch: "",
+    formType: "expense", formDate: new Date().toISOString().slice(0, 10),
+    formCategory: CATEGORIES.expense[0], editingId: null, categoryManual: false
+  };
+  let transactions = [];
+  let budgets = [
+    { id: "b0", category: "อาหารและเครื่องดื่ม", limit: 3000 },
+    { id: "b1", category: "การเดินทาง", limit: 1200 },
+    { id: "b2", category: "ช้อปปิ้ง", limit: 1500 },
+    { id: "b3", category: "บันเทิง", limit: 800 }
+  ];
+  const bills = [
+    { name: { th: "ค่าเช่าห้อง", en: "Rent" }, amount: 8000, day: 1 },
+    { name: { th: "ค่าอินเทอร์เน็ต", en: "Internet" }, amount: 590, day: 5 },
+    { name: { th: "ประกันสุขภาพ", en: "Health insurance" }, amount: 1200, day: 15 },
+    { name: { th: "Netflix", en: "Netflix" }, amount: 349, day: 20 }
+  ];
+
+  // ---------- persistence (localStorage) ----------
+  const STORAGE_KEY = "expense_tracker_transactions_v1";
+  const SETTINGS_KEY = "expense_tracker_settings_v1";
+  let storageAvailable = false;
+  (function testStorage() {
+    try {
+      window.localStorage.setItem("__t__", "1");
+      window.localStorage.removeItem("__t__");
+      storageAvailable = true;
+    } catch (e) { storageAvailable = false; }
+  })();
+  function loadFromStorage() {
+    if (!storageAvailable) return;
+    try {
+      const raw = window.localStorage.getItem(STORAGE_KEY);
+      if (raw) {
+        const data = JSON.parse(raw);
+        if (Array.isArray(data)) {
+          transactions = data;
+          transactions.forEach((t) => { if (!t.updatedAt) t.updatedAt = Date.now(); });
+        }
       }
-      exitEditMode();
-    } else {
-      savedTx = {
-        id: uid(), type: currentType, date, category: $("txCategory").value,
-        amount, note: $("txNote").value.trim(), updatedAt: Date.now()
-      };
-      transactions.push(savedTx);
-    }
-    $("txAmount").value = "";
-    $("txNote").value = "";
-    categoryManuallySet = false;
-    renderAll();
-    if (savedTx) pushTx(savedTx).then((ok) => setSyncStatus(ok ? "ซิงค์ล่าสุด: " + new Date().toLocaleTimeString("th-TH") : "บันทึกในเครื่องแล้ว แต่ยังซิงค์ขึ้นคลาวด์ไม่สำเร็จ", ok));
-  });
+    } catch (e) { /* ignore corrupt data */ }
+    try {
+      const raw = window.localStorage.getItem(SETTINGS_KEY);
+      if (raw) {
+        const s = JSON.parse(raw);
+        if (s.lang === "th" || s.lang === "en") state.lang = s.lang;
+        if (typeof s.dark === "boolean") state.dark = s.dark;
+        if (SCHEME_ORDER.includes(s.scheme)) state.scheme = s.scheme;
+        if (Array.isArray(s.budgets) && s.budgets.length) budgets = s.budgets;
+      }
+    } catch (e) { /* ignore */ }
+  }
+  function saveToStorage() {
+    if (!storageAvailable) return;
+    try { window.localStorage.setItem(STORAGE_KEY, JSON.stringify(transactions)); } catch (e) { /* quota */ }
+  }
+  function saveSettings() {
+    if (!storageAvailable) return;
+    try { window.localStorage.setItem(SETTINGS_KEY, JSON.stringify({ lang: state.lang, dark: state.dark, scheme: state.scheme, budgets })); } catch (e) { /* quota */ }
+  }
 
+  // ---------- theming ----------
+  function applyTheme() {
+    const light = { bg: "#f3f2f2", surface: "#eae9e9", divider: "color-mix(in srgb, #201e1d 40%, transparent)", muted: "color-mix(in srgb, #201e1d 55%, transparent)", text: "#201e1d" };
+    const dark = { bg: "#171514", surface: "#2a2725", divider: "rgba(255,255,255,0.16)", muted: "rgba(243,242,242,0.6)", text: "#f3f2f2" };
+    const t = state.dark ? dark : light;
+    const scheme = SCHEMES[state.scheme];
+    const mono = state.scheme === "mono";
+    const root = document.documentElement.style;
+    root.setProperty("--color-bg", t.bg);
+    root.setProperty("--color-surface", t.surface);
+    root.setProperty("--color-text", t.text);
+    root.setProperty("--color-muted", t.muted);
+    root.setProperty("--color-divider", t.divider);
+    root.setProperty("--color-accent", scheme[0]);
+    root.setProperty("--color-accent-600", scheme[1]);
+    root.setProperty("--color-accent-700", scheme[2]);
+    root.setProperty("--color-income", mono ? t.text : (state.dark ? "#5fae74" : "#2f6b3f"));
+    root.setProperty("--color-expense", mono ? t.text : (state.dark ? "#ef7a63" : "#ae1800"));
+  }
+
+  // ---------- cloud sync (Supabase) ----------
+  const SUPABASE_URL = "https://kbpnolgucodpiglarsoj.supabase.co";
+  const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImticG5vbGd1Y29kcGlnbGFyc29qIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODY4NDkzOTYsImV4cCI6MjEwMjQyNTM5Nn0.mDSJ8msVCVpWRntJTm6hN3etKKm1cq2R3AGhRlX-V0A";
+  let sb = null;
+  try {
+    if (window.supabase && window.supabase.createClient) {
+      sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    }
+  } catch (e) { sb = null; }
+
+  let currentUser = null;
+  let lastSyncStatus = { text: "", ok: null };
+
+  function setSyncStatus(text, ok) {
+    lastSyncStatus = { text, ok };
+    const el = $("syncStatus");
+    if (!el) return;
+    el.className = ok === true ? "ok" : (ok === false ? "err" : "");
+    el.innerHTML = '<span class="sync-dot"></span><span>' + escapeHtml(text) + "</span>";
+  }
+
+  function rowToTx(r) {
+    return { id: r.id, type: r.type, date: r.tx_date, category: r.category, amount: Number(r.amount), note: r.note || "", updatedAt: new Date(r.updated_at).getTime() };
+  }
+  function txToRow(t, deleted) {
+    return {
+      id: t.id, user_id: currentUser ? currentUser.id : null, type: t.type, tx_date: t.date, category: t.category,
+      amount: t.amount, note: t.note || "", deleted: !!deleted,
+      updated_at: new Date(t.updatedAt || Date.now()).toISOString()
+    };
+  }
+  function budgetRowToObj(r) { return { id: r.id, category: r.category, limit: Number(r.limit_amount), updatedAt: new Date(r.updated_at).getTime() }; }
+  function budgetToRow(b, deleted) {
+    return {
+      id: b.id, user_id: currentUser ? currentUser.id : null, category: b.category, limit_amount: b.limit,
+      deleted: !!deleted, updated_at: new Date(b.updatedAt || Date.now()).toISOString()
+    };
+  }
+
+  async function pushRows(table, rows) {
+    if (!sb || !currentUser || !rows.length) return true;
+    try {
+      const { error } = await sb.from(table).upsert(rows);
+      if (error) throw error;
+      return true;
+    } catch (e) { return false; }
+  }
+  async function pushTx(t) { return pushRows("transactions", [txToRow(t, false)]); }
+  async function pushDeleteTx(t) { return pushRows("transactions", [txToRow(t, true)]); }
+
+  async function pullTransactions() {
+    if (!sb || !currentUser) return false;
+    try {
+      const { data, error } = await sb.from("transactions").select("*").eq("user_id", currentUser.id);
+      if (error) throw error;
+      const byId = new Map(transactions.map((t) => [t.id, t]));
+      (data || []).forEach((r) => {
+        const rTime = new Date(r.updated_at).getTime();
+        if (r.deleted) { byId.delete(r.id); return; }
+        const local = byId.get(r.id);
+        if (!local || (local.updatedAt || 0) < rTime) byId.set(r.id, rowToTx(r));
+      });
+      transactions = Array.from(byId.values());
+      saveToStorage();
+      return true;
+    } catch (e) { return false; }
+  }
+  async function pullBudgets() {
+    if (!sb || !currentUser) return false;
+    try {
+      const { data, error } = await sb.from("budgets").select("*").eq("user_id", currentUser.id);
+      if (error) throw error;
+      if (!data || !data.length) return true;
+      const byCat = new Map(budgets.map((b) => [b.category, b]));
+      data.forEach((r) => {
+        if (r.deleted) return;
+        byCat.set(r.category, budgetRowToObj(r));
+      });
+      budgets = Array.from(byCat.values());
+      saveSettings();
+      return true;
+    } catch (e) { return false; }
+  }
+
+  let syncInFlight = false;
+  async function syncNow() {
+    if (!sb) { setSyncStatus("cloud sync unavailable", false); return; }
+    if (!currentUser) { setSyncStatus(L().syncSignedOut, null); return; }
+    if (syncInFlight) return;
+    if (typeof navigator !== "undefined" && navigator.onLine === false) {
+      setSyncStatus(L().syncOffline, false);
+      return;
+    }
+    syncInFlight = true;
+    setSyncStatus(L().syncSyncing, null);
+    const pushTxOk = await pushRows("transactions", transactions.map((t) => txToRow(t, false)));
+    const pushBudgetOk = await pushRows("budgets", budgets.map((b) => budgetToRow(b, false)));
+    const pullTxOk = await pullTransactions();
+    const pullBudgetOk = await pullBudgets();
+    if (pushTxOk && pushBudgetOk && pullTxOk && pullBudgetOk) {
+      setSyncStatus(L().syncLatest + new Date().toLocaleTimeString(state.lang === "en" ? "en-US" : "th-TH"), true);
+      renderScreen();
+    } else {
+      setSyncStatus(L().syncPartial, false);
+    }
+    syncInFlight = false;
+  }
+
+  async function signInWithGoogle() {
+    if (!sb) return;
+    await sb.auth.signInWithOAuth({ provider: "google", options: { redirectTo: window.location.href } });
+  }
+  async function signOutUser() {
+    if (!sb) return;
+    await sb.auth.signOut();
+  }
+
+  // ---------- toast ----------
+  let toastTimer = null;
+  function showToast(msg) {
+    const el = $("toast");
+    el.textContent = msg;
+    el.hidden = false;
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => { el.hidden = true; }, 2200);
+  }
+
+  // ---------- derived data ----------
+  function computeBudgets() {
+    const thisMonthKey = new Date().toISOString().slice(0, 7);
+    const spentByCategory = {};
+    transactions.filter((t) => t.type === "expense" && monthKey(t.date) === thisMonthKey).forEach((t) => {
+      spentByCategory[t.category] = (spentByCategory[t.category] || 0) + t.amount;
+    });
+    return budgets.map((b) => {
+      const spent = spentByCategory[b.category] || 0;
+      const pct = Math.min(100, Math.round((spent / b.limit) * 100));
+      const over = spent > b.limit;
+      return {
+        category: b.category, spentFmt: fmtMoney(spent), limitFmt: fmtMoney(b.limit), pct,
+        barColor: over ? "var(--color-accent-700)" : "var(--color-accent)",
+        statusColor: over ? "var(--color-accent-700)" : "var(--color-muted)",
+        statusLabel: over ? L().overBudget : pct + "%"
+      };
+    });
+  }
+  function computeBreakdown() {
+    const thisMonthKey = new Date().toISOString().slice(0, 7);
+    const totals = {};
+    transactions.filter((t) => t.type === "expense" && monthKey(t.date) === thisMonthKey).forEach((t) => {
+      totals[t.category] = (totals[t.category] || 0) + t.amount;
+    });
+    const entries = Object.entries(totals).sort((a, b) => b[1] - a[1]).slice(0, 6);
+    const max = entries.length ? entries[0][1] : 1;
+    return entries.map(([cat, total]) => ({ category: cat, totalFmt: fmtMoney(total), pct: Math.max(4, Math.round((total / max) * 100)) }));
+  }
+  function computeTrend() {
+    const byMonth = {};
+    transactions.forEach((t) => { const k = monthKey(t.date); byMonth[k] = byMonth[k] || { income: 0, expense: 0 }; byMonth[k][t.type] += t.amount; });
+    const keys = Object.keys(byMonth).sort().slice(-6);
+    const max = Math.max(1, ...keys.map((k) => Math.max(byMonth[k].income, byMonth[k].expense)));
+    return keys.map((k) => ({
+      label: monthLabel(k),
+      incomeH: Math.max(2, Math.round((byMonth[k].income / max) * 130)),
+      expenseH: Math.max(2, Math.round((byMonth[k].expense / max) * 130))
+    }));
+  }
+
+  // ---------- header / tabbar ----------
+  function renderChrome() {
+    $("appTitle").textContent = L().appTitle;
+    $("appSubtitle").textContent = L().appSubtitle;
+    document.title = L().appTitle;
+    document.documentElement.lang = state.lang;
+    const dt = $("darkToggleBtn");
+    dt.innerHTML = (state.dark
+      ? '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>'
+      : '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>'
+    ) + " " + escapeHtml(L().darkModeBtn);
+    document.querySelectorAll("#tabbar span[data-l]").forEach((el) => { el.textContent = L()[el.getAttribute("data-l")]; });
+    document.querySelectorAll("#tabbar button").forEach((btn) => btn.classList.toggle("active", btn.getAttribute("data-tab") === state.tab));
+  }
+
+  // ---------- Home ----------
+  function renderHome() {
+    const l = L();
+    const income = transactions.filter((t) => t.type === "income").reduce((a, t) => a + t.amount, 0);
+    const expense = transactions.filter((t) => t.type === "expense").reduce((a, t) => a + t.amount, 0);
+    const recent = transactions.slice().sort((a, b) => b.date.localeCompare(a.date)).slice(0, 5);
+    const budgetsPreview = computeBudgets().slice(0, 2);
+    const today = new Date().toLocaleDateString(state.lang === "en" ? "en-US" : "th-TH", { month: "long", year: "numeric" });
+
+    $("screen").innerHTML = `
+      <div class="today-label">${escapeHtml(today)}</div>
+      <h2 style="margin-top:2px;font-size:24px">${escapeHtml(l.overview)}</h2>
+      <div class="balance-card">
+        <div class="kicker">${escapeHtml(l.balanceLabel)}</div>
+        <div class="amount">${fmtMoney(income - expense)}</div>
+        <div class="rule"></div>
+        <div class="split">
+          <div><div class="lbl">${escapeHtml(l.incomeLabel)}</div><div class="val">${fmtMoney(income)}</div></div>
+          <div><div class="lbl">${escapeHtml(l.expenseLabel)}</div><div class="val">${fmtMoney(expense)}</div></div>
+        </div>
+      </div>
+      <div class="section-head">
+        <h3>${escapeHtml(l.recentTx)}</h3>
+        <button type="button" class="btn btn-ghost" id="goAddBtn">${escapeHtml(l.addShort)}</button>
+      </div>
+      <div class="tx-list">
+        ${recent.map((t) => txRowHtml(t, false)).join("") || `<div class="empty-note">${escapeHtml(l.noResults)}</div>`}
+      </div>
+      <div class="section-head">
+        <h3>${escapeHtml(l.budgetsThisMonth)}</h3>
+        <button type="button" class="btn btn-ghost" id="goBudgetsBtn">${escapeHtml(l.seeAll)}</button>
+      </div>
+      <div class="budgets-list">
+        ${budgetsPreview.map((b) => `
+          <div class="budget-item">
+            <div class="row1"><span>${escapeHtml(b.category)}</span><span class="right">${b.spentFmt} / ${b.limitFmt}</span></div>
+            <div class="bar-track"><div class="bar-fill" style="width:${b.pct}%;background:${b.barColor}"></div></div>
+          </div>`).join("")}
+      </div>
+    `;
+    $("goAddBtn").addEventListener("click", () => { resetForm(); setTab("add"); });
+    $("goBudgetsBtn").addEventListener("click", () => { state.insightsTab = "budgets"; setTab("insights"); });
+    wireTxRowActions();
+  }
+
+  function txRowHtml(t) {
+    const colorVar = t.type === "income" ? "var(--color-income)" : "var(--color-expense)";
+    const sign = t.type === "income" ? "+" : "−";
+    return `
+      <div class="tx-row" data-tx-actions data-id="${t.id}">
+        <div class="info">
+          <div class="cat">${escapeHtml(t.category)}</div>
+          <div class="meta">${dateLabel(t.date)}${t.note ? " · " + escapeHtml(t.note) : ""}</div>
+        </div>
+        <div class="amt" style="color:${colorVar}">${sign}${fmtMoney(t.amount)}</div>
+        ${t.__actions ? `
+        <div class="actions">
+          <button type="button" class="btn btn-icon" data-edit="${t.id}" aria-label="${escapeHtml(L().editAria)}">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"></path></svg>
+          </button>
+          <button type="button" class="btn btn-icon" style="color:var(--color-accent-700)" data-delete="${t.id}" aria-label="${escapeHtml(L().deleteAria)}">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+          </button>
+        </div>` : ""}
+      </div>`;
+  }
+  function wireTxRowActions() {
+    document.querySelectorAll("[data-edit]").forEach((btn) => btn.addEventListener("click", () => editTx(btn.getAttribute("data-edit"))));
+    document.querySelectorAll("[data-delete]").forEach((btn) => btn.addEventListener("click", () => deleteTx(btn.getAttribute("data-delete"))));
+  }
+
+  // ---------- Transactions ----------
+  function filteredTxList() {
+    let rows = transactions.slice();
+    if (state.txFilterType !== "all") rows = rows.filter((t) => t.type === state.txFilterType);
+    if (state.txFilterMonth !== "all") rows = rows.filter((t) => monthKey(t.date) === state.txFilterMonth);
+    if (state.txFilterCategory !== "all") rows = rows.filter((t) => t.category === state.txFilterCategory);
+    const q = state.txSearch.trim().toLowerCase();
+    if (q) rows = rows.filter((t) => (t.note || "").toLowerCase().includes(q) || t.category.toLowerCase().includes(q));
+    return rows.sort((a, b) => b.date.localeCompare(a.date));
+  }
+  function renderTxListOnly() {
+    const l = L();
+    const rows = filteredTxList();
+    const html = rows.map((t) => txRowHtml(Object.assign({}, t, { __actions: true }))).join("")
+      || `<div class="empty-note">${escapeHtml(l.noResults)}</div>`;
+    $("txListContainer").innerHTML = html;
+    wireTxRowActions();
+  }
+  function renderTransactions() {
+    const l = L();
+    const months = Array.from(new Set(transactions.map((t) => monthKey(t.date)))).sort().reverse();
+    const allCats = CATEGORIES.income.concat(CATEGORIES.expense);
+    $("screen").innerHTML = `
+      <h2 style="font-size:22px;margin-bottom:14px">${escapeHtml(l.allTransactions)}</h2>
+      <div class="seg" role="radiogroup" style="margin-bottom:10px">
+        <label class="seg-opt"><input type="radio" name="tx-type-filter" value="all" ${state.txFilterType === "all" ? "checked" : ""}>${escapeHtml(l.filterAll)}</label>
+        <label class="seg-opt"><input type="radio" name="tx-type-filter" value="income" ${state.txFilterType === "income" ? "checked" : ""}>${escapeHtml(l.incomeLabel)}</label>
+        <label class="seg-opt"><input type="radio" name="tx-type-filter" value="expense" ${state.txFilterType === "expense" ? "checked" : ""}>${escapeHtml(l.expenseLabel)}</label>
+      </div>
+      <div class="filter-row">
+        <select class="input" id="txFilterMonth">
+          <option value="all">${escapeHtml(l.allMonths)}</option>
+          ${months.map((m) => `<option value="${m}" ${state.txFilterMonth === m ? "selected" : ""}>${monthLabel(m)}</option>`).join("")}
+        </select>
+        <select class="input" id="txFilterCategory">
+          <option value="all">${escapeHtml(l.allCategories)}</option>
+          ${allCats.map((c) => `<option value="${escapeHtml(c)}" ${state.txFilterCategory === c ? "selected" : ""}>${escapeHtml(c)}</option>`).join("")}
+        </select>
+      </div>
+      <input class="input" style="margin-bottom:12px" id="txSearchInput" placeholder="${escapeHtml(l.searchPlaceholder)}" value="${escapeHtml(state.txSearch)}">
+      <div class="tx-list" id="txListContainer"></div>
+    `;
+    renderTxListOnly();
+    document.querySelectorAll('input[name="tx-type-filter"]').forEach((r) => r.addEventListener("change", (e) => { state.txFilterType = e.target.value; renderTxListOnly(); }));
+    $("txFilterMonth").addEventListener("change", (e) => { state.txFilterMonth = e.target.value; renderTxListOnly(); });
+    $("txFilterCategory").addEventListener("change", (e) => { state.txFilterCategory = e.target.value; renderTxListOnly(); });
+    $("txSearchInput").addEventListener("input", (e) => { state.txSearch = e.target.value; renderTxListOnly(); });
+  }
+
+  // ---------- Add / Edit ----------
+  function resetForm() {
+    state.formType = "expense";
+    state.formDate = new Date().toISOString().slice(0, 10);
+    state.formCategory = CATEGORIES.expense[0];
+    state.editingId = null;
+    state.categoryManual = false;
+  }
   function editTx(id) {
     const tx = transactions.find((t) => t.id === id);
     if (!tx) return;
-    editingId = id;
-    setType(tx.type, tx.category);
-    $("txDate").value = tx.date;
-    $("txAmount").value = tx.amount;
-    $("txNote").value = tx.note || "";
-    $("formTitle").textContent = "แก้ไขรายการ";
-    $("formSubmitBtn").textContent = "บันทึกการแก้ไข";
-    $("cancelEditBtn").style.display = "inline-block";
-    document.getElementById("addForm").scrollIntoView({ behavior: "smooth", block: "center" });
+    state.editingId = id;
+    state.formType = tx.type;
+    state.formDate = tx.date;
+    state.formCategory = tx.category;
+    state.categoryManual = true;
+    setTab("add");
   }
-  function exitEditMode() {
-    editingId = null;
-    $("formTitle").textContent = "เพิ่มรายการ";
-    $("formSubmitBtn").textContent = "บันทึกรายการ";
-    $("cancelEditBtn").style.display = "none";
-  }
-  $("cancelEditBtn").addEventListener("click", function () {
-    exitEditMode();
-    $("txAmount").value = "";
-    $("txNote").value = "";
-    $("txDate").value = new Date().toISOString().slice(0, 10);
-    setType("expense");
-  });
-  window.__editTx = editTx;
-
   function deleteTx(id) {
-    if (editingId === id) { exitEditMode(); }
+    if (state.editingId === id) resetForm();
     const tx = transactions.find((t) => t.id === id);
     transactions = transactions.filter((t) => t.id !== id);
-    renderAll();
-    if (tx) { tx.updatedAt = Date.now(); pushDeleteTx(tx).then((ok) => setSyncStatus(ok ? "ซิงค์ล่าสุด: " + new Date().toLocaleTimeString("th-TH") : "ลบในเครื่องแล้ว แต่ยังซิงค์ขึ้นคลาวด์ไม่สำเร็จ", ok)); }
-  }
-  window.__deleteTx = deleteTx;
-
-  // ---------- sample data ----------
-  $("loadSampleBtn").addEventListener("click", function () {
-    if (transactions.length && !confirm("จะเพิ่มข้อมูลตัวอย่างต่อจากรายการปัจจุบัน ต้องการดำเนินการต่อหรือไม่?")) return;
-    const today = new Date();
-    const d = (offsetDays) => { const x = new Date(today); x.setDate(x.getDate() - offsetDays); return x.toISOString().slice(0, 10); };
-    const sample = [
-      { type: "income", date: d(2), category: "เงินเดือน", amount: 35000, note: "เงินเดือนประจำเดือน" },
-      { type: "expense", date: d(1), category: "อาหารและเครื่องดื่ม", amount: 180, note: "ข้าวกลางวัน" },
-      { type: "expense", date: d(3), category: "การเดินทาง", amount: 90, note: "ค่า BTS" },
-      { type: "expense", date: d(5), category: "สาธารณูปโภค (ไฟ/น้ำ/เน็ต)", amount: 1200, note: "ค่าไฟ" },
-      { type: "expense", date: d(7), category: "ช้อปปิ้ง", amount: 650, note: "" },
-      { type: "expense", date: d(10), category: "บันเทิง", amount: 320, note: "ดูหนัง" },
-      { type: "income", date: d(20), category: "ธุรกิจ/ฟรีแลนซ์", amount: 4500, note: "งานฟรีแลนซ์" },
-      { type: "expense", date: d(33), category: "อาหารและเครื่องดื่ม", amount: 210, note: "" },
-      { type: "expense", date: d(40), category: "ที่อยู่อาศัย/ค่าเช่า", amount: 8000, note: "ค่าเช่าห้อง" },
-      { type: "income", date: d(35), category: "เงินเดือน", amount: 35000, note: "" },
-      { type: "expense", date: d(60), category: "สุขภาพ", amount: 500, note: "" },
-      { type: "expense", date: d(65), category: "อาหารและเครื่องดื่ม", amount: 195, note: "" },
-      { type: "income", date: d(65), category: "เงินเดือน", amount: 35000, note: "" }
-    ];
-    const added = sample.map((s) => Object.assign({ id: uid(), updatedAt: Date.now() }, s));
-    added.forEach((t) => transactions.push(t));
-    renderAll();
-    pushRows(added.map((t) => txToRow(t, false))).then((ok) => setSyncStatus(ok ? "ซิงค์ล่าสุด: " + new Date().toLocaleTimeString("th-TH") : "บันทึกในเครื่องแล้ว แต่ยังซิงค์ขึ้นคลาวด์ไม่สำเร็จ", ok));
-  });
-
-  // ---------- export / import ----------
-  function download(filename, content, mime) {
-    const blob = new Blob([content], { type: mime });
-    const a = document.createElement("a");
-    a.href = URL.createObjectURL(blob);
-    a.download = filename;
-    document.body.appendChild(a); a.click(); document.body.removeChild(a);
-    URL.revokeObjectURL(a.href);
-  }
-  $("exportJsonBtn").addEventListener("click", function () {
-    download("รายรับรายจ่าย-" + new Date().toISOString().slice(0, 10) + ".json", JSON.stringify(transactions, null, 2), "application/json");
-  });
-  $("exportCsvBtn").addEventListener("click", function () {
-    const header = ["วันที่", "ประเภท", "หมวดหมู่", "รายละเอียด", "จำนวนเงิน"];
-    const rows = transactions.slice().sort((a, b) => a.date.localeCompare(b.date)).map((t) =>
-      [t.date, t.type === "income" ? "รายรับ" : "รายจ่าย", t.category, t.note || "", t.amount].map((v) => `"${String(v).replace(/"/g, '""')}"`).join(",")
-    );
-    download("รายรับรายจ่าย-" + new Date().toISOString().slice(0, 10) + ".csv", "﻿" + header.join(",") + "\n" + rows.join("\n"), "text/csv");
-  });
-  $("importInput").addEventListener("change", function (e) {
-    const file = e.target.files[0];
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onload = function (ev) {
-      try {
-        const data = JSON.parse(ev.target.result);
-        if (!Array.isArray(data)) throw new Error("รูปแบบไฟล์ไม่ถูกต้อง");
-        let count = 0;
-        const added = [];
-        data.forEach((t) => {
-          if (t && t.date && t.type && t.category && typeof t.amount === "number") {
-            const nt = { id: uid(), type: t.type, date: t.date, category: t.category, amount: t.amount, note: t.note || "", updatedAt: Date.now() };
-            transactions.push(nt);
-            added.push(nt);
-            count++;
-          }
-        });
-        renderAll();
-        if (added.length) pushRows(added.map((t) => txToRow(t, false))).then((ok) => setSyncStatus(ok ? "ซิงค์ล่าสุด: " + new Date().toLocaleTimeString("th-TH") : "บันทึกในเครื่องแล้ว แต่ยังซิงค์ขึ้นคลาวด์ไม่สำเร็จ", ok));
-        alert("นำเข้าข้อมูลสำเร็จ " + count + " รายการ");
-      } catch (err) {
-        alert("ไม่สามารถอ่านไฟล์ได้: " + err.message);
-      }
-      e.target.value = "";
-    };
-    reader.readAsText(file);
-  });
-
-  // ---------- theme toggle ----------
-  $("themeToggle").addEventListener("click", function () {
-    const cur = document.documentElement.getAttribute("data-theme");
-    const next = isDark() && cur !== "light" ? "light" : (cur === "dark" ? "light" : "dark");
-    document.documentElement.setAttribute("data-theme", next);
-    renderCharts();
-  });
-
-  // ---------- filters population ----------
-  function populateFilterOptions() {
-    const months = Array.from(new Set(transactions.map((t) => monthKey(t.date)))).sort().reverse();
-    const monthSel = $("filterMonth");
-    const curMonth = monthSel.value;
-    monthSel.innerHTML = '<option value="all">ทุกเดือน</option>' + months.map((m) => `<option value="${m}">${monthLabel(m)}</option>`).join("");
-    if (months.includes(curMonth)) monthSel.value = curMonth;
-
-    const catSel = $("filterCategory");
-    const curCat = catSel.value;
-    const allCats = CATEGORIES.income.concat(CATEGORIES.expense);
-    catSel.innerHTML = '<option value="all">ทุกหมวดหมู่</option>' + allCats.map((c) => `<option value="${c}">${c}</option>`).join("");
-    if (allCats.includes(curCat)) catSel.value = curCat;
-  }
-
-  // ---------- summary ----------
-  function renderSummary() {
-    const income = transactions.filter((t) => t.type === "income").reduce((s, t) => s + t.amount, 0);
-    const expense = transactions.filter((t) => t.type === "expense").reduce((s, t) => s + t.amount, 0);
-    const balance = income - expense;
-    $("statIncome").textContent = fmtMoney(income);
-    $("statExpense").textContent = fmtMoney(expense);
-    const balEl = $("statBalance");
-    balEl.textContent = (balance >= 0 ? "" : "−") + fmtMoney(Math.abs(balance));
-    balEl.classList.toggle("good", balance >= 0);
-    balEl.classList.toggle("bad", balance < 0);
-  }
-
-  // ---------- table ----------
-  function renderTable() {
-    const type = $("filterType").value;
-    const month = $("filterMonth").value;
-    const cat = $("filterCategory").value;
-    const search = $("filterSearch").value.trim().toLowerCase();
-    let rows = transactions.slice().sort((a, b) => b.date.localeCompare(a.date));
-    if (type !== "all") rows = rows.filter((t) => t.type === type);
-    if (month !== "all") rows = rows.filter((t) => monthKey(t.date) === month);
-    if (cat !== "all") rows = rows.filter((t) => t.category === cat);
-    if (search) rows = rows.filter((t) => (t.note || "").toLowerCase().includes(search) || t.category.toLowerCase().includes(search));
-
-    const body = $("txTableBody");
-    body.innerHTML = rows.map((t) => `
-      <tr>
-        <td>${fmtDateShort(t.date)}</td>
-        <td><span class="pill ${t.type}">${t.type === "income" ? "รายรับ" : "รายจ่าย"}</span></td>
-        <td>${t.category}</td>
-        <td>${t.note ? t.note : "<span style='color:var(--text-muted)'>—</span>"}</td>
-        <td style="text-align:right;" class="amt ${t.type}">${t.type === "income" ? "+" : "−"}${fmtMoney(t.amount, 2)}</td>
-        <td style="text-align:right; white-space:nowrap;">
-          <button class="edit-text" onclick="__editTx('${t.id}')">แก้ไข</button><button class="danger-text" onclick="__deleteTx('${t.id}')">ลบ</button>
-        </td>
-      </tr>
-    `).join("");
-    $("tableEmpty").style.display = rows.length ? "none" : "block";
-  }
-  ["filterType", "filterMonth", "filterCategory"].forEach((id) => $(id).addEventListener("change", renderTable));
-  $("filterSearch").addEventListener("input", renderTable);
-
-  // ---------- charts ----------
-  function periodFilter(list, period) {
-    if (period === "all") return list;
-    const now = new Date();
-    if (period === "thisMonth") {
-      const key = now.toISOString().slice(0, 7);
-      return list.filter((t) => monthKey(t.date) === key);
-    }
-    const monthsBack = period === "last3" ? 3 : 6;
-    const cutoff = new Date(now.getFullYear(), now.getMonth() - (monthsBack - 1), 1);
-    return list.filter((t) => new Date(t.date + "T00:00:00") >= cutoff);
-  }
-
-  function renderCategoryChart() {
-    const period = $("chartPeriod").value;
-    const expenses = periodFilter(transactions.filter((t) => t.type === "expense"), period);
-    const totals = {};
-    expenses.forEach((t) => { totals[t.category] = (totals[t.category] || 0) + t.amount; });
-    const entries = Object.entries(totals).sort((a, b) => b[1] - a[1]);
-
-    $("categoryEmpty").style.display = entries.length ? "none" : "block";
-    $("categoryTable").innerHTML = entries.length
-      ? "<tr><th>หมวดหมู่</th><th style='text-align:right'>จำนวนเงิน</th></tr>" +
-        entries.map(([c, v]) => `<tr><td>${c}</td><td style="text-align:right;">${fmtMoney(v)}</td></tr>`).join("")
-      : "";
-
-    const ctx = $("categoryChart").getContext("2d");
-    const secondary = cssVar("--text-secondary");
-    const grid = cssVar("--grid");
-    const series1 = cssVar("--series-1");
-    if (categoryChart) categoryChart.destroy();
-    if (!entries.length) return;
-    categoryChart = new Chart(ctx, {
-      type: "bar",
-      data: {
-        labels: entries.map((e) => e[0]),
-        datasets: [{ data: entries.map((e) => e[1]), backgroundColor: series1, borderRadius: 4, maxBarThickness: 22 }]
-      },
-      options: {
-        indexAxis: "y",
-        responsive: true, maintainAspectRatio: false,
-        plugins: {
-          legend: { display: false },
-          tooltip: { callbacks: { label: (c) => fmtMoney(c.parsed.x) } }
-        },
-        scales: {
-          x: { grid: { color: grid }, ticks: { color: secondary, font: { size: 11 } } },
-          y: { grid: { display: false }, ticks: { color: secondary, font: { size: 11.5 } } }
-        }
-      }
-    });
-  }
-
-  function renderTrendChart() {
-    const byMonth = {};
-    transactions.forEach((t) => {
-      const k = monthKey(t.date);
-      byMonth[k] = byMonth[k] || { income: 0, expense: 0 };
-      byMonth[k][t.type] += t.amount;
-    });
-    const keys = Object.keys(byMonth).sort().slice(-12);
-
-    $("trendEmpty").style.display = keys.length ? "none" : "block";
-    $("trendTable").innerHTML = keys.length
-      ? "<tr><th>เดือน</th><th style='text-align:right'>รายรับ</th><th style='text-align:right'>รายจ่าย</th></tr>" +
-        keys.map((k) => `<tr><td>${monthLabel(k)}</td><td style="text-align:right;">${fmtMoney(byMonth[k].income)}</td><td style="text-align:right;">${fmtMoney(byMonth[k].expense)}</td></tr>`).join("")
-      : "";
-
-    const ctx = $("trendChart").getContext("2d");
-    const secondary = cssVar("--text-secondary");
-    const grid = cssVar("--grid");
-    const series1 = cssVar("--series-1");
-    const series8 = cssVar("--series-8");
-    if (trendChart) trendChart.destroy();
-    if (!keys.length) return;
-    trendChart = new Chart(ctx, {
-      type: "line",
-      data: {
-        labels: keys.map(monthLabel),
-        datasets: [
-          { label: "รายรับ", data: keys.map((k) => byMonth[k].income), borderColor: series1, backgroundColor: series1, tension: 0.3, borderWidth: 2, pointRadius: 3 },
-          { label: "รายจ่าย", data: keys.map((k) => byMonth[k].expense), borderColor: series8, backgroundColor: series8, tension: 0.3, borderWidth: 2, pointRadius: 3 }
-        ]
-      },
-      options: {
-        responsive: true, maintainAspectRatio: false,
-        plugins: {
-          legend: { display: true, position: "top", align: "end", labels: { color: secondary, boxWidth: 10, font: { size: 11.5 } } },
-          tooltip: { callbacks: { label: (c) => c.dataset.label + ": " + fmtMoney(c.parsed.y) } }
-        },
-        scales: {
-          x: { grid: { display: false }, ticks: { color: secondary, font: { size: 11 } } },
-          y: { grid: { color: grid }, ticks: { color: secondary, font: { size: 11 }, callback: (v) => fmtMoney(v) } }
-        }
-      }
-    });
-  }
-
-  function renderCharts() { renderCategoryChart(); renderTrendChart(); }
-  $("chartPeriod").addEventListener("change", renderCategoryChart);
-
-  function renderAll() {
     saveToStorage();
-    populateFilterOptions();
-    renderSummary();
-    renderTable();
-    renderCharts();
+    showToast(L().toastDeleted);
+    renderScreen();
+    if (tx) { tx.updatedAt = Date.now(); pushDeleteTx(tx).then(() => syncNow()); }
+  }
+  function renderFormCategoryOptions(select) {
+    const opts = state.formType === "income" ? CATEGORIES.income : CATEGORIES.expense;
+    select.innerHTML = opts.map((c) => `<option value="${escapeHtml(c)}" ${c === state.formCategory ? "selected" : ""}>${escapeHtml(c)}</option>`).join("");
+  }
+  function renderAdd() {
+    const l = L();
+    const isEditing = !!state.editingId;
+    $("screen").innerHTML = `
+      <h2 style="font-size:22px;margin-bottom:14px">${escapeHtml(isEditing ? l.editTitle : l.addTitle)}</h2>
+      <form class="add-form" id="addForm">
+        <div class="field">
+          <label>${escapeHtml(l.typeLabel)}</label>
+          <div class="seg" role="radiogroup">
+            <label class="seg-opt"><input type="radio" name="form-type" value="expense" ${state.formType === "expense" ? "checked" : ""}>${escapeHtml(l.expenseLabel)}</label>
+            <label class="seg-opt"><input type="radio" name="form-type" value="income" ${state.formType === "income" ? "checked" : ""}>${escapeHtml(l.incomeLabel)}</label>
+          </div>
+        </div>
+        <div class="field">
+          <label for="txDate">${escapeHtml(l.dateLabel)}</label>
+          <input class="input" type="date" id="txDate" value="${state.formDate}" required>
+        </div>
+        <div class="field">
+          <label for="txCategory">${escapeHtml(l.categoryLabel)}</label>
+          <select class="input" id="txCategory" required></select>
+        </div>
+        <div class="field">
+          <label for="txAmount">${escapeHtml(l.amountLabel)}</label>
+          <input class="input" type="number" id="txAmount" min="0" step="0.01" placeholder="0.00" required>
+        </div>
+        <div class="field">
+          <label for="txNote">${escapeHtml(l.noteLabel)}</label>
+          <input class="input" type="text" id="txNote" placeholder="${escapeHtml(l.notePlaceholder)}">
+        </div>
+        <button type="submit" class="btn btn-primary btn-block">${escapeHtml(isEditing ? l.saveEditBtn : l.saveBtn)}</button>
+        ${isEditing ? `<button type="button" class="btn btn-secondary btn-block" id="cancelEditBtn">${escapeHtml(l.cancelEditBtn)}</button>` : ""}
+      </form>
+    `;
+    renderFormCategoryOptions($("txCategory"));
+    if (isEditing) {
+      const tx = transactions.find((t) => t.id === state.editingId);
+      if (tx) { $("txAmount").value = tx.amount; $("txNote").value = tx.note || ""; }
+    }
+    document.querySelectorAll('input[name="form-type"]').forEach((r) => r.addEventListener("change", (e) => {
+      state.formType = e.target.value;
+      const guess = state.categoryManual ? state.formCategory : guessCategory($("txNote").value, state.formType);
+      const opts = state.formType === "income" ? CATEGORIES.income : CATEGORIES.expense;
+      state.formCategory = (guess && opts.includes(guess)) ? guess : opts[0];
+      renderFormCategoryOptions($("txCategory"));
+    }));
+    $("txCategory").addEventListener("change", (e) => { state.formCategory = e.target.value; state.categoryManual = true; });
+    $("txDate").addEventListener("change", (e) => { state.formDate = e.target.value; });
+    $("txNote").addEventListener("input", function () {
+      if (state.categoryManual) return;
+      const guess = guessCategory(this.value, state.formType);
+      if (guess) { state.formCategory = guess; $("txCategory").value = guess; }
+    });
+    if (isEditing) $("cancelEditBtn").addEventListener("click", () => { resetForm(); setTab("transactions"); });
+    $("addForm").addEventListener("submit", function (e) {
+      e.preventDefault();
+      const date = $("txDate").value;
+      const amount = parseFloat($("txAmount").value);
+      if (!date || !amount || amount <= 0) { showToast(L().toastInvalidAmount); return; }
+      const note = $("txNote").value.trim();
+      const category = $("txCategory").value;
+      let savedTx = null;
+      if (state.editingId) {
+        const idx = transactions.findIndex((t) => t.id === state.editingId);
+        if (idx >= 0) {
+          transactions[idx] = Object.assign({}, transactions[idx], { type: state.formType, date, category, amount, note, updatedAt: Date.now() });
+          savedTx = transactions[idx];
+        }
+        showToast(L().toastEdited);
+      } else {
+        savedTx = { id: uid(), type: state.formType, date, category, amount, note, updatedAt: Date.now() };
+        transactions.push(savedTx);
+        showToast(L().toastAdded);
+      }
+      saveToStorage();
+      resetForm();
+      setTab("transactions");
+      if (savedTx) pushTx(savedTx).then(() => syncNow());
+    });
   }
 
-  loadFromStorage();
-  updateStorageStatus();
-  renderAll();
+  // ---------- Insights ----------
+  function renderInsights() {
+    const l = L();
+    $("screen").innerHTML = `
+      <h2 style="font-size:22px;margin-bottom:12px">${escapeHtml(l.financialOverview)}</h2>
+      <div class="seg" role="radiogroup" style="margin-bottom:18px">
+        <label class="seg-opt"><input type="radio" name="insights-tab" value="budgets" ${state.insightsTab === "budgets" ? "checked" : ""}>${escapeHtml(l.budgetsTab)}</label>
+        <label class="seg-opt"><input type="radio" name="insights-tab" value="breakdown" ${state.insightsTab === "breakdown" ? "checked" : ""}>${escapeHtml(l.categoryTab)}</label>
+        <label class="seg-opt"><input type="radio" name="insights-tab" value="trend" ${state.insightsTab === "trend" ? "checked" : ""}>${escapeHtml(l.trendTab)}</label>
+      </div>
+      <div id="insightsBody"></div>
+    `;
+    renderInsightsBody();
+    document.querySelectorAll('input[name="insights-tab"]').forEach((r) => r.addEventListener("change", (e) => { state.insightsTab = e.target.value; renderInsights(); }));
+  }
+  function renderInsightsBody() {
+    const l = L();
+    const body = $("insightsBody");
+    if (state.insightsTab === "budgets") {
+      const rows = computeBudgets();
+      body.innerHTML = `<div class="insight-cards">${rows.map((b) => `
+        <div class="insight-card">
+          <div class="head"><span class="cat">${escapeHtml(b.category)}</span><span class="status" style="color:${b.statusColor}">${escapeHtml(b.statusLabel)}</span></div>
+          <div class="bar-track"><div class="bar-fill" style="width:${b.pct}%;background:${b.barColor}"></div></div>
+          <div class="foot"><span>${b.spentFmt} ${escapeHtml(l.spentSoFar)}</span><span>${escapeHtml(l.budgetOf)} ${b.limitFmt}</span></div>
+        </div>`).join("")}</div>`;
+    } else if (state.insightsTab === "breakdown") {
+      const rows = computeBreakdown();
+      const today = new Date().toLocaleDateString(state.lang === "en" ? "en-US" : "th-TH", { month: "long", year: "numeric" });
+      body.innerHTML = `
+        <div style="font-size:12px;color:var(--color-muted);margin-bottom:12px">${escapeHtml(l.expenseByCategory)} — ${escapeHtml(today)}</div>
+        ${rows.map((d) => `
+          <div class="breakdown-row">
+            <div class="row1"><span>${escapeHtml(d.category)}</span><span class="right">${d.totalFmt}</span></div>
+            <div class="breakdown-bar-track"><div class="bar-fill" style="width:${d.pct}%;background:var(--color-accent)"></div></div>
+          </div>`).join("") || `<div class="empty-note">${escapeHtml(l.noExpensesMonth)}</div>`}
+      `;
+    } else {
+      const trend = computeTrend();
+      body.innerHTML = trend.length ? `
+        <div class="trend-legend">
+          <span><span class="swatch" style="background:var(--color-text)"></span>${escapeHtml(l.incomeLabel)}</span>
+          <span><span class="swatch" style="background:var(--color-accent)"></span>${escapeHtml(l.expenseLabel)}</span>
+        </div>
+        <div class="trend-chart">
+          ${trend.map((m) => `<div class="trend-col"><div class="trend-bars"><div class="bar" style="background:var(--color-text);height:${m.incomeH}px"></div><div class="bar" style="background:var(--color-accent);height:${m.expenseH}px"></div></div></div>`).join("")}
+        </div>
+        <div class="trend-labels">${trend.map((m) => `<div>${escapeHtml(m.label)}</div>`).join("")}</div>
+      ` : `<div class="empty-note">${escapeHtml(l.noResults)}</div>`;
+    }
+  }
 
-  // ---------- sync UI wiring ----------
-  renderAuthUI();
-  $("googleSignInBtn").addEventListener("click", signInWithGoogle);
-  $("signOutBtn").addEventListener("click", signOutUser);
-  $("syncNowBtn").addEventListener("click", syncNow);
+  // ---------- Settings ----------
+  function renderSettings() {
+    const l = L();
+    const meta = currentUser ? (currentUser.user_metadata || {}) : {};
+    const avatarUrl = meta.avatar_url || meta.picture || "";
+    const name = currentUser ? (meta.full_name || meta.name || currentUser.email || "") : l.notSignedIn;
+
+    $("screen").innerHTML = `
+      <h2 style="font-size:22px;margin-bottom:22px">${escapeHtml(l.settingsTitle)}</h2>
+      <div class="settings-block">
+
+        <div class="profile-row">
+          ${avatarUrl ? `<img class="avatar" src="${escapeHtml(avatarUrl)}" alt="">` : `<div class="avatar">${escapeHtml((name || "?").slice(0, 1).toUpperCase())}</div>`}
+          <div>
+            <div class="profile-name">${escapeHtml(name)}</div>
+            <div class="profile-sub">${escapeHtml(currentUser ? l.personalAccount : "")}</div>
+          </div>
+          <button type="button" class="btn btn-secondary" id="authBtn">${escapeHtml(currentUser ? l.signOutBtn : l.signInGoogle)}</button>
+        </div>
+
+        <div>
+          <div class="settings-section-label">${escapeHtml(l.languageSection)}</div>
+          <div class="seg" role="radiogroup">
+            <label class="seg-opt"><input type="radio" name="lang-switch" value="th" ${state.lang === "th" ? "checked" : ""}>ไทย</label>
+            <label class="seg-opt"><input type="radio" name="lang-switch" value="en" ${state.lang === "en" ? "checked" : ""}>English</label>
+          </div>
+        </div>
+
+        <div>
+          <div class="settings-section-label">${escapeHtml(l.displaySection)}</div>
+          <div class="toggle-row">
+            <span style="font-size:14px">${escapeHtml(l.darkModeBtn)}</span>
+            <button type="button" class="toggle-switch ${state.dark ? "on" : ""}" id="darkSwitch"><span class="thumb"></span></button>
+          </div>
+          <div class="scheme-grid">
+            ${SCHEME_ORDER.map((s) => `
+              <label class="scheme-opt ${state.scheme === s ? "active" : ""}" style="--swatch:${SCHEMES[s][0]}">
+                <input type="radio" name="color-scheme" value="${s}" ${state.scheme === s ? "checked" : ""}>
+                <span class="dot"></span>
+                <span class="lbl">${escapeHtml(l["color" + s.charAt(0).toUpperCase() + s.slice(1)])}</span>
+              </label>`).join("")}
+          </div>
+        </div>
+
+        <div>
+          <div class="settings-section-label">${escapeHtml(l.syncSection)}</div>
+          <div class="sync-box">
+            <span id="syncStatus" class="${lastSyncStatus.ok === true ? "ok" : (lastSyncStatus.ok === false ? "err" : "")}"><span class="sync-dot"></span><span>${escapeHtml(currentUser ? lastSyncStatus.text : l.syncSignedOut)}</span></span>
+            <div style="font-size:11.5px;color:var(--color-muted)">${escapeHtml(l.syncHelp)}</div>
+            <button type="button" class="btn btn-secondary" id="syncNowBtn" ${currentUser ? "" : "disabled"}>${escapeHtml(l.syncNowBtn)}</button>
+          </div>
+        </div>
+
+        <div>
+          <div class="settings-section-label">${escapeHtml(l.dataSection)}</div>
+          <div style="display:flex;flex-direction:column;gap:8px">
+            <button type="button" class="btn btn-secondary btn-block" id="exportCsvBtn">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+              ${escapeHtml(l.exportCsvBtn)}
+            </button>
+            <button type="button" class="btn btn-secondary btn-block" id="exportJsonBtn">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+              ${escapeHtml(l.exportJsonBtn)}
+            </button>
+          </div>
+        </div>
+
+        <div>
+          <div class="settings-section-label">${escapeHtml(l.billsSection)}</div>
+          <div class="bills-list">
+            ${bills.map((b) => `
+              <div class="bill-row">
+                <div><div class="name">${escapeHtml(b.name[state.lang])}</div><div class="day">${escapeHtml(l.dueOn)}${b.day}</div></div>
+                <div class="amt">${fmtMoney(b.amount)}</div>
+              </div>`).join("")}
+          </div>
+        </div>
+
+        <p class="footer-note">${escapeHtml(l.footerNote)}</p>
+      </div>
+    `;
+
+    $("authBtn").addEventListener("click", () => { currentUser ? signOutUser() : signInWithGoogle(); });
+    document.querySelectorAll('input[name="lang-switch"]').forEach((r) => r.addEventListener("change", (e) => { state.lang = e.target.value; saveSettings(); renderChrome(); renderScreen(); }));
+    $("darkSwitch").addEventListener("click", () => { state.dark = !state.dark; saveSettings(); applyTheme(); renderScreen(); });
+    document.querySelectorAll('input[name="color-scheme"]').forEach((r) => r.addEventListener("change", (e) => { state.scheme = e.target.value; saveSettings(); applyTheme(); renderScreen(); }));
+    $("syncNowBtn").addEventListener("click", syncNow);
+    $("exportCsvBtn").addEventListener("click", function () {
+      const header = ["วันที่", "ประเภท", "หมวดหมู่", "รายละเอียด", "จำนวนเงิน"];
+      const rows = transactions.slice().sort((a, b) => a.date.localeCompare(b.date)).map((t) =>
+        [t.date, t.type === "income" ? L().incomeLabel : L().expenseLabel, t.category, t.note || "", t.amount].map((v) => '"' + String(v).replace(/"/g, '""') + '"').join(","));
+      const blob = new Blob(["﻿" + header.join(",") + "\n" + rows.join("\n")], { type: "text/csv" });
+      const a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = "transactions.csv";
+      document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(a.href);
+      showToast(L().toastCsv);
+    });
+    $("exportJsonBtn").addEventListener("click", function () {
+      const blob = new Blob([JSON.stringify(transactions, null, 2)], { type: "application/json" });
+      const a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = "transactions.json";
+      document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(a.href);
+      showToast(L().toastJson);
+    });
+  }
+
+  // ---------- tab routing ----------
+  function setTab(tab) {
+    state.tab = tab;
+    renderScreen();
+  }
+  function renderScreen() {
+    if (state.tab === "home") renderHome();
+    else if (state.tab === "transactions") renderTransactions();
+    else if (state.tab === "add") renderAdd();
+    else if (state.tab === "insights") renderInsights();
+    else if (state.tab === "settings") renderSettings();
+    renderChrome();
+  }
+
+  // ---------- boot ----------
+  loadFromStorage();
+  applyTheme();
+  renderScreen();
+
+  document.querySelectorAll("#tabbar button").forEach((btn) => btn.addEventListener("click", () => {
+    if (btn.getAttribute("data-tab") === "add") resetForm();
+    setTab(btn.getAttribute("data-tab"));
+  }));
+  $("darkToggleBtn").addEventListener("click", () => { state.dark = !state.dark; saveSettings(); applyTheme(); renderChrome(); if (state.tab === "settings") renderSettings(); });
+
   window.addEventListener("online", syncNow);
-  window.addEventListener("offline", () => setSyncStatus("ออฟไลน์อยู่ — จะซิงค์อัตโนมัติเมื่อกลับมามีเน็ต", false));
+  window.addEventListener("offline", () => setSyncStatus(L().syncOffline, false));
   document.addEventListener("visibilitychange", function () { if (document.visibilityState === "visible") syncNow(); });
   setInterval(syncNow, 25000);
 
   if (sb) {
     sb.auth.onAuthStateChange(function (event, session) {
       currentUser = session ? session.user : null;
-      renderAuthUI();
+      if (state.tab === "settings") renderSettings();
       if (currentUser) syncNow();
     });
   }
