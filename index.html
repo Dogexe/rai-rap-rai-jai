@@ -99,7 +99,7 @@
   .tx-row .info { min-width: 0; flex: 1; }
   .tx-row .cat { font-size: 14px; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .tx-row .meta { font-size: 11.5px; color: var(--color-muted); }
-  .tx-row .amt { font-size: 14px; font-weight: 700; flex-shrink: 0; }
+  .tx-row .amt { font-size: 14px; font-weight: 600; flex-shrink: 0; }
   .tx-row .actions { display: flex; gap: 2px; flex-shrink: 0; }
   .empty-note { padding: 36px 0; text-align: center; color: var(--color-muted); font-size: 13px; }
 
@@ -173,7 +173,7 @@
   .manage-row .info { min-width: 0; flex: 1; }
   .manage-row .name { font-size: 14px; font-weight: 600; }
   .manage-row .sub { font-size: 11.5px; color: var(--color-muted); }
-  .manage-row .amt { font-size: 14px; font-weight: 700; flex-shrink: 0; }
+  .manage-row .amt { font-size: 14px; font-weight: 600; flex-shrink: 0; }
   .row-actions { display: flex; gap: 2px; flex-shrink: 0; }
   .section-add-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
   .inline-form { display: flex; flex-direction: column; gap: 10px; border: 1px solid var(--color-divider); padding: 12px; margin-bottom: 12px; }
@@ -287,11 +287,16 @@
   const SCHEMES = {
     red: ["#ec3013", "#dd2b0f", "#ae1800"],
     orange: ["#c56a1f", "#a8591a", "#7c4110"],
+    amber: ["#a16207", "#854d0e", "#713f12"],
     green: ["#3d7a3f", "#336636", "#254a27"],
+    teal: ["#0d9488", "#0f766e", "#115e59"],
     blue: ["#3763b5", "#2e5399", "#213c70"],
+    indigo: ["#4f46e5", "#4338ca", "#3730a3"],
+    purple: ["#7c3aed", "#6d28d9", "#5b21b6"],
+    pink: ["#be185d", "#9d174d", "#831843"],
     mono: ["#2d2b2b", "#201e1d", "#201e1d"]
   };
-  const SCHEME_ORDER = ["red", "orange", "green", "blue", "mono"];
+  const SCHEME_ORDER = ["red", "orange", "amber", "green", "teal", "blue", "indigo", "purple", "pink", "mono"];
 
   const LANGS = {
     th: {
@@ -307,7 +312,8 @@
       spentSoFar: "ใช้ไปแล้ว", budgetOf: "งบ", overBudget: "เกินงบ", expenseByCategory: "รายจ่ายตามหมวดหมู่",
       noExpensesMonth: "ยังไม่มีรายจ่ายในเดือนนี้", settingsTitle: "ตั้งค่า",
       personalAccount: "บัญชีส่วนตัว", languageSection: "ภาษา", displaySection: "การแสดงผล",
-      colorRed: "แดง", colorOrange: "ส้ม", colorGreen: "เขียว", colorBlue: "น้ำเงิน", colorMono: "โมโนโครม",
+      colorRed: "แดง", colorOrange: "ส้ม", colorAmber: "เหลืองทอง", colorGreen: "เขียว", colorTeal: "เขียวอมฟ้า",
+      colorBlue: "น้ำเงิน", colorIndigo: "คราม", colorPurple: "ม่วง", colorPink: "ชมพู", colorMono: "โมโนโครม",
       syncSection: "ซิงค์ข้ามอุปกรณ์", dataSection: "ข้อมูล",
       exportCsvBtn: "ส่งออก CSV", exportJsonBtn: "ส่งออกข้อมูล (JSON)", billsSection: "รายการที่ต้องจ่ายประจำ",
       dueOn: "ทุกวันที่ ", footerNote: "ข้อมูลจะถูกบันทึกไว้ในอุปกรณ์นี้เสมอ เข้าสู่ระบบด้วย Google เพื่อซิงค์ข้ามอุปกรณ์โดยอัตโนมัติ แนะนำให้ส่งออกข้อมูลเก็บเป็นไฟล์สำรองเป็นระยะ",
@@ -338,7 +344,8 @@
       spentSoFar: "spent", budgetOf: "Budget", overBudget: "Over", expenseByCategory: "Expenses by category",
       noExpensesMonth: "No expenses yet this month", settingsTitle: "Settings",
       personalAccount: "Personal account", languageSection: "Language", displaySection: "Display",
-      colorRed: "Red", colorOrange: "Orange", colorGreen: "Green", colorBlue: "Blue", colorMono: "Monochrome",
+      colorRed: "Red", colorOrange: "Orange", colorAmber: "Amber", colorGreen: "Green", colorTeal: "Teal",
+      colorBlue: "Blue", colorIndigo: "Indigo", colorPurple: "Purple", colorPink: "Pink", colorMono: "Monochrome",
       syncSection: "Cross-device sync", dataSection: "Data",
       exportCsvBtn: "Export CSV", exportJsonBtn: "Export data (JSON)", billsSection: "Recurring bills",
       dueOn: "Due on day ", footerNote: "Data always stays on this device. Sign in with Google to sync across devices automatically. Export a backup periodically.",
@@ -363,7 +370,7 @@
   const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
   const monthKey = (iso) => iso.slice(0, 7);
   function fmtMoney(n) { return "฿" + Number(n).toLocaleString(state.lang === "en" ? "en-US" : "th-TH", { minimumFractionDigits: 2, maximumFractionDigits: 2 }); }
-  function dateLabel(iso) { return new Date(iso + "T00:00:00").toLocaleDateString(state.lang === "en" ? "en-US" : "th-TH", { day: "numeric", month: "short" }); }
+  function dateLabel(iso) { const [y, m, d] = iso.split("-"); return d + "/" + m + "/" + y; }
   function monthLabel(key) { return new Date(key + "-01T00:00:00").toLocaleDateString(state.lang === "en" ? "en-US" : "th-TH", { month: "short", year: "2-digit" }); }
   function escapeHtml(s) { return String(s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c])); }
   const EDIT_ICON = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"></path></svg>';
@@ -372,7 +379,7 @@
   // ---------- state ----------
   const state = {
     lang: "th", dark: false, scheme: "red",
-    tab: "home", insightsTab: "budgets",
+    tab: "home", insightsTab: "budgets", insightsMonth: new Date().toISOString().slice(0, 7),
     txFilterType: "all", txFilterMonth: "all", txFilterCategory: "all", txSearch: "",
     formType: "expense", formDate: new Date().toISOString().slice(0, 10),
     formCategory: CATEGORIES.expense[0], editingId: null, categoryManual: false,
@@ -627,10 +634,10 @@
   }
 
   // ---------- derived data ----------
-  function computeBudgets() {
-    const thisMonthKey = new Date().toISOString().slice(0, 7);
+  function computeBudgets(forMonth) {
+    const targetMonth = forMonth || new Date().toISOString().slice(0, 7);
     const spentByCategory = {};
-    transactions.filter((t) => t.type === "expense" && monthKey(t.date) === thisMonthKey).forEach((t) => {
+    transactions.filter((t) => t.type === "expense" && monthKey(t.date) === targetMonth).forEach((t) => {
       spentByCategory[t.category] = (spentByCategory[t.category] || 0) + t.amount;
     });
     return budgets.map((b) => {
@@ -645,15 +652,21 @@
       };
     });
   }
-  function computeBreakdown() {
-    const thisMonthKey = new Date().toISOString().slice(0, 7);
+  function computeBreakdown(forMonth) {
+    const targetMonth = forMonth || new Date().toISOString().slice(0, 7);
     const totals = {};
-    transactions.filter((t) => t.type === "expense" && monthKey(t.date) === thisMonthKey).forEach((t) => {
+    transactions.filter((t) => t.type === "expense" && monthKey(t.date) === targetMonth).forEach((t) => {
       totals[t.category] = (totals[t.category] || 0) + t.amount;
     });
     const entries = Object.entries(totals).sort((a, b) => b[1] - a[1]).slice(0, 6);
     const max = entries.length ? entries[0][1] : 1;
     return entries.map(([cat, total]) => ({ category: cat, totalFmt: fmtMoney(total), pct: Math.max(4, Math.round((total / max) * 100)) }));
+  }
+  function insightsMonthOptions() {
+    const keys = new Set(transactions.map((t) => monthKey(t.date)));
+    keys.add(state.insightsMonth);
+    keys.add(new Date().toISOString().slice(0, 7));
+    return Array.from(keys).sort().reverse();
   }
   function computeTrend() {
     const byMonth = {};
@@ -911,23 +924,34 @@
   // ---------- Insights ----------
   function renderInsights() {
     const l = L();
+    const monthOpts = insightsMonthOptions();
     $("screen").innerHTML = `
       <h2 style="font-size:22px;margin-bottom:12px">${escapeHtml(l.financialOverview)}</h2>
-      <div class="seg" role="radiogroup" style="margin-bottom:18px">
+      <div class="seg" role="radiogroup" style="margin-bottom:12px">
         <label class="seg-opt"><input type="radio" name="insights-tab" value="budgets" ${state.insightsTab === "budgets" ? "checked" : ""}>${escapeHtml(l.budgetsTab)}</label>
         <label class="seg-opt"><input type="radio" name="insights-tab" value="breakdown" ${state.insightsTab === "breakdown" ? "checked" : ""}>${escapeHtml(l.categoryTab)}</label>
         <label class="seg-opt"><input type="radio" name="insights-tab" value="trend" ${state.insightsTab === "trend" ? "checked" : ""}>${escapeHtml(l.trendTab)}</label>
       </div>
+      <div class="filter-row" id="insightsMonthRow" style="${state.insightsTab === "trend" ? "display:none" : ""};margin-bottom:18px">
+        <select class="input" id="insightsMonthSelect">
+          ${monthOpts.map((m) => `<option value="${m}" ${state.insightsMonth === m ? "selected" : ""}>${monthLabel(m)}</option>`).join("")}
+        </select>
+      </div>
       <div id="insightsBody"></div>
     `;
     renderInsightsBody();
-    document.querySelectorAll('input[name="insights-tab"]').forEach((r) => r.addEventListener("change", (e) => { state.insightsTab = e.target.value; renderInsights(); }));
+    document.querySelectorAll('input[name="insights-tab"]').forEach((r) => r.addEventListener("change", (e) => {
+      state.insightsTab = e.target.value;
+      $("insightsMonthRow").style.display = state.insightsTab === "trend" ? "none" : "";
+      renderInsightsBody();
+    }));
+    $("insightsMonthSelect").addEventListener("change", (e) => { state.insightsMonth = e.target.value; renderInsightsBody(); });
   }
   function renderInsightsBody() {
     const l = L();
     const body = $("insightsBody");
     if (state.insightsTab === "budgets") {
-      const rows = computeBudgets();
+      const rows = computeBudgets(state.insightsMonth);
       body.innerHTML = `<div class="insight-cards">${rows.map((b) => `
         <div class="insight-card">
           <div class="head"><span class="cat">${escapeHtml(b.category)}</span><span class="status" style="color:${b.statusColor}">${escapeHtml(b.statusLabel)}</span></div>
@@ -935,10 +959,10 @@
           <div class="foot"><span>${b.spentFmt} ${escapeHtml(l.spentSoFar)}</span><span>${escapeHtml(l.budgetOf)} ${b.limitFmt}</span></div>
         </div>`).join("")}</div>`;
     } else if (state.insightsTab === "breakdown") {
-      const rows = computeBreakdown();
-      const today = new Date().toLocaleDateString(state.lang === "en" ? "en-US" : "th-TH", { month: "long", year: "numeric" });
+      const rows = computeBreakdown(state.insightsMonth);
+      const monthLbl = monthLabel(state.insightsMonth);
       body.innerHTML = `
-        <div style="font-size:12px;color:var(--color-muted);margin-bottom:12px">${escapeHtml(l.expenseByCategory)} — ${escapeHtml(today)}</div>
+        <div style="font-size:12px;color:var(--color-muted);margin-bottom:12px">${escapeHtml(l.expenseByCategory)} — ${escapeHtml(monthLbl)}</div>
         ${rows.map((d) => `
           <div class="breakdown-row">
             <div class="row1"><span>${escapeHtml(d.category)}</span><span class="right">${d.totalFmt}</span></div>
