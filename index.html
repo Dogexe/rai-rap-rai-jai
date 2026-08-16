@@ -565,6 +565,18 @@
     } catch (e) { return false; }
   }
 
+  // True while the user has an uncontrolled form open/focused that a full
+  // screen re-render would silently reset mid-edit (Add screen, budget/bill
+  // inline forms, or any focused field in the current screen).
+  function hasLiveInputRisk() {
+    if (state.tab === "add") return true;
+    if (state.budgetEditId || state.billEditId) return true;
+    const active = document.activeElement;
+    const screenEl = $("screen");
+    if (active && screenEl && screenEl.contains(active) && /^(INPUT|SELECT|TEXTAREA)$/.test(active.tagName)) return true;
+    return false;
+  }
+
   let syncInFlight = false;
   async function syncNow() {
     if (!sb) { setSyncStatus("cloud sync unavailable", false); return; }
@@ -584,7 +596,7 @@
     const pullBillOk = await pullBills();
     if (pushTxOk && pushBudgetOk && pushBillOk && pullTxOk && pullBudgetOk && pullBillOk) {
       setSyncStatus(L().syncLatest + new Date().toLocaleTimeString(state.lang === "en" ? "en-US" : "th-TH"), true);
-      renderScreen();
+      if (!hasLiveInputRisk()) renderScreen();
     } else {
       setSyncStatus(L().syncPartial, false);
     }
@@ -1262,7 +1274,7 @@
       if (window.location.hash || window.location.search) {
         window.history.replaceState(null, "", window.location.origin + window.location.pathname);
       }
-      if (state.tab === "settings") renderSettings();
+      if (state.tab === "settings" && !hasLiveInputRisk()) renderSettings();
       if (currentUser) syncNow();
     });
   }
