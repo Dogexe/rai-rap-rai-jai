@@ -547,7 +547,8 @@
 
   async function signInWithGoogle() {
     if (!sb) return;
-    await sb.auth.signInWithOAuth({ provider: "google", options: { redirectTo: window.location.href } });
+    const cleanUrl = window.location.origin + window.location.pathname;
+    await sb.auth.signInWithOAuth({ provider: "google", options: { redirectTo: cleanUrl } });
   }
   async function signOutUser() {
     if (!sb) return;
@@ -1040,6 +1041,9 @@
   if (sb) {
     sb.auth.onAuthStateChange(function (event, session) {
       currentUser = session ? session.user : null;
+      if (window.location.hash || window.location.search) {
+        window.history.replaceState(null, "", window.location.origin + window.location.pathname);
+      }
       if (state.tab === "settings") renderSettings();
       if (currentUser) syncNow();
     });
