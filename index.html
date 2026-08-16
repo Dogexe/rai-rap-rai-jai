@@ -220,6 +220,24 @@
     .app { background: var(--color-surface); }
     .screen, .app-header { background: var(--color-bg); }
   }
+
+  /* — desktop: sidebar nav instead of a bottom bar, wider content — */
+  @media (min-width: 880px) {
+    .tabbar-wrap {
+      left: 0; right: auto; top: 0; bottom: 0; width: 232px;
+      border-top: none; border-right: 2px solid var(--color-divider); padding-top: 12px;
+    }
+    .tabbar { flex-direction: column; width: 100%; max-width: none; gap: 2px; padding: 0 12px; }
+    .tabbar button {
+      flex-direction: row; justify-content: flex-start; gap: 12px;
+      padding: 11px 12px; border-radius: 0;
+    }
+    .tabbar button span { font-size: 13.5px; }
+    .tabbar button.active { background: color-mix(in srgb, var(--color-accent) 10%, transparent); }
+    .app-header, .screen { max-width: 640px; margin-left: 264px; margin-right: auto; }
+    .screen { padding-bottom: 60px; }
+    .toast { left: calc(50% + 116px); }
+  }
 </style>
 </head>
 <body>
