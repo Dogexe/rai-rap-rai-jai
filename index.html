@@ -132,6 +132,7 @@
   .breakdown-row .row1 { display: flex; justify-content: space-between; font-size: 12.5px; margin-bottom: 5px; }
   .breakdown-row .row1 .right { color: var(--color-muted); }
   .breakdown-bar-track { height: 14px; background: var(--color-surface); }
+  .legend-dot { display: inline-block; width: 9px; height: 9px; border-radius: 50%; margin-right: 6px; vertical-align: middle; }
 
   .trend-legend { display: flex; gap: 14px; font-size: 11.5px; color: var(--color-muted); margin-bottom: 14px; }
   .trend-legend .swatch { display: inline-block; width: 8px; height: 8px; margin-right: 5px; vertical-align: middle; }
@@ -200,9 +201,15 @@
   .toast {
     position: fixed; left: 50%; bottom: 78px; transform: translateX(-50%);
     background: var(--color-text); color: var(--color-bg); padding: 10px 16px; font-size: 12.5px;
-    text-align: center; z-index: 40; max-width: 420px; width: calc(100% - 40px);
+    z-index: 40; max-width: 420px; width: calc(100% - 40px);
+    display: flex; align-items: center; justify-content: center; gap: 14px;
   }
   .toast[hidden] { display: none; }
+  .toast-undo-btn {
+    background: none; border: none; padding: 0; min-height: 0; flex-shrink: 0;
+    color: var(--color-bg); font-family: var(--font-heading); font-weight: 800;
+    font-size: 12.5px; text-decoration: underline; cursor: pointer;
+  }
 
   @media (min-width: 560px) {
     .app-header, .screen, .tabbar { max-width: 480px; }
@@ -331,7 +338,10 @@
       dueOn: "ทุกวันที่ ", footerNote: "ข้อมูลจะถูกบันทึกไว้ในอุปกรณ์นี้เสมอ เข้าสู่ระบบด้วย Google เพื่อซิงค์ข้ามอุปกรณ์โดยอัตโนมัติ แนะนำให้ส่งออกข้อมูลเก็บเป็นไฟล์สำรองเป็นระยะ",
       tabHome: "หน้าแรก", tabTx: "รายการ", tabAdd: "เพิ่ม", tabInsights: "ภาพรวม", tabSettings: "ตั้งค่า",
       toastInvalidAmount: "กรุณากรอกจำนวนเงินให้ถูกต้อง", toastEdited: "บันทึกการแก้ไขแล้ว", toastAdded: "เพิ่มรายการแล้ว",
-      toastDeleted: "ลบรายการแล้ว", toastCsv: "ส่งออก CSV แล้ว", toastJson: "ส่งออกข้อมูลแล้ว",
+      toastDeleted: "ลบรายการแล้ว", toastCsv: "ส่งออก CSV แล้ว", toastJson: "ส่งออกข้อมูลแล้ว", undoBtn: "เลิกทำ",
+      toastBudgetOver: "เกินงบ {cat} แล้ว", toastBudgetNear: "ใกล้ถึงงบ {cat} แล้ว (เกิน 80%)",
+      upcomingBillsSection: "รายการที่ใกล้ถึงกำหนด", markPaidBtn: "จ่ายแล้ว",
+      dueToday: "ถึงกำหนดวันนี้", dueTomorrow: "ถึงกำหนดพรุ่งนี้", dueInDays: "อีก {n} วัน",
       notSignedIn: "ยังไม่ได้เข้าสู่ระบบ", signInGoogle: "เข้าสู่ระบบด้วย Google", signOutBtn: "ออกจากระบบ",
       syncNowBtn: "ซิงค์เดี๋ยวนี้", syncHelp: "เข้าสู่ระบบด้วย Google ด้านบนเพื่อซิงค์ข้อมูลข้ามอุปกรณ์โดยอัตโนมัติ — ไม่ต้องใช้รหัสอีกต่อไป",
       syncSignedOut: "เข้าสู่ระบบด้วย Google เพื่อซิงค์ข้อมูลข้ามอุปกรณ์", syncSyncing: "กำลังซิงค์...",
@@ -363,7 +373,10 @@
       dueOn: "Due on day ", footerNote: "Data always stays on this device. Sign in with Google to sync across devices automatically. Export a backup periodically.",
       tabHome: "Home", tabTx: "Transactions", tabAdd: "Add", tabInsights: "Insights", tabSettings: "Settings",
       toastInvalidAmount: "Please enter a valid amount", toastEdited: "Changes saved", toastAdded: "Transaction added",
-      toastDeleted: "Transaction deleted", toastCsv: "CSV exported", toastJson: "Data exported",
+      toastDeleted: "Transaction deleted", toastCsv: "CSV exported", toastJson: "Data exported", undoBtn: "Undo",
+      toastBudgetOver: "Over budget for {cat}", toastBudgetNear: "Nearing budget for {cat} (80%+)",
+      upcomingBillsSection: "Upcoming bills", markPaidBtn: "Mark paid",
+      dueToday: "Due today", dueTomorrow: "Due tomorrow", dueInDays: "Due in {n} days",
       notSignedIn: "Not signed in", signInGoogle: "Sign in with Google", signOutBtn: "Sign out",
       syncNowBtn: "Sync now", syncHelp: "Sign in with Google above to sync your data across devices automatically — no code needed.",
       syncSignedOut: "Sign in with Google to sync across devices", syncSyncing: "Syncing...",
@@ -421,10 +434,10 @@
     { id: "b3", category: "บันเทิง", limit: 800 }
   ];
   let bills = [
-    { id: "bl0", name: "ค่าเช่าห้อง", amount: 8000, day: 1 },
-    { id: "bl1", name: "ค่าอินเทอร์เน็ต", amount: 590, day: 5 },
-    { id: "bl2", name: "ประกันสุขภาพ", amount: 1200, day: 15 },
-    { id: "bl3", name: "Netflix", amount: 349, day: 20 }
+    { id: "bl0", name: "ค่าเช่าห้อง", amount: 8000, day: 1, category: "ที่อยู่อาศัย/ค่าเช่า" },
+    { id: "bl1", name: "ค่าอินเทอร์เน็ต", amount: 590, day: 5, category: "สาธารณูปโภค (ไฟ/น้ำ/เน็ต)" },
+    { id: "bl2", name: "ประกันสุขภาพ", amount: 1200, day: 15, category: "สุขภาพ" },
+    { id: "bl3", name: "Netflix", amount: 349, day: 20, category: "บันเทิง" }
   ];
 
   // ---------- persistence (localStorage) ----------
@@ -491,6 +504,7 @@
     root.setProperty("--color-accent-700", scheme[2]);
     root.setProperty("--color-income", mono ? t.text : (state.dark ? "#5fae74" : "#2f6b3f"));
     root.setProperty("--color-expense", mono ? t.text : (state.dark ? "#ef7a63" : "#ae1800"));
+    root.setProperty("--color-warning", mono ? t.text : (state.dark ? "#e0a030" : "#a66a1f"));
   }
 
   // ---------- cloud sync (Supabase) ----------
@@ -531,10 +545,11 @@
       deleted: !!deleted, updated_at: new Date(b.updatedAt || Date.now()).toISOString()
     };
   }
-  function rowToBill(r) { return { id: r.id, name: r.name, amount: Number(r.amount), day: r.day, updatedAt: new Date(r.updated_at).getTime() }; }
+  function rowToBill(r) { return { id: r.id, name: r.name, amount: Number(r.amount), day: r.day, category: r.category || CATEGORIES.expense[CATEGORIES.expense.length - 1], updatedAt: new Date(r.updated_at).getTime() }; }
   function billToRow(b, deleted) {
     return {
       id: b.id, user_id: currentUser ? currentUser.id : null, name: b.name, amount: b.amount, day: b.day,
+      category: b.category || CATEGORIES.expense[CATEGORIES.expense.length - 1],
       deleted: !!deleted, updated_at: new Date(b.updatedAt || Date.now()).toISOString()
     };
   }
@@ -655,12 +670,20 @@
 
   // ---------- toast ----------
   let toastTimer = null;
-  function showToast(msg) {
+  function showToast(msg, undoFn) {
     const el = $("toast");
-    el.textContent = msg;
+    el.innerHTML = "<span>" + escapeHtml(msg) + "</span>"
+      + (undoFn ? '<button type="button" class="toast-undo-btn" id="toastUndoBtn">' + escapeHtml(L().undoBtn) + "</button>" : "");
     el.hidden = false;
     clearTimeout(toastTimer);
-    toastTimer = setTimeout(() => { el.hidden = true; }, 2200);
+    if (undoFn) {
+      $("toastUndoBtn").addEventListener("click", () => {
+        clearTimeout(toastTimer);
+        el.hidden = true;
+        undoFn();
+      });
+    }
+    toastTimer = setTimeout(() => { el.hidden = true; }, undoFn ? 4000 : 2200);
   }
 
   // ---------- derived data ----------
@@ -674,14 +697,73 @@
       const spent = spentByCategory[b.category] || 0;
       const pct = Math.min(100, Math.round((spent / b.limit) * 100));
       const over = spent > b.limit;
+      const near = !over && spent / b.limit >= 0.8;
       return {
         category: b.category, spentFmt: fmtMoney(spent), limitFmt: fmtMoney(b.limit), pct,
-        barColor: over ? "var(--color-accent-700)" : "var(--color-accent)",
-        statusColor: over ? "var(--color-accent-700)" : "var(--color-muted)",
+        barColor: over ? "var(--color-accent-700)" : (near ? "var(--color-warning)" : "var(--color-accent)"),
+        statusColor: over ? "var(--color-accent-700)" : (near ? "var(--color-warning)" : "var(--color-muted)"),
         statusLabel: over ? L().overBudget : pct + "%"
       };
     });
   }
+  // Returns an alert message if adding/editing `tx` pushed its budget category
+  // to 80%+ of its monthly limit, or null if no budget applies / still under.
+  function checkBudgetAlert(tx) {
+    if (!tx || tx.type !== "expense") return null;
+    const curMonthKey = new Date().toISOString().slice(0, 7);
+    if (monthKey(tx.date) !== curMonthKey) return null;
+    const budget = budgets.find((b) => b.category === tx.category);
+    if (!budget) return null;
+    const spent = transactions.filter((t) => t.type === "expense" && t.category === tx.category && monthKey(t.date) === curMonthKey).reduce((a, t) => a + t.amount, 0);
+    if (spent >= budget.limit) return L().toastBudgetOver.replace("{cat}", tx.category);
+    if (spent / budget.limit >= 0.8) return L().toastBudgetNear.replace("{cat}", tx.category);
+    return null;
+  }
+  // A bill's `day` recurs every month; find its next occurrence (today counts
+  // as due) and how many days away that is.
+  function nextBillDueDate(day) {
+    const now = new Date();
+    let dueMonth = now.getMonth(), dueYear = now.getFullYear();
+    if (day < now.getDate()) {
+      dueMonth += 1;
+      if (dueMonth > 11) { dueMonth = 0; dueYear += 1; }
+    }
+    const lastDayOfMonth = new Date(dueYear, dueMonth + 1, 0).getDate();
+    return new Date(dueYear, dueMonth, Math.min(day, lastDayOfMonth));
+  }
+  function daysUntilBillDue(day) {
+    const due = nextBillDueDate(day);
+    due.setHours(0, 0, 0, 0);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    return Math.round((due - today) / 86400000);
+  }
+  function dueSoonLabel(n) {
+    if (n === 0) return L().dueToday;
+    if (n === 1) return L().dueTomorrow;
+    return L().dueInDays.replace("{n}", n);
+  }
+  function upcomingBills() {
+    return bills
+      .map((b) => Object.assign({}, b, { daysUntil: daysUntilBillDue(b.day) }))
+      .filter((b) => b.daysUntil <= 7)
+      .sort((a, b) => a.daysUntil - b.daysUntil);
+  }
+  function markBillPaid(id) {
+    const bill = bills.find((b) => b.id === id);
+    if (!bill) return;
+    const savedTx = {
+      id: uid(), type: "expense", date: new Date().toISOString().slice(0, 10),
+      category: bill.category || CATEGORIES.expense[CATEGORIES.expense.length - 1],
+      amount: bill.amount, note: bill.name, updatedAt: Date.now()
+    };
+    transactions.push(savedTx);
+    saveToStorage();
+    renderScreen();
+    showToast(checkBudgetAlert(savedTx) || L().toastAdded);
+    pushTx(savedTx).then(() => syncNow());
+  }
+  const CHART_COLORS = ["#ec3013", "#c56a1f", "#a16207", "#3d7a3f", "#0d9488", "#3763b5", "#4f46e5", "#7c3aed", "#be185d", "#2d2b2b"];
   function computeBreakdown(forMonth) {
     const targetMonth = forMonth || new Date().toISOString().slice(0, 7);
     const totals = {};
@@ -690,7 +772,25 @@
     });
     const entries = Object.entries(totals).sort((a, b) => b[1] - a[1]).slice(0, 6);
     const max = entries.length ? entries[0][1] : 1;
-    return entries.map(([cat, total]) => ({ category: cat, totalFmt: fmtMoney(total), pct: Math.max(4, Math.round((total / max) * 100)) }));
+    const sum = entries.reduce((a, [, v]) => a + v, 0) || 1;
+    return entries.map(([cat, total], i) => ({
+      category: cat, total, totalFmt: fmtMoney(total),
+      pct: Math.max(4, Math.round((total / max) * 100)),
+      sharePct: (total / sum) * 100,
+      color: CHART_COLORS[i % CHART_COLORS.length]
+    }));
+  }
+  function pieChartSvg(entries) {
+    const total = entries.reduce((a, e) => a + e.total, 0) || 1;
+    const r = 52, cx = 60, cy = 60, sw = 22, circ = 2 * Math.PI * r;
+    let offset = 0;
+    const circles = entries.map((e) => {
+      const dash = (e.total / total) * circ;
+      const el = `<circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="${e.color}" stroke-width="${sw}" stroke-dasharray="${dash} ${circ - dash}" stroke-dashoffset="${-offset}" transform="rotate(-90 ${cx} ${cy})"></circle>`;
+      offset += dash;
+      return el;
+    }).join("");
+    return `<svg width="120" height="120" viewBox="0 0 120 120">${circles}</svg>`;
   }
   function insightsMonthOptions() {
     const keys = new Set(transactions.map((t) => monthKey(t.date)));
@@ -727,6 +827,7 @@
     const expense = transactions.filter((t) => t.type === "expense").reduce((a, t) => a + t.amount, 0);
     const recent = transactions.slice().sort((a, b) => b.date.localeCompare(a.date)).slice(0, 5);
     const budgetsPreview = computeBudgets().slice(0, 2);
+    const dueSoon = upcomingBills();
     const today = new Date().toLocaleDateString(state.lang === "en" ? "en-US" : "th-TH", { month: "long", year: "numeric" });
 
     $("screen").innerHTML = `
@@ -741,6 +842,21 @@
           <div><div class="lbl">${escapeHtml(l.expenseLabel)}</div><div class="val">${fmtMoney(expense)}</div></div>
         </div>
       </div>
+      ${dueSoon.length ? `
+      <div class="section-head" style="margin-top:0">
+        <h3>${escapeHtml(l.upcomingBillsSection)}</h3>
+      </div>
+      <div class="bills-list">
+        ${dueSoon.map((b) => `
+          <div class="manage-row">
+            <div class="info">
+              <div class="name">${escapeHtml(b.name)}</div>
+              <div class="sub">${escapeHtml(dueSoonLabel(b.daysUntil))}</div>
+            </div>
+            <div class="amt">${fmtMoney(b.amount)}</div>
+            <button type="button" class="btn btn-secondary" data-mark-paid="${b.id}">${escapeHtml(l.markPaidBtn)}</button>
+          </div>`).join("")}
+      </div>` : ""}
       <div class="section-head">
         <h3>${escapeHtml(l.recentTx)}</h3>
         <button type="button" class="btn btn-ghost" id="goAddBtn">${escapeHtml(l.addShort)}</button>
@@ -762,6 +878,7 @@
     `;
     $("goAddBtn").addEventListener("click", () => { resetForm(); setTab("add"); });
     $("goBudgetsBtn").addEventListener("click", () => { state.insightsTab = "budgets"; setTab("insights"); });
+    document.querySelectorAll("[data-mark-paid]").forEach((btn) => btn.addEventListener("click", () => markBillPaid(btn.getAttribute("data-mark-paid"))));
     wireTxRowActions();
   }
 
@@ -861,11 +978,19 @@
   function deleteTx(id) {
     if (state.editingId === id) resetForm();
     const tx = transactions.find((t) => t.id === id);
+    if (!tx) return;
     transactions = transactions.filter((t) => t.id !== id);
     saveToStorage();
-    showToast(L().toastDeleted);
     renderScreen();
-    if (tx) { tx.updatedAt = Date.now(); pushDeleteTx(tx).then(() => syncNow()); }
+    tx.updatedAt = Date.now();
+    pushDeleteTx(tx).then(() => syncNow());
+    showToast(L().toastDeleted, () => {
+      const restored = Object.assign({}, tx, { updatedAt: Date.now() });
+      transactions.push(restored);
+      saveToStorage();
+      renderScreen();
+      pushTx(restored).then(() => syncNow());
+    });
   }
   function renderFormCategoryOptions(select) {
     const opts = state.formType === "income" ? CATEGORIES.income : CATEGORIES.expense;
@@ -954,7 +1079,7 @@
       } else {
         savedTx = { id: uid(), type: state.formType, date, category, amount, note, updatedAt: Date.now() };
         transactions.push(savedTx);
-        showToast(L().toastAdded);
+        showToast(checkBudgetAlert(savedTx) || L().toastAdded);
       }
       saveToStorage();
       resetForm();
@@ -1005,10 +1130,11 @@
       const monthLbl = monthLabel(state.insightsMonth);
       body.innerHTML = `
         <div style="font-size:12px;color:var(--color-muted);margin-bottom:12px">${escapeHtml(l.expenseByCategory)} — ${escapeHtml(monthLbl)}</div>
+        ${rows.length ? `<div style="display:flex;justify-content:center;margin-bottom:16px">${pieChartSvg(rows)}</div>` : ""}
         ${rows.map((d) => `
           <div class="breakdown-row">
-            <div class="row1"><span>${escapeHtml(d.category)}</span><span class="right">${d.totalFmt}</span></div>
-            <div class="breakdown-bar-track"><div class="bar-fill" style="width:${d.pct}%;background:var(--color-accent)"></div></div>
+            <div class="row1"><span><span class="legend-dot" style="background:${d.color}"></span>${escapeHtml(d.category)}</span><span class="right">${d.totalFmt} · ${Math.round(d.sharePct)}%</span></div>
+            <div class="breakdown-bar-track"><div class="bar-fill" style="width:${d.pct}%;background:${d.color}"></div></div>
           </div>`).join("") || `<div class="empty-note">${escapeHtml(l.noExpensesMonth)}</div>`}
       `;
     } else {
@@ -1094,12 +1220,20 @@
   }
   function deleteBudget(id) {
     const b = budgets.find((x) => x.id === id);
+    if (!b) return;
     budgets = budgets.filter((x) => x.id !== id);
     saveSettings();
     if (state.budgetEditId === id) state.budgetEditId = null;
-    showToast(L().toastBudgetDeleted);
     renderSettings();
-    if (b) { b.updatedAt = Date.now(); pushRows("budgets", [budgetToRow(b, true)]).then(() => syncNow()); }
+    b.updatedAt = Date.now();
+    pushRows("budgets", [budgetToRow(b, true)]).then(() => syncNow());
+    showToast(L().toastBudgetDeleted, () => {
+      const restored = Object.assign({}, b, { updatedAt: Date.now() });
+      budgets.push(restored);
+      saveSettings();
+      renderSettings();
+      pushRows("budgets", [budgetToRow(restored, false)]).then(() => syncNow());
+    });
   }
 
   // ---------- Bills management ----------
@@ -1123,11 +1257,18 @@
     const isNew = state.billEditId === "new";
     const editing = !isNew ? bills.find((b) => b.id === state.billEditId) : null;
     if (!isNew && !editing) return "";
+    const curCategory = isNew ? CATEGORIES.expense[0] : editing.category;
     return `
       <div class="inline-form">
         <div class="field">
           <label>${escapeHtml(l.billNameLabel)}</label>
           <input class="input" type="text" id="billNameInput" value="${isNew ? "" : escapeHtml(editing.name)}">
+        </div>
+        <div class="field">
+          <label>${escapeHtml(l.categoryLabel)}</label>
+          <select class="input" id="billCategorySelect">
+            ${CATEGORIES.expense.map((c) => `<option value="${escapeHtml(c)}" ${c === curCategory ? "selected" : ""}>${escapeHtml(c)}</option>`).join("")}
+          </select>
         </div>
         <div class="field">
           <label>${escapeHtml(l.amountLabel)}</label>
@@ -1146,17 +1287,18 @@
   function saveBillForm() {
     const isNew = state.billEditId === "new";
     const name = ($("billNameInput") || {}).value ? $("billNameInput").value.trim() : "";
+    const category = ($("billCategorySelect") || {}).value || CATEGORIES.expense[0];
     const amount = parseFloat(($("billAmountInput") || {}).value);
     const day = parseInt(($("billDayInput") || {}).value, 10);
     if (!name || !amount || amount <= 0 || !day || day < 1 || day > 31) { showToast(L().toastInvalidAmount); return; }
     let saved;
     if (isNew) {
-      saved = { id: uid(), name, amount, day, updatedAt: Date.now() };
+      saved = { id: uid(), name, category, amount, day, updatedAt: Date.now() };
       bills.push(saved);
     } else {
       const b = bills.find((x) => x.id === state.billEditId);
       if (!b) return;
-      b.name = name; b.amount = amount; b.day = day; b.updatedAt = Date.now();
+      b.name = name; b.category = category; b.amount = amount; b.day = day; b.updatedAt = Date.now();
       saved = b;
     }
     saveSettings();
@@ -1167,12 +1309,20 @@
   }
   function deleteBill(id) {
     const b = bills.find((x) => x.id === id);
+    if (!b) return;
     bills = bills.filter((x) => x.id !== id);
     saveSettings();
     if (state.billEditId === id) state.billEditId = null;
-    showToast(L().toastBillDeleted);
     renderSettings();
-    if (b) { b.updatedAt = Date.now(); pushRows("bills", [billToRow(b, true)]).then(() => syncNow()); }
+    b.updatedAt = Date.now();
+    pushRows("bills", [billToRow(b, true)]).then(() => syncNow());
+    showToast(L().toastBillDeleted, () => {
+      const restored = Object.assign({}, b, { updatedAt: Date.now() });
+      bills.push(restored);
+      saveSettings();
+      renderSettings();
+      pushRows("bills", [billToRow(restored, false)]).then(() => syncNow());
+    });
   }
 
   // ---------- Settings ----------
