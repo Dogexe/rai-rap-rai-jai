@@ -115,6 +115,10 @@
 
   /* — add form — */
   .add-form { display: flex; flex-direction: column; gap: 14px; }
+  .date-input-wrap { position: relative; }
+  .date-input-wrap .input { padding-right: 38px; }
+  .date-icon { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); pointer-events: none; color: var(--color-muted); }
+  .date-native-overlay { position: absolute; right: 0; top: 0; width: 38px; height: 100%; opacity: 0; cursor: pointer; border: none; padding: 0; margin: 0; }
 
   /* — insights — */
   .insight-card { border: 1px solid var(--color-divider); padding: 14px; }
@@ -297,6 +301,14 @@
     mono: ["#2d2b2b", "#201e1d", "#201e1d"]
   };
   const SCHEME_ORDER = ["red", "orange", "amber", "green", "teal", "blue", "indigo", "purple", "pink", "mono"];
+  function darkenHex(hex, factor) {
+    const n = parseInt(hex.slice(1), 16);
+    const r = Math.round(((n >> 16) & 255) * factor);
+    const g = Math.round(((n >> 8) & 255) * factor);
+    const b = Math.round((n & 255) * factor);
+    return "#" + [r, g, b].map((c) => Math.max(0, Math.min(255, c)).toString(16).padStart(2, "0")).join("");
+  }
+  function computeCustomScheme(hex) { return [hex, darkenHex(hex, 0.82), darkenHex(hex, 0.6)]; }
 
   const LANGS = {
     th: {
@@ -313,7 +325,7 @@
       noExpensesMonth: "ยังไม่มีรายจ่ายในเดือนนี้", settingsTitle: "ตั้งค่า",
       personalAccount: "บัญชีส่วนตัว", languageSection: "ภาษา", displaySection: "การแสดงผล",
       colorRed: "แดง", colorOrange: "ส้ม", colorAmber: "เหลืองทอง", colorGreen: "เขียว", colorTeal: "เขียวอมฟ้า",
-      colorBlue: "น้ำเงิน", colorIndigo: "คราม", colorPurple: "ม่วง", colorPink: "ชมพู", colorMono: "โมโนโครม",
+      colorBlue: "น้ำเงิน", colorIndigo: "คราม", colorPurple: "ม่วง", colorPink: "ชมพู", colorMono: "โมโนโครม", colorCustom: "กำหนดเอง",
       syncSection: "ซิงค์ข้ามอุปกรณ์", dataSection: "ข้อมูล",
       exportCsvBtn: "ส่งออก CSV", exportJsonBtn: "ส่งออกข้อมูล (JSON)", billsSection: "รายการที่ต้องจ่ายประจำ",
       dueOn: "ทุกวันที่ ", footerNote: "ข้อมูลจะถูกบันทึกไว้ในอุปกรณ์นี้เสมอ เข้าสู่ระบบด้วย Google เพื่อซิงค์ข้ามอุปกรณ์โดยอัตโนมัติ แนะนำให้ส่งออกข้อมูลเก็บเป็นไฟล์สำรองเป็นระยะ",
@@ -345,7 +357,7 @@
       noExpensesMonth: "No expenses yet this month", settingsTitle: "Settings",
       personalAccount: "Personal account", languageSection: "Language", displaySection: "Display",
       colorRed: "Red", colorOrange: "Orange", colorAmber: "Amber", colorGreen: "Green", colorTeal: "Teal",
-      colorBlue: "Blue", colorIndigo: "Indigo", colorPurple: "Purple", colorPink: "Pink", colorMono: "Monochrome",
+      colorBlue: "Blue", colorIndigo: "Indigo", colorPurple: "Purple", colorPink: "Pink", colorMono: "Monochrome", colorCustom: "Custom",
       syncSection: "Cross-device sync", dataSection: "Data",
       exportCsvBtn: "Export CSV", exportJsonBtn: "Export data (JSON)", billsSection: "Recurring bills",
       dueOn: "Due on day ", footerNote: "Data always stays on this device. Sign in with Google to sync across devices automatically. Export a backup periodically.",
@@ -371,6 +383,22 @@
   const monthKey = (iso) => iso.slice(0, 7);
   function fmtMoney(n) { return "฿" + Number(n).toLocaleString(state.lang === "en" ? "en-US" : "th-TH", { minimumFractionDigits: 2, maximumFractionDigits: 2 }); }
   function dateLabel(iso) { const [y, m, d] = iso.split("-"); return d + "/" + m + "/" + y; }
+  function formatDateTyping(raw) {
+    const digits = raw.replace(/\D/g, "").slice(0, 8);
+    if (digits.length > 4) return digits.slice(0, 2) + "/" + digits.slice(2, 4) + "/" + digits.slice(4);
+    if (digits.length > 2) return digits.slice(0, 2) + "/" + digits.slice(2);
+    return digits;
+  }
+  function parseDateText(text) {
+    const m = /^(\d{1,2})\/(\d{1,2})\/(\d{4})$/.exec(text.trim());
+    if (!m) return null;
+    const d = parseInt(m[1], 10), mo = parseInt(m[2], 10), y = parseInt(m[3], 10);
+    if (mo < 1 || mo > 12 || d < 1 || d > 31) return null;
+    const iso = String(y).padStart(4, "0") + "-" + String(mo).padStart(2, "0") + "-" + String(d).padStart(2, "0");
+    const dt = new Date(iso + "T00:00:00");
+    if (isNaN(dt.getTime()) || dt.getDate() !== d || dt.getMonth() + 1 !== mo || dt.getFullYear() !== y) return null;
+    return iso;
+  }
   function monthLabel(key) { return new Date(key + "-01T00:00:00").toLocaleDateString(state.lang === "en" ? "en-US" : "th-TH", { month: "short", year: "2-digit" }); }
   function escapeHtml(s) { return String(s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c])); }
   const EDIT_ICON = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"></path></svg>';
@@ -378,7 +406,7 @@
 
   // ---------- state ----------
   const state = {
-    lang: "th", dark: false, scheme: "red",
+    lang: "th", dark: false, scheme: "red", customColor: "#ec3013",
     tab: "home", insightsTab: "budgets", insightsMonth: new Date().toISOString().slice(0, 7),
     txFilterType: "all", txFilterMonth: "all", txFilterCategory: "all", txSearch: "",
     formType: "expense", formDate: new Date().toISOString().slice(0, 10),
@@ -428,11 +456,13 @@
         const s = JSON.parse(raw);
         if (s.lang === "th" || s.lang === "en") state.lang = s.lang;
         if (typeof s.dark === "boolean") state.dark = s.dark;
-        if (SCHEME_ORDER.includes(s.scheme)) state.scheme = s.scheme;
+        if (/^#[0-9a-fA-F]{6}$/.test(s.customColor)) state.customColor = s.customColor;
+        if (s.scheme === "custom" || SCHEME_ORDER.includes(s.scheme)) state.scheme = s.scheme;
         if (Array.isArray(s.budgets) && s.budgets.length) budgets = s.budgets;
         if (Array.isArray(s.bills) && s.bills.length) bills = s.bills;
       }
     } catch (e) { /* ignore */ }
+    SCHEMES.custom = computeCustomScheme(state.customColor);
   }
   function saveToStorage() {
     if (!storageAvailable) return;
@@ -440,7 +470,7 @@
   }
   function saveSettings() {
     if (!storageAvailable) return;
-    try { window.localStorage.setItem(SETTINGS_KEY, JSON.stringify({ lang: state.lang, dark: state.dark, scheme: state.scheme, budgets, bills })); } catch (e) { /* quota */ }
+    try { window.localStorage.setItem(SETTINGS_KEY, JSON.stringify({ lang: state.lang, dark: state.dark, scheme: state.scheme, customColor: state.customColor, budgets, bills })); } catch (e) { /* quota */ }
   }
 
   // ---------- theming ----------
@@ -855,8 +885,12 @@
           </div>
         </div>
         <div class="field">
-          <label for="txDate">${escapeHtml(l.dateLabel)}</label>
-          <input class="input" type="date" id="txDate" value="${state.formDate}" required>
+          <label for="txDateText">${escapeHtml(l.dateLabel)}</label>
+          <div class="date-input-wrap">
+            <input class="input" type="text" id="txDateText" inputmode="numeric" placeholder="dd/mm/yyyy" maxlength="10" value="${dateLabel(state.formDate)}" required>
+            <svg class="date-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+            <input class="date-native-overlay" type="date" id="txDateNative" value="${state.formDate}" tabindex="-1" aria-hidden="true">
+          </div>
         </div>
         <div class="field">
           <label for="txCategory">${escapeHtml(l.categoryLabel)}</label>
@@ -887,7 +921,15 @@
       renderFormCategoryOptions($("txCategory"));
     }));
     $("txCategory").addEventListener("change", (e) => { state.formCategory = e.target.value; state.categoryManual = true; });
-    $("txDate").addEventListener("change", (e) => { state.formDate = e.target.value; });
+    $("txDateText").addEventListener("input", function () { this.value = formatDateTyping(this.value); });
+    $("txDateText").addEventListener("change", function () {
+      const iso = parseDateText(this.value);
+      if (iso) { state.formDate = iso; $("txDateNative").value = iso; }
+      else { this.value = dateLabel(state.formDate); }
+    });
+    $("txDateNative").addEventListener("change", function () {
+      if (this.value) { state.formDate = this.value; $("txDateText").value = dateLabel(this.value); }
+    });
     $("txNote").addEventListener("input", function () {
       if (state.categoryManual) return;
       const guess = guessCategory(this.value, state.formType);
@@ -896,7 +938,7 @@
     if (isEditing) $("cancelEditBtn").addEventListener("click", () => { resetForm(); setTab("transactions"); });
     $("addForm").addEventListener("submit", function (e) {
       e.preventDefault();
-      const date = $("txDate").value;
+      const date = state.formDate;
       const amount = parseFloat($("txAmount").value);
       if (!date || !amount || amount <= 0) { showToast(L().toastInvalidAmount); return; }
       const note = $("txNote").value.trim();
@@ -1174,6 +1216,11 @@
                 <span class="dot"></span>
                 <span class="lbl">${escapeHtml(l["color" + s.charAt(0).toUpperCase() + s.slice(1)])}</span>
               </label>`).join("")}
+            <label class="scheme-opt ${state.scheme === "custom" ? "active" : ""}" style="--swatch:${state.customColor}">
+              <input type="color" id="customColorPicker" value="${state.customColor}">
+              <span class="dot"></span>
+              <span class="lbl">${escapeHtml(l.colorCustom)}</span>
+            </label>
           </div>
         </div>
 
@@ -1230,6 +1277,14 @@
     document.querySelectorAll('input[name="lang-switch"]').forEach((r) => r.addEventListener("change", (e) => { state.lang = e.target.value; saveSettings(); renderChrome(); renderScreen(); }));
     $("darkSwitch").addEventListener("click", () => { state.dark = !state.dark; saveSettings(); applyTheme(); renderScreen(); });
     document.querySelectorAll('input[name="color-scheme"]').forEach((r) => r.addEventListener("change", (e) => { state.scheme = e.target.value; saveSettings(); applyTheme(); renderScreen(); }));
+    $("customColorPicker").addEventListener("change", (e) => {
+      state.customColor = e.target.value;
+      state.scheme = "custom";
+      SCHEMES.custom = computeCustomScheme(state.customColor);
+      saveSettings();
+      applyTheme();
+      renderScreen();
+    });
     $("syncNowBtn").addEventListener("click", syncNow);
     $("exportCsvBtn").addEventListener("click", function () {
       const header = ["วันที่", "ประเภท", "หมวดหมู่", "รายละเอียด", "จำนวนเงิน"];
