@@ -168,11 +168,17 @@
   #syncStatus.ok .sync-dot { background: var(--color-income); }
   #syncStatus.err .sync-dot { background: var(--color-expense); }
 
-  .bills-list { border-top: 2px solid var(--color-divider); }
-  .bill-row { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid var(--color-divider); }
-  .bill-row .name { font-size: 14px; font-weight: 600; }
-  .bill-row .day { font-size: 11.5px; color: var(--color-muted); }
-  .bill-row .amt { font-size: 14px; font-weight: 700; }
+  .bills-list, .budgets-manage-list { border-top: 2px solid var(--color-divider); }
+  .manage-row { display: flex; align-items: center; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid var(--color-divider); gap: 10px; }
+  .manage-row .info { min-width: 0; flex: 1; }
+  .manage-row .name { font-size: 14px; font-weight: 600; }
+  .manage-row .sub { font-size: 11.5px; color: var(--color-muted); }
+  .manage-row .amt { font-size: 14px; font-weight: 700; flex-shrink: 0; }
+  .row-actions { display: flex; gap: 2px; flex-shrink: 0; }
+  .section-add-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
+  .inline-form { display: flex; flex-direction: column; gap: 10px; border: 1px solid var(--color-divider); padding: 12px; margin-bottom: 12px; }
+  .inline-form .actions-row { display: flex; gap: 8px; }
+  .inline-form .actions-row .btn { flex: 1; }
 
   .footer-note { font-size: 11px; line-height: 1.6; color: var(--color-muted); margin: 4px 0 0; }
 
@@ -313,7 +319,12 @@
       syncNowBtn: "ซิงค์เดี๋ยวนี้", syncHelp: "เข้าสู่ระบบด้วย Google ด้านบนเพื่อซิงค์ข้อมูลข้ามอุปกรณ์โดยอัตโนมัติ — ไม่ต้องใช้รหัสอีกต่อไป",
       syncSignedOut: "เข้าสู่ระบบด้วย Google เพื่อซิงค์ข้อมูลข้ามอุปกรณ์", syncSyncing: "กำลังซิงค์...",
       syncOffline: "ออฟไลน์อยู่ — จะซิงค์อัตโนมัติเมื่อกลับมามีเน็ต", syncPartial: "ซิงค์ไม่สำเร็จบางส่วน — จะลองใหม่อัตโนมัติ",
-      syncLatest: "ซิงค์ล่าสุด: "
+      syncLatest: "ซิงค์ล่าสุด: ",
+      budgetsSection: "งบประมาณ", addBudgetBtn: "+ เพิ่มงบประมาณ", limitLabel: "วงเงิน (บาท)", saveBudgetBtn: "บันทึกงบประมาณ",
+      cancelBtn: "ยกเลิก", noBudgets: "ยังไม่มีงบประมาณ", allBudgeted: "ตั้งงบประมาณครบทุกหมวดหมู่รายจ่ายแล้ว",
+      toastBudgetSaved: "บันทึกงบประมาณแล้ว", toastBudgetDeleted: "ลบงบประมาณแล้ว",
+      addBillBtn: "+ เพิ่มรายการ", billNameLabel: "ชื่อรายการ", billDayLabel: "วันที่ต้องจ่าย (1-31)", saveBillBtn: "บันทึกรายการ",
+      noBills: "ยังไม่มีรายการที่ต้องจ่ายประจำ", toastBillSaved: "บันทึกรายการแล้ว", toastBillDeleted: "ลบรายการแล้ว"
     },
     en: {
       appTitle: "Income & Expenses", appSubtitle: "Personal income & expense tracker",
@@ -339,7 +350,12 @@
       syncNowBtn: "Sync now", syncHelp: "Sign in with Google above to sync your data across devices automatically — no code needed.",
       syncSignedOut: "Sign in with Google to sync across devices", syncSyncing: "Syncing...",
       syncOffline: "Offline — will sync automatically when back online", syncPartial: "Sync partially failed — will retry automatically",
-      syncLatest: "Last synced: "
+      syncLatest: "Last synced: ",
+      budgetsSection: "Budgets", addBudgetBtn: "+ Add budget", limitLabel: "Limit (THB)", saveBudgetBtn: "Save budget",
+      cancelBtn: "Cancel", noBudgets: "No budgets yet", allBudgeted: "All expense categories already have a budget",
+      toastBudgetSaved: "Budget saved", toastBudgetDeleted: "Budget deleted",
+      addBillBtn: "+ Add bill", billNameLabel: "Bill name", billDayLabel: "Due day (1-31)", saveBillBtn: "Save bill",
+      noBills: "No recurring bills yet", toastBillSaved: "Bill saved", toastBillDeleted: "Bill deleted"
     }
   };
   function L() { return LANGS[state.lang]; }
@@ -351,6 +367,8 @@
   function dateLabel(iso) { return new Date(iso + "T00:00:00").toLocaleDateString(state.lang === "en" ? "en-US" : "th-TH", { day: "numeric", month: "short" }); }
   function monthLabel(key) { return new Date(key + "-01T00:00:00").toLocaleDateString(state.lang === "en" ? "en-US" : "th-TH", { month: "short", year: "2-digit" }); }
   function escapeHtml(s) { return String(s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c])); }
+  const EDIT_ICON = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"></path></svg>';
+  const DELETE_ICON = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>';
 
   // ---------- state ----------
   const state = {
@@ -358,7 +376,8 @@
     tab: "home", insightsTab: "budgets",
     txFilterType: "all", txFilterMonth: "all", txFilterCategory: "all", txSearch: "",
     formType: "expense", formDate: new Date().toISOString().slice(0, 10),
-    formCategory: CATEGORIES.expense[0], editingId: null, categoryManual: false
+    formCategory: CATEGORIES.expense[0], editingId: null, categoryManual: false,
+    budgetEditId: null, billEditId: null
   };
   let transactions = [];
   let budgets = [
@@ -367,11 +386,11 @@
     { id: "b2", category: "ช้อปปิ้ง", limit: 1500 },
     { id: "b3", category: "บันเทิง", limit: 800 }
   ];
-  const bills = [
-    { name: { th: "ค่าเช่าห้อง", en: "Rent" }, amount: 8000, day: 1 },
-    { name: { th: "ค่าอินเทอร์เน็ต", en: "Internet" }, amount: 590, day: 5 },
-    { name: { th: "ประกันสุขภาพ", en: "Health insurance" }, amount: 1200, day: 15 },
-    { name: { th: "Netflix", en: "Netflix" }, amount: 349, day: 20 }
+  let bills = [
+    { id: "bl0", name: "ค่าเช่าห้อง", amount: 8000, day: 1 },
+    { id: "bl1", name: "ค่าอินเทอร์เน็ต", amount: 590, day: 5 },
+    { id: "bl2", name: "ประกันสุขภาพ", amount: 1200, day: 15 },
+    { id: "bl3", name: "Netflix", amount: 349, day: 20 }
   ];
 
   // ---------- persistence (localStorage) ----------
@@ -405,6 +424,7 @@
         if (typeof s.dark === "boolean") state.dark = s.dark;
         if (SCHEME_ORDER.includes(s.scheme)) state.scheme = s.scheme;
         if (Array.isArray(s.budgets) && s.budgets.length) budgets = s.budgets;
+        if (Array.isArray(s.bills) && s.bills.length) bills = s.bills;
       }
     } catch (e) { /* ignore */ }
   }
@@ -414,7 +434,7 @@
   }
   function saveSettings() {
     if (!storageAvailable) return;
-    try { window.localStorage.setItem(SETTINGS_KEY, JSON.stringify({ lang: state.lang, dark: state.dark, scheme: state.scheme, budgets })); } catch (e) { /* quota */ }
+    try { window.localStorage.setItem(SETTINGS_KEY, JSON.stringify({ lang: state.lang, dark: state.dark, scheme: state.scheme, budgets, bills })); } catch (e) { /* quota */ }
   }
 
   // ---------- theming ----------
@@ -475,6 +495,13 @@
       deleted: !!deleted, updated_at: new Date(b.updatedAt || Date.now()).toISOString()
     };
   }
+  function rowToBill(r) { return { id: r.id, name: r.name, amount: Number(r.amount), day: r.day, updatedAt: new Date(r.updated_at).getTime() }; }
+  function billToRow(b, deleted) {
+    return {
+      id: b.id, user_id: currentUser ? currentUser.id : null, name: b.name, amount: b.amount, day: b.day,
+      deleted: !!deleted, updated_at: new Date(b.updatedAt || Date.now()).toISOString()
+    };
+  }
 
   async function pushRows(table, rows) {
     if (!sb || !currentUser || !rows.length) return true;
@@ -520,6 +547,23 @@
       return true;
     } catch (e) { return false; }
   }
+  async function pullBills() {
+    if (!sb || !currentUser) return false;
+    try {
+      const { data, error } = await sb.from("bills").select("*").eq("user_id", currentUser.id);
+      if (error) throw error;
+      const byId = new Map(bills.map((b) => [b.id, b]));
+      (data || []).forEach((r) => {
+        const rTime = new Date(r.updated_at).getTime();
+        if (r.deleted) { byId.delete(r.id); return; }
+        const local = byId.get(r.id);
+        if (!local || (local.updatedAt || 0) < rTime) byId.set(r.id, rowToBill(r));
+      });
+      bills = Array.from(byId.values());
+      saveSettings();
+      return true;
+    } catch (e) { return false; }
+  }
 
   let syncInFlight = false;
   async function syncNow() {
@@ -534,9 +578,11 @@
     setSyncStatus(L().syncSyncing, null);
     const pushTxOk = await pushRows("transactions", transactions.map((t) => txToRow(t, false)));
     const pushBudgetOk = await pushRows("budgets", budgets.map((b) => budgetToRow(b, false)));
+    const pushBillOk = await pushRows("bills", bills.map((b) => billToRow(b, false)));
     const pullTxOk = await pullTransactions();
     const pullBudgetOk = await pullBudgets();
-    if (pushTxOk && pushBudgetOk && pullTxOk && pullBudgetOk) {
+    const pullBillOk = await pullBills();
+    if (pushTxOk && pushBudgetOk && pushBillOk && pullTxOk && pullBudgetOk && pullBillOk) {
       setSyncStatus(L().syncLatest + new Date().toLocaleTimeString(state.lang === "en" ? "en-US" : "th-TH"), true);
       renderScreen();
     } else {
@@ -904,6 +950,155 @@
     }
   }
 
+  // ---------- Budgets management ----------
+  function budgetRowHtml(b) {
+    return `
+      <div class="manage-row">
+        <div class="info">
+          <div class="name">${escapeHtml(b.category)}</div>
+          <div class="sub">${escapeHtml(L().budgetOf)} ${fmtMoney(b.limit)}</div>
+        </div>
+        <div class="row-actions">
+          <button type="button" class="btn btn-icon" data-edit-budget="${b.id}" aria-label="${escapeHtml(L().editAria)}">${EDIT_ICON}</button>
+          <button type="button" class="btn btn-icon" style="color:var(--color-accent-700)" data-delete-budget="${b.id}" aria-label="${escapeHtml(L().deleteAria)}">${DELETE_ICON}</button>
+        </div>
+      </div>`;
+  }
+  function budgetFormHtml() {
+    const l = L();
+    if (!state.budgetEditId) return "";
+    const isNew = state.budgetEditId === "new";
+    const editing = !isNew ? budgets.find((b) => b.id === state.budgetEditId) : null;
+    if (!isNew && !editing) return "";
+    const usedCats = new Set(budgets.filter((b) => b.id !== state.budgetEditId).map((b) => b.category));
+    const availableCats = CATEGORIES.expense.filter((c) => !usedCats.has(c));
+    if (isNew && !availableCats.length) {
+      return `<div class="inline-form"><div class="empty-note" style="padding:8px 0">${escapeHtml(l.allBudgeted)}</div><button type="button" class="btn btn-secondary" id="cancelBudgetFormBtn">${escapeHtml(l.cancelBtn)}</button></div>`;
+    }
+    return `
+      <div class="inline-form">
+        ${isNew
+          ? `<div class="field"><label>${escapeHtml(l.categoryLabel)}</label>
+              <select class="input" id="budgetCategorySelect">${availableCats.map((c) => `<option value="${escapeHtml(c)}">${escapeHtml(c)}</option>`).join("")}</select>
+            </div>`
+          : `<div style="font-size:14px;font-weight:600">${escapeHtml(editing.category)}</div>`}
+        <div class="field">
+          <label>${escapeHtml(l.limitLabel)}</label>
+          <input class="input" type="number" id="budgetLimitInput" min="0" step="1" value="${isNew ? "" : editing.limit}">
+        </div>
+        <div class="actions-row">
+          <button type="button" class="btn btn-primary" id="saveBudgetFormBtn">${escapeHtml(l.saveBudgetBtn)}</button>
+          <button type="button" class="btn btn-secondary" id="cancelBudgetFormBtn">${escapeHtml(l.cancelBtn)}</button>
+        </div>
+      </div>`;
+  }
+  function saveBudgetForm() {
+    const isNew = state.budgetEditId === "new";
+    const limitInput = $("budgetLimitInput");
+    const limit = limitInput ? parseFloat(limitInput.value) : NaN;
+    if (!limit || limit <= 0) { showToast(L().toastInvalidAmount); return; }
+    let saved;
+    if (isNew) {
+      const sel = $("budgetCategorySelect");
+      const category = sel ? sel.value : "";
+      if (!category) return;
+      saved = { id: uid(), category, limit, updatedAt: Date.now() };
+      budgets.push(saved);
+    } else {
+      const b = budgets.find((x) => x.id === state.budgetEditId);
+      if (!b) return;
+      b.limit = limit; b.updatedAt = Date.now();
+      saved = b;
+    }
+    saveSettings();
+    state.budgetEditId = null;
+    showToast(L().toastBudgetSaved);
+    renderSettings();
+    pushRows("budgets", [budgetToRow(saved, false)]).then(() => syncNow());
+  }
+  function deleteBudget(id) {
+    const b = budgets.find((x) => x.id === id);
+    budgets = budgets.filter((x) => x.id !== id);
+    saveSettings();
+    if (state.budgetEditId === id) state.budgetEditId = null;
+    showToast(L().toastBudgetDeleted);
+    renderSettings();
+    if (b) { b.updatedAt = Date.now(); pushRows("budgets", [budgetToRow(b, true)]).then(() => syncNow()); }
+  }
+
+  // ---------- Bills management ----------
+  function billRowHtml(b) {
+    return `
+      <div class="manage-row">
+        <div class="info">
+          <div class="name">${escapeHtml(b.name)}</div>
+          <div class="sub">${escapeHtml(L().dueOn)}${b.day}</div>
+        </div>
+        <div class="amt">${fmtMoney(b.amount)}</div>
+        <div class="row-actions">
+          <button type="button" class="btn btn-icon" data-edit-bill="${b.id}" aria-label="${escapeHtml(L().editAria)}">${EDIT_ICON}</button>
+          <button type="button" class="btn btn-icon" style="color:var(--color-accent-700)" data-delete-bill="${b.id}" aria-label="${escapeHtml(L().deleteAria)}">${DELETE_ICON}</button>
+        </div>
+      </div>`;
+  }
+  function billFormHtml() {
+    const l = L();
+    if (!state.billEditId) return "";
+    const isNew = state.billEditId === "new";
+    const editing = !isNew ? bills.find((b) => b.id === state.billEditId) : null;
+    if (!isNew && !editing) return "";
+    return `
+      <div class="inline-form">
+        <div class="field">
+          <label>${escapeHtml(l.billNameLabel)}</label>
+          <input class="input" type="text" id="billNameInput" value="${isNew ? "" : escapeHtml(editing.name)}">
+        </div>
+        <div class="field">
+          <label>${escapeHtml(l.amountLabel)}</label>
+          <input class="input" type="number" id="billAmountInput" min="0" step="0.01" value="${isNew ? "" : editing.amount}">
+        </div>
+        <div class="field">
+          <label>${escapeHtml(l.billDayLabel)}</label>
+          <input class="input" type="number" id="billDayInput" min="1" max="31" step="1" value="${isNew ? "" : editing.day}">
+        </div>
+        <div class="actions-row">
+          <button type="button" class="btn btn-primary" id="saveBillFormBtn">${escapeHtml(l.saveBillBtn)}</button>
+          <button type="button" class="btn btn-secondary" id="cancelBillFormBtn">${escapeHtml(l.cancelBtn)}</button>
+        </div>
+      </div>`;
+  }
+  function saveBillForm() {
+    const isNew = state.billEditId === "new";
+    const name = ($("billNameInput") || {}).value ? $("billNameInput").value.trim() : "";
+    const amount = parseFloat(($("billAmountInput") || {}).value);
+    const day = parseInt(($("billDayInput") || {}).value, 10);
+    if (!name || !amount || amount <= 0 || !day || day < 1 || day > 31) { showToast(L().toastInvalidAmount); return; }
+    let saved;
+    if (isNew) {
+      saved = { id: uid(), name, amount, day, updatedAt: Date.now() };
+      bills.push(saved);
+    } else {
+      const b = bills.find((x) => x.id === state.billEditId);
+      if (!b) return;
+      b.name = name; b.amount = amount; b.day = day; b.updatedAt = Date.now();
+      saved = b;
+    }
+    saveSettings();
+    state.billEditId = null;
+    showToast(L().toastBillSaved);
+    renderSettings();
+    pushRows("bills", [billToRow(saved, false)]).then(() => syncNow());
+  }
+  function deleteBill(id) {
+    const b = bills.find((x) => x.id === id);
+    bills = bills.filter((x) => x.id !== id);
+    saveSettings();
+    if (state.billEditId === id) state.billEditId = null;
+    showToast(L().toastBillDeleted);
+    renderSettings();
+    if (b) { b.updatedAt = Date.now(); pushRows("bills", [billToRow(b, true)]).then(() => syncNow()); }
+  }
+
   // ---------- Settings ----------
   function renderSettings() {
     const l = L();
@@ -972,13 +1167,24 @@
         </div>
 
         <div>
-          <div class="settings-section-label">${escapeHtml(l.billsSection)}</div>
+          <div class="section-add-row">
+            <div class="settings-section-label" style="margin:0">${escapeHtml(l.budgetsSection)}</div>
+            <button type="button" class="btn btn-ghost" id="addBudgetBtn" style="padding:0;font-size:12px">${escapeHtml(l.addBudgetBtn)}</button>
+          </div>
+          <div id="budgetFormSlot">${budgetFormHtml()}</div>
+          <div class="budgets-manage-list">
+            ${budgets.map(budgetRowHtml).join("") || `<div class="empty-note">${escapeHtml(l.noBudgets)}</div>`}
+          </div>
+        </div>
+
+        <div>
+          <div class="section-add-row">
+            <div class="settings-section-label" style="margin:0">${escapeHtml(l.billsSection)}</div>
+            <button type="button" class="btn btn-ghost" id="addBillBtn" style="padding:0;font-size:12px">${escapeHtml(l.addBillBtn)}</button>
+          </div>
+          <div id="billFormSlot">${billFormHtml()}</div>
           <div class="bills-list">
-            ${bills.map((b) => `
-              <div class="bill-row">
-                <div><div class="name">${escapeHtml(b.name[state.lang])}</div><div class="day">${escapeHtml(l.dueOn)}${b.day}</div></div>
-                <div class="amt">${fmtMoney(b.amount)}</div>
-              </div>`).join("")}
+            ${bills.map(billRowHtml).join("") || `<div class="empty-note">${escapeHtml(l.noBills)}</div>`}
           </div>
         </div>
 
@@ -1006,6 +1212,18 @@
       document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(a.href);
       showToast(L().toastJson);
     });
+
+    $("addBudgetBtn").addEventListener("click", () => { state.budgetEditId = "new"; renderSettings(); });
+    document.querySelectorAll("[data-edit-budget]").forEach((btn) => btn.addEventListener("click", () => { state.budgetEditId = btn.getAttribute("data-edit-budget"); renderSettings(); }));
+    document.querySelectorAll("[data-delete-budget]").forEach((btn) => btn.addEventListener("click", () => deleteBudget(btn.getAttribute("data-delete-budget"))));
+    if ($("saveBudgetFormBtn")) $("saveBudgetFormBtn").addEventListener("click", saveBudgetForm);
+    if ($("cancelBudgetFormBtn")) $("cancelBudgetFormBtn").addEventListener("click", () => { state.budgetEditId = null; renderSettings(); });
+
+    $("addBillBtn").addEventListener("click", () => { state.billEditId = "new"; renderSettings(); });
+    document.querySelectorAll("[data-edit-bill]").forEach((btn) => btn.addEventListener("click", () => { state.billEditId = btn.getAttribute("data-edit-bill"); renderSettings(); }));
+    document.querySelectorAll("[data-delete-bill]").forEach((btn) => btn.addEventListener("click", () => deleteBill(btn.getAttribute("data-delete-bill"))));
+    if ($("saveBillFormBtn")) $("saveBillFormBtn").addEventListener("click", saveBillForm);
+    if ($("cancelBillFormBtn")) $("cancelBillFormBtn").addEventListener("click", () => { state.billEditId = null; renderSettings(); });
   }
 
   // ---------- tab routing ----------
