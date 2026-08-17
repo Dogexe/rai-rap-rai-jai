@@ -7,213 +7,260 @@
 <link rel="manifest" href="manifest.json">
 <link rel="icon" href="icons/icon-192.png">
 <link rel="apple-touch-icon" href="icons/icon-192.png">
-<meta name="theme-color" content="#ec3013" id="themeColorMeta">
+<meta name="theme-color" content="#6247ea" id="themeColorMeta">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;600;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://unpkg.com/lucide@latest"></script>
 <style>
   :root {
-    --color-bg: #f3f2f2;
-    --color-surface: #eae9e9;
-    --color-text: #201e1d;
-    --color-muted: color-mix(in srgb, #201e1d 55%, transparent);
-    --color-divider: color-mix(in srgb, #201e1d 40%, transparent);
-    --color-accent: #ec3013;
-    --color-accent-600: #dd2b0f;
-    --color-accent-700: #ae1800;
-    --color-income: #2f6b3f;
-    --color-expense: #ae1800;
-    --font-heading: "Archivo", system-ui, sans-serif;
-    --font-body: "Archivo", system-ui, sans-serif;
+    /* neutrals */
+    --gray-0:#ffffff; --gray-50:#f6f6f8; --gray-100:#eeeef1; --gray-150:#e4e4e9; --gray-200:#d9dae0;
+    --gray-300:#bdbfc8; --gray-400:#9497a3; --gray-500:#71747f; --gray-600:#565964; --gray-900:#15161a;
+    /* brand accent */
+    --color-accent: #6247ea;
+    --color-accent-600: #4f34d6;
+    --color-accent-700: #3f28ab;
+    --color-accent-tint: color-mix(in srgb, var(--color-accent) 12%, white);
+    --shadow-accent: 0 12px 28px color-mix(in srgb, var(--color-accent) 30%, transparent);
+    /* semantic */
+    --color-income: #1fae71; --color-income-tint: color-mix(in srgb, var(--color-income) 12%, white);
+    --color-expense: #ef4b3a; --color-expense-700: #c22f22; --color-expense-tint: color-mix(in srgb, var(--color-expense) 12%, white);
+    --color-warning: #ec9f2e; --color-warning-text: #93630f; --color-warning-tint: color-mix(in srgb, var(--color-warning) 15%, white);
+    /* surfaces (swapped by applyTheme for dark mode) */
+    --color-bg: #f6f6f8; --color-card: #ffffff; --color-surface: #eeeef1;
+    --color-text: #15161a; --color-muted: #71747f; --color-tertiary: #9497a3; --color-divider: #e4e4e9; --color-border: #d9dae0;
+    /* type + shape */
+    --font-sans: "Inter", -apple-system, BlinkMacSystemFont, "SF Pro Text", system-ui, sans-serif;
+    --radius-sm: 8px; --radius-md: 12px; --radius-lg: 18px; --radius-xl: 24px; --radius-pill: 999px;
+    --shadow-xs: 0 1px 2px rgba(15,15,20,0.04);
+    --shadow-sm: 0 2px 6px rgba(15,15,20,0.06);
+    --shadow-md: 0 8px 24px rgba(15,15,20,0.08);
+    --shadow-lg: 0 16px 40px rgba(15,15,20,0.14);
+    --ease-standard: cubic-bezier(0.4,0,0.2,1);
+    --duration-fast: 120ms; --duration-normal: 200ms;
   }
   * { box-sizing: border-box; }
   html, body { margin: 0; min-height: 100%; }
   body {
-    background: var(--color-bg); color: var(--color-text); font-family: var(--font-body);
-    font-size: 15px; line-height: 1.5;
+    background: var(--color-bg); color: var(--color-text); font-family: var(--font-sans);
+    font-size: 15px; line-height: 1.45; -webkit-font-smoothing: antialiased;
   }
-  h1, h2, h3, h4 { font-family: var(--font-heading); font-weight: 800; margin: 0; letter-spacing: -0.015em; }
+  h1, h2, h3, h4 { font-family: var(--font-sans); font-weight: 800; margin: 0; letter-spacing: -0.02em; }
   a { color: var(--color-accent); }
+  svg { display: block; }
+  .icon { width: 18px; height: 18px; flex-shrink: 0; }
 
   .app { display: flex; flex-direction: column; min-height: 100vh; }
   .app-header {
-    text-align: center; display: flex; flex-direction: column; gap: 10px; align-items: center;
-    max-width: 480px; margin: 0 auto; width: 100%; padding: 28px 20px 8px;
+    text-align: center; display: flex; flex-direction: column; gap: 8px; align-items: center;
+    max-width: 480px; margin: 0 auto; width: 100%; padding: 26px 20px 6px;
   }
-  .app-header h1 { font-size: 26px; }
+  .app-header h1 { font-size: 24px; }
   .app-header p { margin: 0; color: var(--color-muted); font-size: 13px; line-height: 1.5; max-width: 380px; }
 
-  .screen { flex: 1; max-width: 480px; margin: 0 auto; width: 100%; padding: 4px 20px 96px; box-sizing: border-box; }
+  .screen { flex: 1; max-width: 480px; margin: 0 auto; width: 100%; padding: 8px 20px 100px; box-sizing: border-box; }
+  .screen-title { font-size: 22px; margin: 4px 0 16px; }
 
   /* — buttons — */
   .btn {
-    display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+    display: inline-flex; align-items: center; justify-content: center; gap: 7px;
     cursor: pointer; text-decoration: none;
-    font-family: var(--font-heading); font-weight: 800; font-size: 14px; line-height: 1.2;
-    color: var(--color-text); background: transparent; border: 1px solid transparent;
-    padding: 9px 15px; border-radius: 0;
+    font-family: var(--font-sans); font-weight: 600; font-size: 14px; line-height: 1.2;
+    color: var(--color-text); background: transparent; border: none;
+    height: 44px; padding: 0 18px; border-radius: var(--radius-pill);
+    transition: transform var(--duration-fast) var(--ease-standard), background var(--duration-fast) var(--ease-standard), opacity var(--duration-fast) var(--ease-standard);
   }
-  .btn svg { display: block; flex-shrink: 0; }
-  .btn:disabled { opacity: 0.45; cursor: not-allowed; }
-  .btn-primary { background: var(--color-accent); color: #fff; }
+  .btn:active { transform: scale(0.97); }
+  .btn:disabled { opacity: 0.45; cursor: not-allowed; transform: none; }
+  .btn-primary { background: var(--color-accent); color: #fff; box-shadow: var(--shadow-accent); }
   .btn-primary:hover { background: var(--color-accent-600); }
-  .btn-primary:active { background: var(--color-accent-700); }
-  .btn-secondary { border-color: var(--color-divider); }
-  .btn-secondary:hover { background: color-mix(in srgb, var(--color-text) 7%, transparent); }
-  .btn-ghost { color: var(--color-accent); padding-inline: 4px; }
-  .btn-ghost:hover { background: color-mix(in srgb, var(--color-accent) 10%, transparent); }
-  .btn-icon { width: 30px; height: 30px; padding: 0; }
-  .btn-block { width: 100%; margin-top: 8px; }
+  .btn-secondary { background: var(--color-card); color: var(--color-text); border: 1px solid var(--color-border); box-shadow: none; }
+  .btn-secondary:hover { background: var(--color-surface); }
+  .btn-ghost { color: var(--color-accent-600); padding: 0 4px; height: auto; font-size: 13px; font-weight: 600; }
+  .btn-ghost:hover { opacity: 0.75; }
+  .btn-icon { width: 30px; height: 30px; padding: 0; border-radius: 50%; background: var(--color-surface); }
+  .btn-icon:hover { background: var(--color-border); }
+  .btn-block { width: 100%; }
+  .btn-sm { height: 36px; padding: 0 14px; font-size: 13px; }
 
   /* — forms — */
-  .field { display: flex; flex-direction: column; gap: 5px; }
-  .field > label { font-size: 12px; color: color-mix(in srgb, var(--color-text) 70%, transparent); }
+  .field { display: flex; flex-direction: column; gap: 6px; }
+  .field > label { font-size: 13px; font-weight: 500; color: var(--color-muted); }
+  .input-wrap {
+    display: flex; align-items: center; gap: 8px; height: 48px; padding: 0 14px;
+    border-radius: var(--radius-md); border: 1px solid var(--color-border); background: var(--color-card);
+  }
+  .input-wrap:focus-within { outline: 2px solid var(--color-accent); outline-offset: 1px; }
+  .input-wrap .prefix { color: var(--color-tertiary); font-size: 15px; flex-shrink: 0; }
   .input {
-    width: 100%; min-height: 38px; padding: 7px 10px; font: inherit; font-size: 15px;
-    color: var(--color-text); background: var(--color-surface);
-    border: 1px solid var(--color-divider); border-radius: 0;
+    width: 100%; min-height: 46px; padding: 0 14px; font: inherit; font-size: 15px;
+    color: var(--color-text); background: var(--color-card);
+    border: 1px solid var(--color-border); border-radius: var(--radius-md);
   }
-  .input:focus-visible { outline: 2px solid var(--color-accent); outline-offset: 0; }
-  .seg { display: inline-flex; overflow: hidden; border: 1px solid var(--color-divider); width: 100%; }
-  .seg-opt {
-    display: inline-flex; align-items: center; justify-content: center; gap: 6px; flex: 1;
-    padding: 8px 10px; font-size: 13px; cursor: pointer;
+  .input:focus-visible { outline: 2px solid var(--color-accent); outline-offset: 1px; }
+  .input-wrap input { flex: 1; min-width: 0; border: none; outline: none; background: transparent; font: inherit; font-size: 15px; color: var(--color-text); height: 100%; padding: 0; }
+
+  .tabs { display: inline-flex; background: var(--color-surface); border-radius: var(--radius-pill); padding: 4px; gap: 2px; max-width: 100%; }
+  .tabs.block { display: flex; width: 100%; }
+  .tab-opt {
+    display: inline-flex; align-items: center; justify-content: center; flex: 1;
+    padding: 8px 16px; font-size: 13px; font-weight: 600; cursor: pointer; border-radius: var(--radius-pill);
+    color: var(--color-muted); white-space: nowrap; text-align: center;
   }
-  .seg-opt + .seg-opt { border-left: 1px solid var(--color-divider); }
-  .seg-opt input { position: absolute; opacity: 0; width: 0; height: 0; pointer-events: none; }
-  .seg-opt:has(input:checked) { background: var(--color-accent); color: #fff; }
-  .seg-opt:not(:has(input:checked)):hover { background: color-mix(in srgb, var(--color-text) 7%, transparent); }
+  .tab-opt input { position: absolute; opacity: 0; width: 0; height: 0; pointer-events: none; }
+  .tab-opt:has(input:checked) { background: var(--color-card); color: var(--color-text); box-shadow: var(--shadow-xs); }
+
+  /* — badges & switches — */
+  .badge { display: inline-flex; align-items: center; height: 24px; padding: 0 10px; border-radius: var(--radius-pill); font-size: 12px; font-weight: 600; white-space: nowrap; }
+  .badge-brand { background: var(--color-accent-tint); color: var(--color-accent-700); }
+  .badge-income { background: var(--color-income-tint); color: var(--color-income); }
+  .badge-expense { background: var(--color-expense-tint); color: var(--color-expense-700); }
+  .badge-warn { background: var(--color-warning-tint); color: var(--color-warning-text); }
+  .switch { width: 48px; height: 28px; background: var(--color-border); border: none; border-radius: var(--radius-pill); padding: 2px; cursor: pointer; position: relative; box-sizing: border-box; display: inline-flex; transition: background var(--duration-normal) var(--ease-standard); }
+  .switch.on { background: var(--color-accent); justify-content: flex-end; }
+  .switch .thumb { display: block; width: 24px; height: 24px; border-radius: 50%; background: #fff; box-shadow: var(--shadow-xs); transition: transform var(--duration-normal) var(--ease-standard); }
+
+  /* — icon avatar + list rows — */
+  .icon-avatar { width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .icon-avatar.sm { width: 30px; height: 30px; }
+  .card { background: var(--color-card); border-radius: var(--radius-lg); box-shadow: var(--shadow-sm); }
+  .list-card { background: var(--color-card); border-radius: var(--radius-lg); box-shadow: var(--shadow-sm); padding: 4px 14px; }
 
   /* — home — */
-  .today-label { font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--color-muted); }
-  .balance-card { margin: 12px 0 20px; background: var(--color-accent); color: #fff; padding: 20px; }
-  .balance-card .kicker { font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; opacity: 0.85; }
-  .balance-card .amount { font-size: 34px; font-weight: 800; font-family: var(--font-heading); margin-top: 4px; }
-  .balance-card .rule { height: 2px; background: rgba(255,255,255,0.35); margin: 16px 0; }
-  .balance-card .split { display: flex; gap: 24px; }
-  .balance-card .split .lbl { font-size: 11px; opacity: 0.85; }
-  .balance-card .split .val { font-size: 16px; font-weight: 600; margin-top: 2px; }
+  .today-label { font-size: 13px; color: var(--color-muted); }
+  .home-columns { display: flex; flex-direction: column; gap: 20px; }
+  .hero-card { border-radius: var(--radius-lg); padding: 22px; color: #fff; background: linear-gradient(135deg, var(--color-accent) 0%, var(--color-accent-700) 100%); box-shadow: var(--shadow-accent); margin-top: 16px; }
+  .hero-card .kicker { font-size: 13px; opacity: 0.85; font-weight: 500; }
+  .hero-card .amount { font-size: 34px; font-weight: 800; letter-spacing: -0.02em; margin-top: 4px; }
+  .hero-card .foot-row { display: flex; align-items: center; justify-content: space-between; margin-top: 14px; }
+  .hero-card .delta-pill { font-size: 13px; font-weight: 600; background: rgba(255,255,255,0.18); border-radius: var(--radius-pill); padding: 6px 12px; white-space: nowrap; }
 
-  .section-head { margin: 20px 0 6px; display: flex; align-items: center; justify-content: space-between; }
-  .section-head h3 { font-size: 15px; font-weight: 800; }
+  .stat-row { display: flex; gap: 12px; margin-top: 12px; }
+  .stat-card { flex: 1; background: var(--color-card); border-radius: var(--radius-lg); box-shadow: var(--shadow-sm); padding: 14px 16px; min-width: 0; }
+  .stat-card .head { display: flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 600; color: var(--color-muted); }
+  .stat-card .head .icon { width: 15px; height: 15px; }
+  .stat-card .value { font-size: 20px; font-weight: 700; margin-top: 6px; letter-spacing: -0.02em; }
+  .stat-card .delta { font-size: 12px; font-weight: 600; margin-top: 4px; }
+
+  .section-head { margin: 22px 0 6px; display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+  .section-head h3 { font-size: 15px; font-weight: 700; }
   .section-head:first-of-type { margin-top: 0; }
 
-  .tx-list { border-top: 2px solid var(--color-divider); }
-  .tx-row { display: flex; align-items: center; justify-content: space-between; padding: 11px 0; border-bottom: 1px solid var(--color-divider); gap: 10px; }
+  .tx-row { display: flex; align-items: center; gap: 12px; padding: 12px 4px; border-bottom: 1px solid var(--color-divider); }
+  .tx-row:last-child { border-bottom: none; }
   .tx-row .info { min-width: 0; flex: 1; }
-  .tx-row .cat { font-size: 14px; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-  .tx-row .meta { font-size: 11.5px; color: var(--color-muted); }
-  .tx-row .amt { font-size: 14px; font-weight: 600; flex-shrink: 0; }
-  .tx-row .actions { display: flex; gap: 2px; flex-shrink: 0; }
+  .tx-row .cat { font-size: 15px; font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .tx-row .meta { font-size: 12px; color: var(--color-muted); margin-top: 2px; }
+  .tx-row .amt { font-size: 14px; font-weight: 700; flex-shrink: 0; }
+  .tx-row .actions { display: flex; gap: 4px; flex-shrink: 0; }
   .empty-note { padding: 36px 0; text-align: center; color: var(--color-muted); font-size: 13px; }
 
-  .budget-item .row1 { display: flex; justify-content: space-between; font-size: 12.5px; margin-bottom: 5px; }
+  .budget-item .row1 { display: flex; justify-content: space-between; font-size: 13px; margin-bottom: 6px; }
   .budget-item .row1 .right { color: var(--color-muted); }
-  .bar-track { height: 6px; background: var(--color-surface); }
-  .bar-fill { height: 100%; }
-  .budgets-list { display: flex; flex-direction: column; gap: 12px; }
+  .bar-track { height: 8px; border-radius: var(--radius-pill); background: var(--color-surface); overflow: hidden; }
+  .bar-fill { height: 100%; border-radius: var(--radius-pill); }
+  .budgets-list { display: flex; flex-direction: column; gap: 14px; padding: 16px; }
 
   /* — transactions filters — */
   .filter-row { display: flex; gap: 8px; margin-bottom: 10px; }
-  .filter-row .input { flex: 1; }
+  .filter-row select.input { flex: 1; min-width: 0; }
 
   /* — add form — */
-  .add-form { display: flex; flex-direction: column; gap: 14px; }
+  .add-form { display: flex; flex-direction: column; gap: 16px; }
   .date-input-wrap { position: relative; }
-  .date-input-wrap .input { padding-right: 38px; }
-  .date-icon { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); pointer-events: none; color: var(--color-muted); }
-  .date-native-overlay { position: absolute; right: 0; top: 0; width: 38px; height: 100%; opacity: 0; cursor: pointer; border: none; padding: 0; margin: 0; }
+  .date-input-wrap .input-wrap input { padding-right: 24px; }
+  .date-icon { position: absolute; right: 14px; top: 50%; transform: translateY(-50%); pointer-events: none; color: var(--color-tertiary); }
+  .date-native-overlay { position: absolute; right: 0; top: 0; width: 40px; height: 100%; opacity: 0; cursor: pointer; border: none; padding: 0; margin: 0; }
 
   /* — insights — */
-  .insight-card { border: 1px solid var(--color-divider); padding: 14px; }
-  .insight-card .head { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 8px; }
+  .insight-cards { display: flex; flex-direction: column; gap: 14px; padding-bottom: 16px; }
+  .insight-card { background: var(--color-card); border-radius: var(--radius-lg); box-shadow: var(--shadow-sm); padding: 16px; }
+  .insight-card .head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; gap: 8px; }
   .insight-card .head .cat { font-weight: 600; font-size: 14px; }
-  .insight-card .head .status { font-size: 11.5px; }
   .insight-card .foot { display: flex; justify-content: space-between; font-size: 12px; color: var(--color-muted); margin-top: 8px; }
-  .insight-cards { display: flex; flex-direction: column; gap: 16px; padding-bottom: 16px; }
 
-  .breakdown-row { margin-bottom: 12px; }
-  .breakdown-row .row1 { display: flex; justify-content: space-between; font-size: 12.5px; margin-bottom: 5px; }
+  .breakdown-row { margin-bottom: 14px; }
+  .breakdown-row:last-child { margin-bottom: 0; }
+  .breakdown-row .row1 { display: flex; justify-content: space-between; font-size: 13px; margin-bottom: 6px; }
   .breakdown-row .row1 .right { color: var(--color-muted); }
-  .breakdown-bar-track { height: 14px; background: var(--color-surface); }
-  .legend-dot { display: inline-block; width: 9px; height: 9px; border-radius: 50%; margin-right: 6px; vertical-align: middle; }
+  .legend-dot { display: inline-block; width: 9px; height: 9px; border-radius: 50%; margin-right: 7px; vertical-align: middle; }
 
-  .trend-legend { display: flex; gap: 14px; font-size: 11.5px; color: var(--color-muted); margin-bottom: 14px; }
-  .trend-legend .swatch { display: inline-block; width: 8px; height: 8px; margin-right: 5px; vertical-align: middle; }
-  .trend-chart { display: flex; align-items: flex-end; gap: 10px; height: 150px; border-bottom: 2px solid var(--color-divider); padding-bottom: 2px; }
+  .trend-legend { display: flex; gap: 16px; font-size: 12px; color: var(--color-muted); margin-bottom: 14px; }
+  .trend-legend .swatch { display: inline-block; width: 8px; height: 8px; border-radius: 2px; margin-right: 6px; vertical-align: middle; }
+  .trend-chart-card { background: var(--color-card); border-radius: var(--radius-lg); box-shadow: var(--shadow-sm); padding: 20px 16px 8px; }
+  .trend-chart { display: flex; align-items: flex-end; gap: 12px; height: 140px; }
   .trend-col { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 4px; height: 100%; justify-content: flex-end; }
-  .trend-bars { display: flex; gap: 3px; align-items: flex-end; height: 100%; }
-  .trend-bars .bar { width: 9px; }
-  .trend-labels { display: flex; gap: 10px; margin-top: 6px; }
-  .trend-labels div { flex: 1; text-align: center; font-size: 10.5px; color: var(--color-muted); }
+  .trend-bars { display: flex; gap: 4px; align-items: flex-end; height: 100%; }
+  .trend-bars .bar { width: 10px; border-radius: 4px 4px 0 0; }
+  .trend-labels { display: flex; gap: 12px; margin-top: 8px; padding-bottom: 12px; }
+  .trend-labels div { flex: 1; text-align: center; font-size: 11px; color: var(--color-tertiary); }
 
   /* — settings — */
   .settings-block { display: flex; flex-direction: column; gap: 22px; padding-bottom: 24px; }
   .settings-columns { display: flex; flex-direction: column; gap: 22px; }
   .settings-col { display: flex; flex-direction: column; gap: 22px; }
-  .settings-section-label { font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--color-muted); margin-bottom: 8px; }
-  .profile-row { display: flex; align-items: center; gap: 12px; }
-  .avatar { width: 48px; height: 48px; border-radius: 50%; background: var(--color-surface); display: flex; align-items: center; justify-content: center; font-weight: 800; font-family: var(--font-heading); font-size: 18px; flex-shrink: 0; object-fit: cover; }
+  .settings-section-label { font-size: 12px; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; color: var(--color-tertiary); margin-bottom: 8px; }
+  .profile-row { display: flex; align-items: center; gap: 14px; }
+  .avatar { width: 52px; height: 52px; border-radius: 50%; background: var(--color-surface); display: flex; align-items: center; justify-content: center; font-weight: 700; font-family: var(--font-sans); font-size: 18px; color: var(--color-tertiary); flex-shrink: 0; object-fit: cover; }
   .profile-name { font-weight: 600; font-size: 15px; }
-  .profile-sub { font-size: 12px; color: var(--color-muted); }
-  .profile-row .btn { margin-left: auto; }
+  .profile-sub { font-size: 12px; color: var(--color-muted); margin-top: 2px; }
+  .profile-row .btn { margin-left: auto; flex-shrink: 0; }
 
-  .toggle-row { display: flex; align-items: center; justify-content: space-between; border: 1px solid var(--color-divider); padding: 12px 14px; margin-bottom: 8px; }
-  .toggle-switch { width: 44px; height: 24px; background: var(--color-surface); border: none; padding: 2px; cursor: pointer; position: relative; box-sizing: border-box; }
-  .toggle-switch.on { background: var(--color-accent); }
-  .toggle-switch .thumb { display: block; width: 18px; height: 18px; background: #fff; transition: transform 0.15s; }
-  .toggle-switch.on .thumb { transform: translateX(20px); }
+  .toggle-row { display: flex; align-items: center; gap: 12px; padding: 12px 4px; }
+  .toggle-row .label { flex: 1; font-size: 15px; font-weight: 500; }
 
-  .scheme-grid { display: flex; flex-wrap: wrap; gap: 8px; }
-  .scheme-opt { flex: 1 1 30%; min-width: 96px; display: flex; align-items: center; gap: 7px; border: 1px solid var(--color-divider); padding: 10px; cursor: pointer; }
-  .scheme-opt.active { border-color: var(--swatch); }
-  .scheme-opt input { position: absolute; opacity: 0; width: 0; height: 0; pointer-events: none; }
-  .scheme-opt .dot { width: 14px; height: 14px; background: var(--swatch); flex-shrink: 0; }
-  .scheme-opt .lbl { font-size: 12.5px; }
-
-  .sync-box { border: 1px solid var(--color-divider); padding: 14px; display: flex; flex-direction: column; gap: 10px; }
+  .sync-box { background: var(--color-card); border-radius: var(--radius-lg); box-shadow: var(--shadow-sm); padding: 16px; display: flex; flex-direction: column; gap: 10px; }
   #syncStatus { font-size: 12.5px; color: var(--color-muted); display: flex; align-items: center; gap: 6px; }
   #syncStatus.ok { color: var(--color-income); }
   #syncStatus.err { color: var(--color-expense); }
-  .sync-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: var(--color-muted); flex-shrink: 0; }
+  .sync-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: var(--color-tertiary); flex-shrink: 0; }
   #syncStatus.ok .sync-dot { background: var(--color-income); }
   #syncStatus.err .sync-dot { background: var(--color-expense); }
 
-  .bills-list, .budgets-manage-list { border-top: 2px solid var(--color-divider); }
-  .manage-row { display: flex; align-items: center; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid var(--color-divider); gap: 10px; }
+  .manage-row { display: flex; align-items: center; gap: 10px; padding: 12px 4px; border-bottom: 1px solid var(--color-divider); }
+  .manage-row:last-child { border-bottom: none; }
   .manage-row .info { min-width: 0; flex: 1; }
-  .manage-row .name { font-size: 14px; font-weight: 600; }
-  .manage-row .sub { font-size: 11.5px; color: var(--color-muted); }
+  .manage-row .name { font-size: 14px; font-weight: 500; }
+  .manage-row .sub { font-size: 12px; color: var(--color-muted); margin-top: 2px; }
   .manage-row .amt { font-size: 14px; font-weight: 600; flex-shrink: 0; }
-  .row-actions { display: flex; gap: 2px; flex-shrink: 0; }
+  .row-actions { display: flex; gap: 4px; flex-shrink: 0; }
   .section-add-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
-  .inline-form { display: flex; flex-direction: column; gap: 10px; border: 1px solid var(--color-divider); padding: 12px; margin-bottom: 12px; }
+  .inline-form { display: flex; flex-direction: column; gap: 12px; background: var(--color-card); border-radius: var(--radius-lg); box-shadow: var(--shadow-sm); padding: 16px; margin-bottom: 12px; }
   .inline-form .actions-row { display: flex; gap: 8px; }
   .inline-form .actions-row .btn { flex: 1; }
 
-  .footer-note { font-size: 11px; line-height: 1.6; color: var(--color-muted); margin: 4px 0 0; }
+  .goal-card { background: var(--color-card); border-radius: var(--radius-lg); box-shadow: var(--shadow-sm); padding: 16px; }
+  .goal-card .top { display: flex; align-items: center; gap: 12px; }
+  .goal-card .name { font-weight: 700; font-size: 15px; }
+  .goal-card .progress-label { font-size: 13px; color: var(--color-muted); margin-top: 2px; }
+  .goal-card .bar-track { margin-top: 12px; }
+  .goal-card-actions { display: flex; gap: 4px; flex-shrink: 0; align-items: center; }
+
+  .footer-note { font-size: 11px; line-height: 1.6; color: var(--color-tertiary); margin: 4px 0 0; }
 
   /* — tab bar — */
-  .tabbar-wrap { position: fixed; left: 0; right: 0; bottom: 0; display: flex; justify-content: center; background: var(--color-bg); border-top: 2px solid var(--color-divider); z-index: 30; }
-  .tabbar { display: flex; width: 100%; max-width: 480px; }
+  .tabbar-wrap { position: fixed; left: 0; right: 0; bottom: 0; display: flex; justify-content: center; background: color-mix(in srgb, var(--color-bg) 82%, transparent); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); border-top: 1px solid var(--color-divider); z-index: 30; }
+  .tabbar { display: flex; width: 100%; max-width: 480px; height: 64px; }
   .tabbar button {
-    flex: 1; display: flex; flex-direction: column; align-items: center; gap: 3px;
-    padding: 9px 0 8px; background: none; border: none; cursor: pointer; color: var(--color-muted);
-    font-family: var(--font-body);
+    flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px;
+    background: none; border: none; cursor: pointer; color: var(--color-tertiary);
+    font-family: var(--font-sans);
   }
   .tabbar button.active { color: var(--color-accent); }
-  .tabbar button span { font-size: 10px; font-weight: 600; }
+  .tabbar button span { font-size: 11px; font-weight: 600; }
 
   .toast {
-    position: fixed; left: 50%; bottom: 78px; transform: translateX(-50%);
-    background: var(--color-text); color: var(--color-bg); padding: 10px 16px; font-size: 12.5px;
+    position: fixed; left: 50%; bottom: 82px; transform: translateX(-50%);
+    background: var(--gray-900); color: #fff; padding: 12px 18px; font-size: 13px; font-weight: 500;
+    border-radius: var(--radius-pill); box-shadow: var(--shadow-lg);
     z-index: 40; max-width: 420px; width: calc(100% - 40px);
     display: flex; align-items: center; justify-content: center; gap: 14px;
   }
   .toast[hidden] { display: none; }
   .toast-undo-btn {
     background: none; border: none; padding: 0; min-height: 0; flex-shrink: 0;
-    color: var(--color-bg); font-family: var(--font-heading); font-weight: 800;
+    color: #fff; font-family: var(--font-sans); font-weight: 700;
     font-size: 12.5px; text-decoration: underline; cursor: pointer;
   }
 
@@ -227,10 +274,10 @@
   @media (min-width: 880px) {
     .app-header, .screen { max-width: 1120px; }
     .add-form { max-width: 480px; }
-    .scheme-opt { flex: 1 1 18%; }
     .home-columns { display: grid; grid-template-columns: 1.4fr 1fr; gap: 32px; align-items: start; }
+    .home-columns .hero-card { margin-top: 0; }
     .breakdown-columns { display: grid; grid-template-columns: 260px 1fr; gap: 32px; align-items: start; }
-    .insight-cards { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; }
+    .insight-cards { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; }
     .settings-columns { display: grid; grid-template-columns: 1fr 1fr; gap: 0 32px; align-items: start; }
   }
 </style>
@@ -250,23 +297,23 @@
   <div class="tabbar-wrap">
     <nav class="tabbar" id="tabbar">
       <button type="button" data-tab="home">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
+        <i class="icon" data-lucide="layout-grid"></i>
         <span data-l="tabHome"></span>
       </button>
       <button type="button" data-tab="transactions">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"></line><line x1="8" y1="12" x2="21" y2="12"></line><line x1="8" y1="18" x2="21" y2="18"></line><line x1="3" y1="6" x2="3.01" y2="6"></line><line x1="3" y1="12" x2="3.01" y2="12"></line><line x1="3" y1="18" x2="3.01" y2="18"></line></svg>
+        <i class="icon" data-lucide="list"></i>
         <span data-l="tabTx"></span>
       </button>
       <button type="button" data-tab="add">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+        <i class="icon" data-lucide="plus-circle"></i>
         <span data-l="tabAdd"></span>
       </button>
       <button type="button" data-tab="insights">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg>
+        <i class="icon" data-lucide="pie-chart"></i>
         <span data-l="tabInsights"></span>
       </button>
       <button type="button" data-tab="settings">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" y1="21" x2="4" y2="14"></line><line x1="4" y1="10" x2="4" y2="3"></line><line x1="12" y1="21" x2="12" y2="12"></line><line x1="12" y1="8" x2="12" y2="3"></line><line x1="20" y1="21" x2="20" y2="16"></line><line x1="20" y1="12" x2="20" y2="3"></line><line x1="1" y1="14" x2="7" y2="14"></line><line x1="9" y1="8" x2="15" y2="8"></line><line x1="17" y1="16" x2="23" y2="16"></line></svg>
+        <i class="icon" data-lucide="settings"></i>
         <span data-l="tabSettings"></span>
       </button>
     </nav>
@@ -311,28 +358,19 @@
     }
     return null;
   }
-
-  const SCHEMES = {
-    red: ["#ec3013", "#dd2b0f", "#ae1800"],
-    orange: ["#c56a1f", "#a8591a", "#7c4110"],
-    amber: ["#a16207", "#854d0e", "#713f12"],
-    green: ["#3d7a3f", "#336636", "#254a27"],
-    teal: ["#0d9488", "#0f766e", "#115e59"],
-    blue: ["#3763b5", "#2e5399", "#213c70"],
-    indigo: ["#4f46e5", "#4338ca", "#3730a3"],
-    purple: ["#7c3aed", "#6d28d9", "#5b21b6"],
-    pink: ["#be185d", "#9d174d", "#831843"],
-    mono: ["#2d2b2b", "#201e1d", "#201e1d"]
+  const CATEGORY_ICON = {
+    "เงินเดือน": "briefcase", "โบนัส/รายได้พิเศษ": "gift", "ธุรกิจ/ฟรีแลนซ์": "laptop", "ดอกเบี้ย/เงินลงทุน": "trending-up", "อื่นๆ (รายรับ)": "plus-circle",
+    "อาหารและเครื่องดื่ม": "utensils", "การเดินทาง": "car", "ที่อยู่อาศัย/ค่าเช่า": "home", "สาธารณูปโภค (ไฟ/น้ำ/เน็ต)": "zap", "ช้อปปิ้ง": "shopping-bag",
+    "บันเทิง": "tv", "สุขภาพ": "heart-pulse", "การศึกษา": "book-open", "ผ่อนชำระ/หนี้สิน": "credit-card", "ออมเงิน/ลงทุน": "piggy-bank", "อื่นๆ (รายจ่าย)": "more-horizontal"
   };
-  const SCHEME_ORDER = ["red", "orange", "amber", "green", "teal", "blue", "indigo", "purple", "pink", "mono"];
-  function darkenHex(hex, factor) {
-    const n = parseInt(hex.slice(1), 16);
-    const r = Math.round(((n >> 16) & 255) * factor);
-    const g = Math.round(((n >> 8) & 255) * factor);
-    const b = Math.round((n & 255) * factor);
-    return "#" + [r, g, b].map((c) => Math.max(0, Math.min(255, c)).toString(16).padStart(2, "0")).join("");
-  }
-  function computeCustomScheme(hex) { return [hex, darkenHex(hex, 0.82), darkenHex(hex, 0.6)]; }
+  function iconFor(cat) { return CATEGORY_ICON[cat] || "circle"; }
+  function rowTone(type) { return type === "income" ? { bg: "var(--color-income-tint)", color: "var(--color-income)" } : { bg: "var(--color-accent-tint)", color: "var(--color-accent)" }; }
+  const GOAL_ICONS = ["flag", "piggy-bank", "plane", "shield", "gift", "target"];
+  const GOAL_TONES = [
+    { bg: "var(--color-accent-tint)", color: "var(--color-accent)" },
+    { bg: "var(--color-income-tint)", color: "var(--color-income)" },
+    { bg: "var(--color-warning-tint)", color: "var(--color-warning-text)" }
+  ];
 
   const LANGS = {
     th: {
@@ -348,8 +386,6 @@
       spentSoFar: "ใช้ไปแล้ว", budgetOf: "งบ", overBudget: "เกินงบ", expenseByCategory: "รายจ่ายตามหมวดหมู่",
       noExpensesMonth: "ยังไม่มีรายจ่ายในเดือนนี้", settingsTitle: "ตั้งค่า",
       personalAccount: "บัญชีส่วนตัว", languageSection: "ภาษา", displaySection: "การแสดงผล",
-      colorRed: "แดง", colorOrange: "ส้ม", colorAmber: "เหลืองทอง", colorGreen: "เขียว", colorTeal: "เขียวอมฟ้า",
-      colorBlue: "น้ำเงิน", colorIndigo: "คราม", colorPurple: "ม่วง", colorPink: "ชมพู", colorMono: "โมโนโครม", colorCustom: "กำหนดเอง",
       syncSection: "ซิงค์ข้ามอุปกรณ์", dataSection: "ข้อมูล",
       exportCsvBtn: "ส่งออก CSV", exportJsonBtn: "ส่งออกข้อมูล (JSON)", billsSection: "รายการที่ต้องจ่ายประจำ",
       dueOn: "ทุกวันที่ ", footerNote: "ข้อมูลจะถูกบันทึกไว้ในอุปกรณ์นี้เสมอ เข้าสู่ระบบด้วย Google เพื่อซิงค์ข้ามอุปกรณ์โดยอัตโนมัติ แนะนำให้ส่งออกข้อมูลเก็บเป็นไฟล์สำรองเป็นระยะ",
@@ -373,7 +409,8 @@
       cancelBtn: "ยกเลิก", noBudgets: "ยังไม่มีงบประมาณ", allBudgeted: "ตั้งงบประมาณครบทุกหมวดหมู่รายจ่ายแล้ว",
       toastBudgetSaved: "บันทึกงบประมาณแล้ว", toastBudgetDeleted: "ลบงบประมาณแล้ว",
       addBillBtn: "+ เพิ่มรายการ", billNameLabel: "ชื่อรายการ", billDayLabel: "วันที่ต้องจ่าย (1-31)", saveBillBtn: "บันทึกรายการ",
-      noBills: "ยังไม่มีรายการที่ต้องจ่ายประจำ", toastBillSaved: "บันทึกรายการแล้ว", toastBillDeleted: "ลบรายการแล้ว"
+      noBills: "ยังไม่มีรายการที่ต้องจ่ายประจำ", toastBillSaved: "บันทึกรายการแล้ว", toastBillDeleted: "ลบรายการแล้ว",
+      vsLastMonth: "จากเดือนที่แล้ว", ofLabel: "จาก"
     },
     en: {
       appTitle: "Income & Expenses", appSubtitle: "Personal income & expense tracker",
@@ -388,8 +425,6 @@
       spentSoFar: "spent", budgetOf: "Budget", overBudget: "Over", expenseByCategory: "Expenses by category",
       noExpensesMonth: "No expenses yet this month", settingsTitle: "Settings",
       personalAccount: "Personal account", languageSection: "Language", displaySection: "Display",
-      colorRed: "Red", colorOrange: "Orange", colorAmber: "Amber", colorGreen: "Green", colorTeal: "Teal",
-      colorBlue: "Blue", colorIndigo: "Indigo", colorPurple: "Purple", colorPink: "Pink", colorMono: "Monochrome", colorCustom: "Custom",
       syncSection: "Cross-device sync", dataSection: "Data",
       exportCsvBtn: "Export CSV", exportJsonBtn: "Export data (JSON)", billsSection: "Recurring bills",
       dueOn: "Due on day ", footerNote: "Data always stays on this device. Sign in with Google to sync across devices automatically. Export a backup periodically.",
@@ -413,7 +448,8 @@
       cancelBtn: "Cancel", noBudgets: "No budgets yet", allBudgeted: "All expense categories already have a budget",
       toastBudgetSaved: "Budget saved", toastBudgetDeleted: "Budget deleted",
       addBillBtn: "+ Add bill", billNameLabel: "Bill name", billDayLabel: "Due day (1-31)", saveBillBtn: "Save bill",
-      noBills: "No recurring bills yet", toastBillSaved: "Bill saved", toastBillDeleted: "Bill deleted"
+      noBills: "No recurring bills yet", toastBillSaved: "Bill saved", toastBillDeleted: "Bill deleted",
+      vsLastMonth: "vs last month", ofLabel: "of"
     }
   };
   function L() { return LANGS[state.lang]; }
@@ -441,13 +477,15 @@
   }
   function monthLabel(key) { return new Date(key + "-01T00:00:00").toLocaleDateString(state.lang === "en" ? "en-US" : "th-TH", { month: "short", year: "2-digit" }); }
   function escapeHtml(s) { return String(s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c])); }
-  const EDIT_ICON = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"></path></svg>';
-  const DELETE_ICON = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>';
-  const PLUS_ICON = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>';
+  function icon(name, attrs) { return `<i class="icon" data-lucide="${name}"${attrs ? " " + attrs : ""}></i>`; }
+  const EDIT_ICON = icon("pencil");
+  const DELETE_ICON = icon("trash-2");
+  const PLUS_ICON = icon("plus");
+  function refreshIcons() { if (window.lucide) window.lucide.createIcons(); }
 
   // ---------- state ----------
   const state = {
-    lang: "th", dark: false, scheme: "red", customColor: "#ec3013",
+    lang: "th", dark: false,
     tab: "home", insightsTab: "budgets", insightsMonth: new Date().toISOString().slice(0, 7),
     txFilterType: "all", txFilterMonth: "all", txFilterCategory: "all", txSearch: "",
     formType: "expense", formDate: new Date().toISOString().slice(0, 10),
@@ -498,14 +536,11 @@
         const s = JSON.parse(raw);
         if (s.lang === "th" || s.lang === "en") state.lang = s.lang;
         if (typeof s.dark === "boolean") state.dark = s.dark;
-        if (/^#[0-9a-fA-F]{6}$/.test(s.customColor)) state.customColor = s.customColor;
-        if (s.scheme === "custom" || SCHEME_ORDER.includes(s.scheme)) state.scheme = s.scheme;
         if (Array.isArray(s.budgets) && s.budgets.length) budgets = s.budgets;
         if (Array.isArray(s.bills) && s.bills.length) bills = s.bills;
         if (Array.isArray(s.goals)) goals = s.goals;
       }
     } catch (e) { /* ignore */ }
-    SCHEMES.custom = computeCustomScheme(state.customColor);
   }
   function saveToStorage() {
     if (!storageAvailable) return;
@@ -513,28 +548,26 @@
   }
   function saveSettings() {
     if (!storageAvailable) return;
-    try { window.localStorage.setItem(SETTINGS_KEY, JSON.stringify({ lang: state.lang, dark: state.dark, scheme: state.scheme, customColor: state.customColor, budgets, bills, goals })); } catch (e) { /* quota */ }
+    try { window.localStorage.setItem(SETTINGS_KEY, JSON.stringify({ lang: state.lang, dark: state.dark, budgets, bills, goals })); } catch (e) { /* quota */ }
   }
 
   // ---------- theming ----------
   function applyTheme() {
-    const light = { bg: "#f3f2f2", surface: "#eae9e9", divider: "color-mix(in srgb, #201e1d 40%, transparent)", muted: "color-mix(in srgb, #201e1d 55%, transparent)", text: "#201e1d" };
-    const dark = { bg: "#171514", surface: "#2a2725", divider: "rgba(255,255,255,0.16)", muted: "rgba(243,242,242,0.6)", text: "#f3f2f2" };
+    const light = { bg: "#f6f6f8", card: "#ffffff", surface: "#eeeef1", divider: "#e4e4e9", border: "#d9dae0", muted: "#71747f", tertiary: "#9497a3", text: "#15161a" };
+    const dark = { bg: "#141519", card: "#1e1f24", surface: "#26272d", divider: "rgba(255,255,255,0.10)", border: "rgba(255,255,255,0.16)", muted: "rgba(245,245,247,0.62)", tertiary: "rgba(245,245,247,0.42)", text: "#f5f5f7" };
     const t = state.dark ? dark : light;
-    const scheme = SCHEMES[state.scheme];
-    const mono = state.scheme === "mono";
     const root = document.documentElement.style;
     root.setProperty("--color-bg", t.bg);
+    root.setProperty("--color-card", t.card);
     root.setProperty("--color-surface", t.surface);
     root.setProperty("--color-text", t.text);
     root.setProperty("--color-muted", t.muted);
+    root.setProperty("--color-tertiary", t.tertiary);
     root.setProperty("--color-divider", t.divider);
-    root.setProperty("--color-accent", scheme[0]);
-    root.setProperty("--color-accent-600", scheme[1]);
-    root.setProperty("--color-accent-700", scheme[2]);
-    root.setProperty("--color-income", mono ? t.text : (state.dark ? "#5fae74" : "#2f6b3f"));
-    root.setProperty("--color-expense", mono ? t.text : (state.dark ? "#ef7a63" : "#ae1800"));
-    root.setProperty("--color-warning", mono ? t.text : (state.dark ? "#e0a030" : "#a66a1f"));
+    root.setProperty("--color-border", t.border);
+    root.setProperty("--color-income", state.dark ? "#34c98a" : "#1fae71");
+    root.setProperty("--color-expense", state.dark ? "#ff7a68" : "#ef4b3a");
+    root.setProperty("--color-warning", state.dark ? "#f5b95a" : "#ec9f2e");
     const themeColorMeta = $("themeColorMeta");
     if (themeColorMeta) themeColorMeta.setAttribute("content", t.bg);
   }
@@ -759,8 +792,8 @@
       const near = !over && spent / b.limit >= 0.8;
       return {
         category: b.category, spentFmt: fmtMoney(spent), limitFmt: fmtMoney(b.limit), pct,
-        barColor: over ? "var(--color-accent-700)" : (near ? "var(--color-warning)" : "var(--color-accent)"),
-        statusColor: over ? "var(--color-accent-700)" : (near ? "var(--color-warning)" : "var(--color-muted)"),
+        barColor: over ? "var(--color-expense)" : (near ? "var(--color-warning)" : "var(--color-accent)"),
+        badgeClass: over ? "badge-expense" : (near ? "badge-warn" : "badge-brand"),
         statusLabel: over ? L().overBudget : pct + "%"
       };
     });
@@ -827,7 +860,7 @@
     showToast(checkBudgetAlert(savedTx) || L().toastAdded);
     Promise.all([pushTx(savedTx), pushRows("bills", [billToRow(bill, false)])]).then(() => syncNow());
   }
-  const CHART_COLORS = ["#ec3013", "#c56a1f", "#a16207", "#3d7a3f", "#0d9488", "#3763b5", "#4f46e5", "#7c3aed", "#be185d", "#2d2b2b"];
+  const CHART_COLORS = ["var(--color-accent)", "var(--color-income)", "var(--color-expense)", "var(--color-warning)", "#a190f7", "var(--color-tertiary)"];
   function computeBreakdown(forMonth) {
     const targetMonth = forMonth || new Date().toISOString().slice(0, 7);
     const totals = {};
@@ -875,6 +908,37 @@
       expenseH: Math.max(2, Math.round((byMonth[k].expense / max) * 130))
     }));
   }
+  function monthTotal(key, type) {
+    return transactions.filter((t) => t.type === type && monthKey(t.date) === key).reduce((a, t) => a + t.amount, 0);
+  }
+  function pctDeltaLabel(cur, prev) {
+    if (!prev) return cur > 0 ? "+100%" : "+0%";
+    const p = Math.round(((cur - prev) / prev) * 100);
+    return (p >= 0 ? "+" : "") + p + "%";
+  }
+  function prevMonthKey() {
+    const now = new Date();
+    let pm = now.getMonth() - 1, py = now.getFullYear();
+    if (pm < 0) { pm = 11; py -= 1; }
+    return py + "-" + String(pm + 1).padStart(2, "0");
+  }
+  // Running net balance per day (last 8 datapoints) for the home hero sparkline.
+  function computeSparklinePoints() {
+    const netByDay = {};
+    transactions.slice().sort((a, b) => a.date.localeCompare(b.date)).forEach((t) => {
+      netByDay[t.date] = (netByDay[t.date] || 0) + (t.type === "income" ? t.amount : -t.amount);
+    });
+    let running = 0;
+    return Object.keys(netByDay).sort().map((d) => (running += netByDay[d])).slice(-8);
+  }
+  function sparklineSvg(points, color, width, height, strokeWidth) {
+    if (!points.length) return "";
+    const max = Math.max(...points), min = Math.min(...points);
+    const range = max - min || 1;
+    const step = width / (points.length - 1 || 1);
+    const d = points.map((p, i) => `${i === 0 ? "M" : "L"} ${i * step} ${height - ((p - min) / range) * height}`).join(" ");
+    return `<svg width="${width}" height="${height}" viewBox="0 0 ${width} ${height}"><path d="${d}" fill="none" stroke="${color}" stroke-width="${strokeWidth}" stroke-linecap="round" stroke-linejoin="round"></path></svg>`;
+  }
 
   // ---------- header / tabbar ----------
   function renderChrome() {
@@ -896,26 +960,47 @@
     const dueSoon = upcomingBills();
     const today = new Date().toLocaleDateString(state.lang === "en" ? "en-US" : "th-TH", { month: "long", year: "numeric" });
 
+    const curM = new Date().toISOString().slice(0, 7);
+    const prevM = prevMonthKey();
+    const curIncome = monthTotal(curM, "income"), prevIncome = monthTotal(prevM, "income");
+    const curExpense = monthTotal(curM, "expense"), prevExpense = monthTotal(prevM, "expense");
+    const balanceDelta = pctDeltaLabel(curIncome - curExpense, prevIncome - prevExpense);
+    const incomeDelta = pctDeltaLabel(curIncome, prevIncome);
+    const expenseDelta = pctDeltaLabel(curExpense, prevExpense);
+    const sparkline = sparklineSvg(computeSparklinePoints(), "#ffffff", 150, 34, 2.5);
+
     $("screen").innerHTML = `
       <div class="today-label">${escapeHtml(today)}</div>
-      <h2 style="margin-top:2px;font-size:24px">${escapeHtml(l.overview)}</h2>
-      <div class="balance-card">
-        <div class="kicker">${escapeHtml(l.balanceLabel)}</div>
-        <div class="amount">${fmtMoney(income - expense)}</div>
-        <div class="rule"></div>
-        <div class="split">
-          <div><div class="lbl">${escapeHtml(l.incomeLabel)}</div><div class="val">${fmtMoney(income)}</div></div>
-          <div><div class="lbl">${escapeHtml(l.expenseLabel)}</div><div class="val">${fmtMoney(expense)}</div></div>
-        </div>
-      </div>
+      <h2 class="screen-title" style="margin:2px 0 0">${escapeHtml(l.overview)}</h2>
       <div class="home-columns">
         <div class="home-col-main">
-          <div class="section-head" style="margin-top:0">
+          <div class="hero-card">
+            <div class="kicker">${escapeHtml(l.balanceLabel)}</div>
+            <div class="amount">${fmtMoney(income - expense)}</div>
+            <div class="foot-row">
+              ${sparkline}
+              <div class="delta-pill">${escapeHtml(balanceDelta)}</div>
+            </div>
+          </div>
+          <div class="stat-row">
+            <div class="stat-card">
+              <div class="head">${icon("arrow-down-left")}<span>${escapeHtml(l.incomeLabel)}</span></div>
+              <div class="value">${fmtMoney(income)}</div>
+              <div class="delta" style="color:var(--color-income)">${escapeHtml(incomeDelta)} ${escapeHtml(l.vsLastMonth)}</div>
+            </div>
+            <div class="stat-card">
+              <div class="head">${icon("arrow-up-right")}<span>${escapeHtml(l.expenseLabel)}</span></div>
+              <div class="value">${fmtMoney(expense)}</div>
+              <div class="delta" style="color:var(--color-expense)">${escapeHtml(expenseDelta)} ${escapeHtml(l.vsLastMonth)}</div>
+            </div>
+          </div>
+
+          <div class="section-head">
             <h3>${escapeHtml(l.recentTx)}</h3>
             <button type="button" class="btn btn-ghost" id="goAddBtn">${escapeHtml(l.addShort)}</button>
           </div>
-          <div class="tx-list">
-            ${recent.map((t) => txRowHtml(t, false)).join("") || `<div class="empty-note">${escapeHtml(l.noResults)}</div>`}
+          <div class="list-card">
+            ${recent.map((t) => txRowHtml(t)).join("") || `<div class="empty-note">${escapeHtml(l.noResults)}</div>`}
           </div>
         </div>
         <div class="home-col-side">
@@ -923,22 +1008,23 @@
           <div class="section-head" style="margin-top:0">
             <h3>${escapeHtml(l.upcomingBillsSection)}</h3>
           </div>
-          <div class="bills-list">
+          <div class="list-card">
             ${dueSoon.map((b) => `
               <div class="manage-row">
+                <div class="icon-avatar" style="background:var(--color-warning-tint);color:var(--color-warning-text)">${icon("calendar-clock")}</div>
                 <div class="info">
                   <div class="name">${escapeHtml(b.name)}</div>
                   <div class="sub">${escapeHtml(dueSoonLabel(b.daysUntil))}</div>
                 </div>
                 <div class="amt">${fmtMoney(b.amount)}</div>
-                <button type="button" class="btn btn-secondary" data-mark-paid="${b.id}">${escapeHtml(l.markPaidBtn)}</button>
+                <button type="button" class="btn btn-secondary btn-sm" data-mark-paid="${b.id}">${escapeHtml(l.markPaidBtn)}</button>
               </div>`).join("")}
           </div>` : ""}
           <div class="section-head" style="${dueSoon.length ? "" : "margin-top:0"}">
             <h3>${escapeHtml(l.budgetsThisMonth)}</h3>
             <button type="button" class="btn btn-ghost" id="goBudgetsBtn">${escapeHtml(l.seeAll)}</button>
           </div>
-          <div class="budgets-list">
+          <div class="card budgets-list">
             ${budgetsPreview.map((b) => `
               <div class="budget-item">
                 <div class="row1"><span>${escapeHtml(b.category)}</span><span class="right">${b.spentFmt} / ${b.limitFmt}</span></div>
@@ -952,26 +1038,25 @@
     $("goBudgetsBtn").addEventListener("click", () => { state.insightsTab = "budgets"; setTab("insights"); });
     document.querySelectorAll("[data-mark-paid]").forEach((btn) => btn.addEventListener("click", () => markBillPaid(btn.getAttribute("data-mark-paid"))));
     wireTxRowActions();
+    refreshIcons();
   }
 
   function txRowHtml(t) {
-    const colorVar = t.type === "income" ? "var(--color-income)" : "var(--color-expense)";
+    const tone = rowTone(t.type);
+    const amountColor = t.type === "income" ? "var(--color-income)" : "var(--color-text)";
     const sign = t.type === "income" ? "+" : "−";
     return `
       <div class="tx-row" data-tx-actions data-id="${t.id}">
+        <div class="icon-avatar" style="background:${tone.bg};color:${tone.color}">${icon(iconFor(t.category))}</div>
         <div class="info">
           <div class="cat">${escapeHtml(t.category)}</div>
           <div class="meta">${dateLabel(t.date)}${t.note ? " · " + escapeHtml(t.note) : ""}</div>
         </div>
-        <div class="amt" style="color:${colorVar}">${sign}${fmtMoney(t.amount)}</div>
+        <div class="amt" style="color:${amountColor}">${sign}${fmtMoney(t.amount)}</div>
         ${t.__actions ? `
         <div class="actions">
-          <button type="button" class="btn btn-icon" data-edit="${t.id}" aria-label="${escapeHtml(L().editAria)}">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"></path></svg>
-          </button>
-          <button type="button" class="btn btn-icon" style="color:var(--color-accent-700)" data-delete="${t.id}" aria-label="${escapeHtml(L().deleteAria)}">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
-          </button>
+          <button type="button" class="btn btn-icon" data-edit="${t.id}" aria-label="${escapeHtml(L().editAria)}">${EDIT_ICON}</button>
+          <button type="button" class="btn btn-icon" style="color:var(--color-expense-700)" data-delete="${t.id}" aria-label="${escapeHtml(L().deleteAria)}">${DELETE_ICON}</button>
         </div>` : ""}
       </div>`;
   }
@@ -997,17 +1082,18 @@
       || `<div class="empty-note">${escapeHtml(l.noResults)}</div>`;
     $("txListContainer").innerHTML = html;
     wireTxRowActions();
+    refreshIcons();
   }
   function renderTransactions() {
     const l = L();
     const months = Array.from(new Set(transactions.map((t) => monthKey(t.date)))).sort().reverse();
     const allCats = CATEGORIES.income.concat(CATEGORIES.expense);
     $("screen").innerHTML = `
-      <h2 style="font-size:22px;margin-bottom:14px">${escapeHtml(l.allTransactions)}</h2>
-      <div class="seg" role="radiogroup" style="margin-bottom:10px">
-        <label class="seg-opt"><input type="radio" name="tx-type-filter" value="all" ${state.txFilterType === "all" ? "checked" : ""}>${escapeHtml(l.filterAll)}</label>
-        <label class="seg-opt"><input type="radio" name="tx-type-filter" value="income" ${state.txFilterType === "income" ? "checked" : ""}>${escapeHtml(l.incomeLabel)}</label>
-        <label class="seg-opt"><input type="radio" name="tx-type-filter" value="expense" ${state.txFilterType === "expense" ? "checked" : ""}>${escapeHtml(l.expenseLabel)}</label>
+      <h2 class="screen-title">${escapeHtml(l.allTransactions)}</h2>
+      <div class="tabs block" role="radiogroup" style="margin-bottom:12px">
+        <label class="tab-opt"><input type="radio" name="tx-type-filter" value="all" ${state.txFilterType === "all" ? "checked" : ""}>${escapeHtml(l.filterAll)}</label>
+        <label class="tab-opt"><input type="radio" name="tx-type-filter" value="income" ${state.txFilterType === "income" ? "checked" : ""}>${escapeHtml(l.incomeLabel)}</label>
+        <label class="tab-opt"><input type="radio" name="tx-type-filter" value="expense" ${state.txFilterType === "expense" ? "checked" : ""}>${escapeHtml(l.expenseLabel)}</label>
       </div>
       <div class="filter-row">
         <select class="input" id="txFilterMonth">
@@ -1020,13 +1106,14 @@
         </select>
       </div>
       <input class="input" style="margin-bottom:12px" id="txSearchInput" placeholder="${escapeHtml(l.searchPlaceholder)}" value="${escapeHtml(state.txSearch)}">
-      <div class="tx-list" id="txListContainer"></div>
+      <div class="list-card" id="txListContainer"></div>
     `;
     renderTxListOnly();
     document.querySelectorAll('input[name="tx-type-filter"]').forEach((r) => r.addEventListener("change", (e) => { state.txFilterType = e.target.value; renderTxListOnly(); }));
     $("txFilterMonth").addEventListener("change", (e) => { state.txFilterMonth = e.target.value; renderTxListOnly(); });
     $("txFilterCategory").addEventListener("change", (e) => { state.txFilterCategory = e.target.value; renderTxListOnly(); });
     $("txSearchInput").addEventListener("input", (e) => { state.txSearch = e.target.value; renderTxListOnly(); });
+    refreshIcons();
   }
 
   // ---------- Add / Edit ----------
@@ -1072,20 +1159,22 @@
     const l = L();
     const isEditing = !!state.editingId;
     $("screen").innerHTML = `
-      <h2 style="font-size:22px;margin-bottom:14px">${escapeHtml(isEditing ? l.editTitle : l.addTitle)}</h2>
+      <h2 class="screen-title">${escapeHtml(isEditing ? l.editTitle : l.addTitle)}</h2>
       <form class="add-form" id="addForm">
         <div class="field">
           <label>${escapeHtml(l.typeLabel)}</label>
-          <div class="seg" role="radiogroup">
-            <label class="seg-opt"><input type="radio" name="form-type" value="expense" ${state.formType === "expense" ? "checked" : ""}>${escapeHtml(l.expenseLabel)}</label>
-            <label class="seg-opt"><input type="radio" name="form-type" value="income" ${state.formType === "income" ? "checked" : ""}>${escapeHtml(l.incomeLabel)}</label>
+          <div class="tabs block" role="radiogroup">
+            <label class="tab-opt"><input type="radio" name="form-type" value="expense" ${state.formType === "expense" ? "checked" : ""}>${escapeHtml(l.expenseLabel)}</label>
+            <label class="tab-opt"><input type="radio" name="form-type" value="income" ${state.formType === "income" ? "checked" : ""}>${escapeHtml(l.incomeLabel)}</label>
           </div>
         </div>
         <div class="field">
           <label for="txDateText">${escapeHtml(l.dateLabel)}</label>
           <div class="date-input-wrap">
-            <input class="input" type="text" id="txDateText" inputmode="numeric" placeholder="dd/mm/yyyy" maxlength="10" value="${dateLabel(state.formDate)}" required>
-            <svg class="date-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+            <div class="input-wrap">
+              <input type="text" id="txDateText" inputmode="numeric" placeholder="dd/mm/yyyy" maxlength="10" value="${dateLabel(state.formDate)}" required>
+            </div>
+            <svg class="date-icon icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
             <input class="date-native-overlay" type="date" id="txDateNative" value="${state.formDate}" tabindex="-1" aria-hidden="true">
           </div>
         </div>
@@ -1095,11 +1184,11 @@
         </div>
         <div class="field">
           <label for="txAmount">${escapeHtml(l.amountLabel)}</label>
-          <input class="input" type="number" id="txAmount" min="0" step="0.01" placeholder="0.00" required>
+          <div class="input-wrap"><span class="prefix">฿</span><input type="number" id="txAmount" min="0" step="0.01" placeholder="0.00" required></div>
         </div>
         <div class="field">
           <label for="txNote">${escapeHtml(l.noteLabel)}</label>
-          <input class="input" type="text" id="txNote" placeholder="${escapeHtml(l.notePlaceholder)}">
+          <div class="input-wrap"><input type="text" id="txNote" placeholder="${escapeHtml(l.notePlaceholder)}"></div>
         </div>
         <button type="submit" class="btn btn-primary btn-block">${escapeHtml(isEditing ? l.saveEditBtn : l.saveBtn)}</button>
         ${isEditing ? `<button type="button" class="btn btn-secondary btn-block" id="cancelEditBtn">${escapeHtml(l.cancelEditBtn)}</button>` : ""}
@@ -1158,6 +1247,7 @@
       setTab("transactions");
       if (savedTx) pushTx(savedTx).then(() => syncNow());
     });
+    refreshIcons();
   }
 
   // ---------- Insights ----------
@@ -1165,11 +1255,11 @@
     const l = L();
     const monthOpts = insightsMonthOptions();
     $("screen").innerHTML = `
-      <h2 style="font-size:22px;margin-bottom:12px">${escapeHtml(l.financialOverview)}</h2>
-      <div class="seg" role="radiogroup" style="margin-bottom:12px">
-        <label class="seg-opt"><input type="radio" name="insights-tab" value="budgets" ${state.insightsTab === "budgets" ? "checked" : ""}>${escapeHtml(l.budgetsTab)}</label>
-        <label class="seg-opt"><input type="radio" name="insights-tab" value="breakdown" ${state.insightsTab === "breakdown" ? "checked" : ""}>${escapeHtml(l.categoryTab)}</label>
-        <label class="seg-opt"><input type="radio" name="insights-tab" value="trend" ${state.insightsTab === "trend" ? "checked" : ""}>${escapeHtml(l.trendTab)}</label>
+      <h2 class="screen-title" style="margin-bottom:12px">${escapeHtml(l.financialOverview)}</h2>
+      <div class="tabs block" role="radiogroup" style="margin-bottom:14px">
+        <label class="tab-opt"><input type="radio" name="insights-tab" value="budgets" ${state.insightsTab === "budgets" ? "checked" : ""}>${escapeHtml(l.budgetsTab)}</label>
+        <label class="tab-opt"><input type="radio" name="insights-tab" value="breakdown" ${state.insightsTab === "breakdown" ? "checked" : ""}>${escapeHtml(l.categoryTab)}</label>
+        <label class="tab-opt"><input type="radio" name="insights-tab" value="trend" ${state.insightsTab === "trend" ? "checked" : ""}>${escapeHtml(l.trendTab)}</label>
       </div>
       <div class="filter-row" id="insightsMonthRow" style="${state.insightsTab === "trend" ? "display:none" : ""};margin-bottom:18px">
         <select class="input" id="insightsMonthSelect">
@@ -1193,7 +1283,7 @@
       const rows = computeBudgets(state.insightsMonth);
       body.innerHTML = `<div class="insight-cards">${rows.map((b) => `
         <div class="insight-card">
-          <div class="head"><span class="cat">${escapeHtml(b.category)}</span><span class="status" style="color:${b.statusColor}">${escapeHtml(b.statusLabel)}</span></div>
+          <div class="head"><span class="cat">${escapeHtml(b.category)}</span><span class="badge ${b.badgeClass}">${escapeHtml(b.statusLabel)}</span></div>
           <div class="bar-track"><div class="bar-fill" style="width:${b.pct}%;background:${b.barColor}"></div></div>
           <div class="foot"><span>${b.spentFmt} ${escapeHtml(l.spentSoFar)}</span><span>${escapeHtml(l.budgetOf)} ${b.limitFmt}</span></div>
         </div>`).join("")}</div>`;
@@ -1203,29 +1293,32 @@
       const listHtml = rows.map((d) => `
           <div class="breakdown-row">
             <div class="row1"><span><span class="legend-dot" style="background:${d.color}"></span>${escapeHtml(d.category)}</span><span class="right">${d.totalFmt} · ${Math.round(d.sharePct)}%</span></div>
-            <div class="breakdown-bar-track"><div class="bar-fill" style="width:${d.pct}%;background:${d.color}"></div></div>
+            <div class="bar-track"><div class="bar-fill" style="width:${d.pct}%;background:${d.color}"></div></div>
           </div>`).join("") || `<div class="empty-note">${escapeHtml(l.noExpensesMonth)}</div>`;
       body.innerHTML = `
-        <div style="font-size:12px;color:var(--color-muted);margin-bottom:12px">${escapeHtml(l.expenseByCategory)} — ${escapeHtml(monthLbl)}</div>
+        <div style="font-size:12px;color:var(--color-muted);margin-bottom:14px">${escapeHtml(l.expenseByCategory)} — ${escapeHtml(monthLbl)}</div>
         ${rows.length ? `
         <div class="breakdown-columns">
           <div style="display:flex;justify-content:center;margin-bottom:16px">${pieChartSvg(rows)}</div>
-          <div>${listHtml}</div>
+          <div class="card" style="padding:16px">${listHtml}</div>
         </div>` : listHtml}
       `;
     } else {
       const trend = computeTrend();
       body.innerHTML = trend.length ? `
         <div class="trend-legend">
-          <span><span class="swatch" style="background:var(--color-text)"></span>${escapeHtml(l.incomeLabel)}</span>
+          <span><span class="swatch" style="background:var(--color-income)"></span>${escapeHtml(l.incomeLabel)}</span>
           <span><span class="swatch" style="background:var(--color-accent)"></span>${escapeHtml(l.expenseLabel)}</span>
         </div>
-        <div class="trend-chart">
-          ${trend.map((m) => `<div class="trend-col"><div class="trend-bars"><div class="bar" style="background:var(--color-text);height:${m.incomeH}px"></div><div class="bar" style="background:var(--color-accent);height:${m.expenseH}px"></div></div></div>`).join("")}
+        <div class="trend-chart-card">
+          <div class="trend-chart">
+            ${trend.map((m) => `<div class="trend-col"><div class="trend-bars"><div class="bar" style="background:var(--color-income);height:${m.incomeH}px"></div><div class="bar" style="background:var(--color-accent);height:${m.expenseH}px"></div></div></div>`).join("")}
+          </div>
+          <div class="trend-labels">${trend.map((m) => `<div>${escapeHtml(m.label)}</div>`).join("")}</div>
         </div>
-        <div class="trend-labels">${trend.map((m) => `<div>${escapeHtml(m.label)}</div>`).join("")}</div>
       ` : `<div class="empty-note">${escapeHtml(l.noResults)}</div>`;
     }
+    refreshIcons();
   }
 
   // ---------- Budgets management ----------
@@ -1238,7 +1331,7 @@
         </div>
         <div class="row-actions">
           <button type="button" class="btn btn-icon" data-edit-budget="${b.id}" aria-label="${escapeHtml(L().editAria)}">${EDIT_ICON}</button>
-          <button type="button" class="btn btn-icon" style="color:var(--color-accent-700)" data-delete-budget="${b.id}" aria-label="${escapeHtml(L().deleteAria)}">${DELETE_ICON}</button>
+          <button type="button" class="btn btn-icon" style="color:var(--color-expense-700)" data-delete-budget="${b.id}" aria-label="${escapeHtml(L().deleteAria)}">${DELETE_ICON}</button>
         </div>
       </div>`;
   }
@@ -1323,7 +1416,7 @@
         <div class="amt">${fmtMoney(b.amount)}</div>
         <div class="row-actions">
           <button type="button" class="btn btn-icon" data-edit-bill="${b.id}" aria-label="${escapeHtml(L().editAria)}">${EDIT_ICON}</button>
-          <button type="button" class="btn btn-icon" style="color:var(--color-accent-700)" data-delete-bill="${b.id}" aria-label="${escapeHtml(L().deleteAria)}">${DELETE_ICON}</button>
+          <button type="button" class="btn btn-icon" style="color:var(--color-expense-700)" data-delete-bill="${b.id}" aria-label="${escapeHtml(L().deleteAria)}">${DELETE_ICON}</button>
         </div>
       </div>`;
   }
@@ -1402,29 +1495,35 @@
   }
 
   // ---------- Savings goals management ----------
-  function goalCardHtml(g) {
+  function goalCardHtml(g, idx) {
     const l = L();
     const pct = Math.min(100, Math.round((g.saved / g.target) * 100));
     const complete = g.saved >= g.target;
+    const tone = GOAL_TONES[idx % GOAL_TONES.length];
+    const gIcon = GOAL_ICONS[idx % GOAL_ICONS.length];
     return `
-      <div class="insight-card">
-        <div class="head">
-          <span class="cat">${escapeHtml(g.name)}</span>
-          <div class="row-actions">
+      <div class="goal-card">
+        <div class="top">
+          <div class="icon-avatar" style="background:${tone.bg};color:${tone.color}">${icon(gIcon)}</div>
+          <div style="flex:1;min-width:0">
+            <div class="name">${escapeHtml(g.name)}</div>
+            <div class="progress-label">${fmtMoney(g.saved)} ${escapeHtml(l.ofLabel || "/")} ${fmtMoney(g.target)}</div>
+          </div>
+          <span class="badge ${complete ? "badge-income" : "badge-brand"}">${complete ? escapeHtml(l.goalComplete) : pct + "%"}</span>
+          <div class="goal-card-actions">
             <button type="button" class="btn btn-icon" data-contribute-goal="${g.id}" aria-label="${escapeHtml(l.contributeAria)}">${PLUS_ICON}</button>
             <button type="button" class="btn btn-icon" data-edit-goal="${g.id}" aria-label="${escapeHtml(l.editAria)}">${EDIT_ICON}</button>
-            <button type="button" class="btn btn-icon" style="color:var(--color-accent-700)" data-delete-goal="${g.id}" aria-label="${escapeHtml(l.deleteAria)}">${DELETE_ICON}</button>
+            <button type="button" class="btn btn-icon" style="color:var(--color-expense-700)" data-delete-goal="${g.id}" aria-label="${escapeHtml(l.deleteAria)}">${DELETE_ICON}</button>
           </div>
         </div>
-        <div class="bar-track"><div class="bar-fill" style="width:${pct}%;background:${complete ? "var(--color-income)" : "var(--color-accent)"}"></div></div>
-        <div class="foot"><span>${fmtMoney(g.saved)} / ${fmtMoney(g.target)}</span><span>${complete ? escapeHtml(l.goalComplete) : pct + "%"}</span></div>
+        <div class="bar-track"><div class="bar-fill" style="width:${pct}%;background:${complete ? "var(--color-income)" : tone.color}"></div></div>
         ${state.goalContributeId === g.id ? goalContributeFormHtml(g) : ""}
       </div>`;
   }
   function goalContributeFormHtml() {
     const l = L();
     return `
-      <div class="inline-form" style="margin:12px 0 0">
+      <div class="inline-form" style="margin:14px 0 0">
         <div class="field">
           <label>${escapeHtml(l.contributeAmountLabel)}</label>
           <input class="input" type="number" id="goalContributeInput" min="0" step="0.01">
@@ -1521,46 +1620,36 @@
     const name = currentUser ? (meta.full_name || meta.name || currentUser.email || "") : l.notSignedIn;
 
     $("screen").innerHTML = `
-      <h2 style="font-size:22px;margin-bottom:22px">${escapeHtml(l.settingsTitle)}</h2>
+      <h2 class="screen-title" style="margin-bottom:22px">${escapeHtml(l.settingsTitle)}</h2>
       <div class="settings-block">
 
         <div class="settings-columns">
           <div class="settings-col">
             <div class="profile-row">
-              ${avatarUrl ? `<img class="avatar" src="${escapeHtml(avatarUrl)}" alt="">` : `<div class="avatar">${escapeHtml((name || "?").slice(0, 1).toUpperCase())}</div>`}
+              ${avatarUrl ? `<img class="avatar" src="${escapeHtml(avatarUrl)}" alt="">` : `<div class="avatar">${currentUser ? escapeHtml((name || "?").slice(0, 1).toUpperCase()) : icon("user")}</div>`}
               <div>
                 <div class="profile-name">${escapeHtml(name)}</div>
                 <div class="profile-sub">${escapeHtml(currentUser ? l.personalAccount : "")}</div>
               </div>
-              <button type="button" class="btn btn-secondary" id="authBtn">${escapeHtml(currentUser ? l.signOutBtn : l.signInGoogle)}</button>
+              <button type="button" class="btn btn-secondary btn-sm" id="authBtn">${escapeHtml(currentUser ? l.signOutBtn : l.signInGoogle)}</button>
             </div>
 
             <div>
               <div class="settings-section-label">${escapeHtml(l.languageSection)}</div>
-              <div class="seg" role="radiogroup">
-                <label class="seg-opt"><input type="radio" name="lang-switch" value="th" ${state.lang === "th" ? "checked" : ""}>ไทย</label>
-                <label class="seg-opt"><input type="radio" name="lang-switch" value="en" ${state.lang === "en" ? "checked" : ""}>English</label>
+              <div class="tabs block" role="radiogroup">
+                <label class="tab-opt"><input type="radio" name="lang-switch" value="th" ${state.lang === "th" ? "checked" : ""}>ไทย</label>
+                <label class="tab-opt"><input type="radio" name="lang-switch" value="en" ${state.lang === "en" ? "checked" : ""}>English</label>
               </div>
             </div>
 
             <div>
               <div class="settings-section-label">${escapeHtml(l.displaySection)}</div>
-              <div class="toggle-row">
-                <span style="font-size:14px">${escapeHtml(l.darkModeBtn)}</span>
-                <button type="button" class="toggle-switch ${state.dark ? "on" : ""}" id="darkSwitch"><span class="thumb"></span></button>
-              </div>
-              <div class="scheme-grid">
-                ${SCHEME_ORDER.map((s) => `
-                  <label class="scheme-opt ${state.scheme === s ? "active" : ""}" style="--swatch:${SCHEMES[s][0]}">
-                    <input type="radio" name="color-scheme" value="${s}" ${state.scheme === s ? "checked" : ""}>
-                    <span class="dot"></span>
-                    <span class="lbl">${escapeHtml(l["color" + s.charAt(0).toUpperCase() + s.slice(1)])}</span>
-                  </label>`).join("")}
-                <label class="scheme-opt ${state.scheme === "custom" ? "active" : ""}" style="--swatch:${state.customColor}">
-                  <input type="color" id="customColorPicker" value="${state.customColor}">
-                  <span class="dot"></span>
-                  <span class="lbl">${escapeHtml(l.colorCustom)}</span>
-                </label>
+              <div class="list-card">
+                <div class="toggle-row">
+                  <div class="icon-avatar sm" style="background:var(--color-accent-tint);color:var(--color-accent)">${icon("moon", 'width="15" height="15"')}</div>
+                  <span class="label">${escapeHtml(l.darkModeBtn)}</span>
+                  <button type="button" class="switch ${state.dark ? "on" : ""}" id="darkSwitch"><span class="thumb"></span></button>
+                </div>
               </div>
             </div>
           </div>
@@ -1578,7 +1667,7 @@
             ${deferredInstallPrompt ? `
             <div>
               <button type="button" class="btn btn-primary btn-block" id="installAppBtn">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right:6px"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                ${icon("download-cloud")}
                 ${escapeHtml(l.installAppBtn)}
               </button>
             </div>` : ""}
@@ -1587,11 +1676,11 @@
               <div class="settings-section-label">${escapeHtml(l.dataSection)}</div>
               <div style="display:flex;flex-direction:column;gap:8px">
                 <button type="button" class="btn btn-secondary btn-block" id="exportCsvBtn">
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                  ${icon("download")}
                   ${escapeHtml(l.exportCsvBtn)}
                 </button>
                 <button type="button" class="btn btn-secondary btn-block" id="exportJsonBtn">
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                  ${icon("download")}
                   ${escapeHtml(l.exportJsonBtn)}
                 </button>
               </div>
@@ -1602,10 +1691,10 @@
         <div>
           <div class="section-add-row">
             <div class="settings-section-label" style="margin:0">${escapeHtml(l.budgetsSection)}</div>
-            <button type="button" class="btn btn-ghost" id="addBudgetBtn" style="padding:0;font-size:12px">${escapeHtml(l.addBudgetBtn)}</button>
+            <button type="button" class="btn btn-ghost" id="addBudgetBtn">${escapeHtml(l.addBudgetBtn)}</button>
           </div>
           <div id="budgetFormSlot">${budgetFormHtml()}</div>
-          <div class="budgets-manage-list">
+          <div class="list-card">
             ${budgets.map(budgetRowHtml).join("") || `<div class="empty-note">${escapeHtml(l.noBudgets)}</div>`}
           </div>
         </div>
@@ -1613,10 +1702,10 @@
         <div>
           <div class="section-add-row">
             <div class="settings-section-label" style="margin:0">${escapeHtml(l.billsSection)}</div>
-            <button type="button" class="btn btn-ghost" id="addBillBtn" style="padding:0;font-size:12px">${escapeHtml(l.addBillBtn)}</button>
+            <button type="button" class="btn btn-ghost" id="addBillBtn">${escapeHtml(l.addBillBtn)}</button>
           </div>
           <div id="billFormSlot">${billFormHtml()}</div>
-          <div class="bills-list">
+          <div class="list-card">
             ${bills.map(billRowHtml).join("") || `<div class="empty-note">${escapeHtml(l.noBills)}</div>`}
           </div>
         </div>
@@ -1624,7 +1713,7 @@
         <div>
           <div class="section-add-row">
             <div class="settings-section-label" style="margin:0">${escapeHtml(l.goalsSection)}</div>
-            <button type="button" class="btn btn-ghost" id="addGoalBtn" style="padding:0;font-size:12px">${escapeHtml(l.addGoalBtn)}</button>
+            <button type="button" class="btn btn-ghost" id="addGoalBtn">${escapeHtml(l.addGoalBtn)}</button>
           </div>
           <div id="goalFormSlot">${state.goalEditId ? goalFormHtml() : ""}</div>
           <div class="insight-cards" style="padding-bottom:0">
@@ -1639,15 +1728,6 @@
     $("authBtn").addEventListener("click", () => { currentUser ? signOutUser() : signInWithGoogle(); });
     document.querySelectorAll('input[name="lang-switch"]').forEach((r) => r.addEventListener("change", (e) => { state.lang = e.target.value; saveSettings(); renderChrome(); renderScreen(); }));
     $("darkSwitch").addEventListener("click", () => { state.dark = !state.dark; saveSettings(); applyTheme(); renderScreen(); });
-    document.querySelectorAll('input[name="color-scheme"]').forEach((r) => r.addEventListener("change", (e) => { state.scheme = e.target.value; saveSettings(); applyTheme(); renderScreen(); }));
-    $("customColorPicker").addEventListener("change", (e) => {
-      state.customColor = e.target.value;
-      state.scheme = "custom";
-      SCHEMES.custom = computeCustomScheme(state.customColor);
-      saveSettings();
-      applyTheme();
-      renderScreen();
-    });
     $("syncNowBtn").addEventListener("click", syncNow);
     if ($("installAppBtn")) $("installAppBtn").addEventListener("click", function () {
       if (!deferredInstallPrompt) return;
@@ -1693,6 +1773,7 @@
     if ($("cancelGoalFormBtn")) $("cancelGoalFormBtn").addEventListener("click", () => { state.goalEditId = null; renderSettings(); });
     if ($("saveContributeBtn")) $("saveContributeBtn").addEventListener("click", saveContribution);
     if ($("cancelContributeBtn")) $("cancelContributeBtn").addEventListener("click", () => { state.goalContributeId = null; renderSettings(); });
+    refreshIcons();
   }
 
   // ---------- tab routing ----------
@@ -1713,6 +1794,7 @@
   loadFromStorage();
   applyTheme();
   renderScreen();
+  refreshIcons();
 
   document.querySelectorAll("#tabbar button").forEach((btn) => btn.addEventListener("click", () => {
     if (btn.getAttribute("data-tab") === "add") resetForm();

@@ -23,7 +23,7 @@ Personal income & expense tracker with Google sign-in, cross-device sync, budget
 - **Recurring bills** — see what's due in the next 7 days on the home screen and mark it paid in one tap, which logs the transaction for you
 - **Savings goals** — set a target, add funds over time, watch the progress bar fill
 - **Insights** — budget progress, a category breakdown with a donut chart, and a 6-month income/expense trend
-- **10 accent colors + a custom color picker**, light/dark mode
+- **Light/dark mode**
 - **Thai / English** interface
 - **Installable PWA** — add to your home screen, keeps working offline
 - **Responsive** — mobile-first bottom nav, wider multi-column layout on desktop
