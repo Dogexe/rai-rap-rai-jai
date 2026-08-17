@@ -444,7 +444,9 @@
     billDayLabel: ["วันที่ต้องจ่าย (1-31)", "Due day (1-31)"], saveBillBtn: ["บันทึกรายการ", "Save bill"],
     noBills: ["ยังไม่มีรายการที่ต้องจ่ายประจำ", "No recurring bills yet"], toastBillSaved: ["บันทึกรายการแล้ว", "Bill saved"],
     toastBillDeleted: ["ลบรายการแล้ว", "Bill deleted"],
-    vsLastMonth: ["จากเดือนที่แล้ว", "vs last month"], ofLabel: ["จาก", "of"], spentToday: ["ใช้จ่ายวันนี้", "Spent today"]
+    vsLastMonth: ["จากเดือนที่แล้ว", "vs last month"], ofLabel: ["จาก", "of"], spentToday: ["ใช้จ่ายวันนี้", "Spent today"],
+    csvDate: ["วันที่", "Date"], csvType: ["ประเภท", "Type"], csvCategory: ["หมวดหมู่", "Category"],
+    csvNote: ["รายละเอียด", "Note"], csvAmount: ["จำนวนเงิน", "Amount"]
   };
   const LANGS = { th: {}, en: {} };
   for (const k in STRINGS) { LANGS.th[k] = STRINGS[k][0]; LANGS.en[k] = STRINGS[k][1]; }
@@ -1116,6 +1118,10 @@
   function renderTransactions() {
     const l = L();
     const years = availableYears();
+    // If the previously-picked year no longer has any data behind it (e.g.
+    // its only transactions were deleted), fall back to "all" rather than
+    // leaving the select pointing at an option that no longer exists.
+    if (state.txFilterYear !== "all" && !years.includes(state.txFilterYear)) state.txFilterYear = "all";
     const allCats = CATEGORIES.income.concat(CATEGORIES.expense);
     $("screen").innerHTML = `
       <h2 class="screen-title">${escapeHtml(l.allTransactions)}</h2>
@@ -1295,6 +1301,10 @@
   function renderInsights() {
     const l = L();
     const years = availableYears();
+    // Insights always needs one concrete year (unlike Transactions, it has
+    // no "all" option); fall back to the current year if the previously
+    // picked one no longer has any data behind it.
+    if (!years.includes(state.insightsYear)) state.insightsYear = String(new Date().getFullYear());
     $("screen").innerHTML = `
       <h2 class="screen-title" style="margin-bottom:12px">${escapeHtml(l.financialOverview)}</h2>
       <div class="tabs block" role="radiogroup" style="margin-bottom:14px">
@@ -1741,7 +1751,8 @@
       });
     });
     $("exportCsvBtn").addEventListener("click", function () {
-      const header = ["วันที่", "ประเภท", "หมวดหมู่", "รายละเอียด", "จำนวนเงิน"];
+      const l = L();
+      const header = [l.csvDate, l.csvType, l.csvCategory, l.csvNote, l.csvAmount];
       const rows = transactions.slice().sort((a, b) => a.date.localeCompare(b.date)).map((t) =>
         [t.date, t.type === "income" ? L().incomeLabel : L().expenseLabel, t.category, t.note || "", t.amount].map((v) => '"' + String(v).replace(/"/g, '""') + '"').join(","));
       const blob = new Blob(["﻿" + header.join(",") + "\n" + rows.join("\n")], { type: "text/csv" });
