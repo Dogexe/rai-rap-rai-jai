@@ -2,8 +2,6 @@
 
 <img src="icons/icon-512.png" width="84" height="84" alt="App icon" />
 
-# รายรับ-รายจ่าย · Income & Expenses
-
 Personal income & expense tracker with Google sign-in, cross-device sync, budgets, recurring bills, and savings goals — installable as a PWA.
 
 **[Open the app →](https://dogexe.github.io/whereisit/)**
