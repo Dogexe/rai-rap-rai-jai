@@ -6,7 +6,7 @@
 
 Personal income & expense tracker with Google sign-in, cross-device sync, budgets, recurring bills, and savings goals — installable as a PWA.
 
-**[Open the app →](https://dogexe.github.io/rai-rap-rai-jai/)**
+**[Open the app →](https://dogexe.github.io/whereisit/)**
 
 ![Made with JavaScript](https://img.shields.io/badge/JavaScript-F7DF1E?style=flat-square&logo=javascript&logoColor=black)
 ![Supabase](https://img.shields.io/badge/Supabase-3ECF8E?style=flat-square&logo=supabase&logoColor=white)
