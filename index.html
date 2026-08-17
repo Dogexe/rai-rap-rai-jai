@@ -370,7 +370,7 @@
       appTitle: "รายรับ-รายจ่าย",
       darkModeBtn: "โหมดมืด", overview: "ภาพรวม", balanceLabel: "คงเหลือ", incomeLabel: "รายรับ", expenseLabel: "รายจ่าย",
       recentTx: "รายการล่าสุด", addShort: "+ เพิ่มรายการ", budgetsThisMonth: "งบประมาณเดือนนี้", seeAll: "ดูทั้งหมด",
-      allTransactions: "รายการทั้งหมด", filterAll: "ทั้งหมด", allMonths: "ทุกเดือน", allCategories: "ทุกหมวดหมู่",
+      allTransactions: "รายการทั้งหมด", filterAll: "ทั้งหมด", allMonths: "ทุกเดือน", allYears: "ทุกปี", allCategories: "ทุกหมวดหมู่",
       searchPlaceholder: "ค้นหารายละเอียด...", noResults: "ไม่พบรายการ", editAria: "แก้ไข", deleteAria: "ลบ",
       addTitle: "เพิ่มรายการ", editTitle: "แก้ไขรายการ", saveBtn: "บันทึกรายการ", saveEditBtn: "บันทึกการแก้ไข",
       typeLabel: "ประเภท", dateLabel: "วันที่", categoryLabel: "หมวดหมู่", amountLabel: "จำนวนเงิน (บาท)",
@@ -409,7 +409,7 @@
       appTitle: "Income & Expenses",
       darkModeBtn: "Dark mode", overview: "Overview", balanceLabel: "Balance", incomeLabel: "Income", expenseLabel: "Expense",
       recentTx: "Recent activity", addShort: "+ Add transaction", budgetsThisMonth: "This month's budgets", seeAll: "See all",
-      allTransactions: "All Transactions", filterAll: "All", allMonths: "All months", allCategories: "All categories",
+      allTransactions: "All Transactions", filterAll: "All", allMonths: "All months", allYears: "All years", allCategories: "All categories",
       searchPlaceholder: "Search notes...", noResults: "No transactions found", editAria: "Edit", deleteAria: "Delete",
       addTitle: "Add transaction", editTitle: "Edit transaction", saveBtn: "Save transaction", saveEditBtn: "Save changes",
       typeLabel: "Type", dateLabel: "Date", categoryLabel: "Category", amountLabel: "Amount (THB)",
@@ -479,8 +479,9 @@
   // ---------- state ----------
   const state = {
     lang: "th", dark: false,
-    tab: "home", insightsTab: "budgets", insightsMonth: new Date().toISOString().slice(0, 7),
-    txFilterType: "all", txFilterMonth: "all", txFilterCategory: "all", txSearch: "",
+    tab: "home", insightsTab: "budgets",
+    insightsMonthNum: new Date().toISOString().slice(5, 7), insightsYear: String(new Date().getFullYear()),
+    txFilterType: "all", txFilterMonthNum: "all", txFilterYear: "all", txFilterCategory: "all", txSearch: "",
     formType: "expense", formDate: new Date().toISOString().slice(0, 10),
     formCategory: CATEGORIES.expense[0], editingId: null, categoryManual: false,
     budgetEditId: null, billEditId: null, goalEditId: null, goalContributeId: null
@@ -892,11 +893,17 @@
     }).join("");
     return `<svg width="140" height="140" viewBox="0 0 140 140">${circles}</svg>`;
   }
-  function insightsMonthOptions() {
-    const keys = new Set(transactions.map((t) => monthKey(t.date)));
-    keys.add(state.insightsMonth);
-    keys.add(new Date().toISOString().slice(0, 7));
-    return Array.from(keys).sort().reverse();
+  const MONTH_NUMS = ["01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12"];
+  function monthOnlyLabel(mm) {
+    return new Date(2000, parseInt(mm, 10) - 1, 1).toLocaleDateString(state.lang === "en" ? "en-US" : "th-TH", { month: "short" });
+  }
+  // Thai locale conventionally displays the Buddhist Era year (Gregorian + 543);
+  // dates/keys stay Gregorian internally, this only affects what's shown.
+  function yearLabel(yyyy) { return state.lang === "en" ? yyyy : String(Number(yyyy) + 543); }
+  function availableYears() {
+    const years = new Set(transactions.map((t) => t.date.slice(0, 4)));
+    years.add(String(new Date().getFullYear()));
+    return Array.from(years).sort().reverse();
   }
   function computeTrend() {
     const byMonth = {};
@@ -1076,7 +1083,8 @@
   function filteredTxList() {
     let rows = transactions.slice();
     if (state.txFilterType !== "all") rows = rows.filter((t) => t.type === state.txFilterType);
-    if (state.txFilterMonth !== "all") rows = rows.filter((t) => monthKey(t.date) === state.txFilterMonth);
+    if (state.txFilterMonthNum !== "all") rows = rows.filter((t) => t.date.slice(5, 7) === state.txFilterMonthNum);
+    if (state.txFilterYear !== "all") rows = rows.filter((t) => t.date.slice(0, 4) === state.txFilterYear);
     if (state.txFilterCategory !== "all") rows = rows.filter((t) => t.category === state.txFilterCategory);
     const q = state.txSearch.trim().toLowerCase();
     if (q) rows = rows.filter((t) => (t.note || "").toLowerCase().includes(q) || t.category.toLowerCase().includes(q));
@@ -1093,7 +1101,7 @@
   }
   function renderTransactions() {
     const l = L();
-    const months = Array.from(new Set(transactions.map((t) => monthKey(t.date)))).sort().reverse();
+    const years = availableYears();
     const allCats = CATEGORIES.income.concat(CATEGORIES.expense);
     $("screen").innerHTML = `
       <h2 class="screen-title">${escapeHtml(l.allTransactions)}</h2>
@@ -1105,8 +1113,14 @@
       <div class="filter-row">
         <select class="input" id="txFilterMonth">
           <option value="all">${escapeHtml(l.allMonths)}</option>
-          ${months.map((m) => `<option value="${m}" ${state.txFilterMonth === m ? "selected" : ""}>${monthLabel(m)}</option>`).join("")}
+          ${MONTH_NUMS.map((m) => `<option value="${m}" ${state.txFilterMonthNum === m ? "selected" : ""}>${monthOnlyLabel(m)}</option>`).join("")}
         </select>
+        <select class="input" id="txFilterYear">
+          <option value="all">${escapeHtml(l.allYears)}</option>
+          ${years.map((y) => `<option value="${y}" ${state.txFilterYear === y ? "selected" : ""}>${yearLabel(y)}</option>`).join("")}
+        </select>
+      </div>
+      <div class="filter-row">
         <select class="input" id="txFilterCategory">
           <option value="all">${escapeHtml(l.allCategories)}</option>
           ${allCats.map((c) => `<option value="${escapeHtml(c)}" ${state.txFilterCategory === c ? "selected" : ""}>${escapeHtml(c)}</option>`).join("")}
@@ -1117,7 +1131,8 @@
     `;
     renderTxListOnly();
     document.querySelectorAll('input[name="tx-type-filter"]').forEach((r) => r.addEventListener("change", (e) => { state.txFilterType = e.target.value; renderTxListOnly(); }));
-    $("txFilterMonth").addEventListener("change", (e) => { state.txFilterMonth = e.target.value; renderTxListOnly(); });
+    $("txFilterMonth").addEventListener("change", (e) => { state.txFilterMonthNum = e.target.value; renderTxListOnly(); });
+    $("txFilterYear").addEventListener("change", (e) => { state.txFilterYear = e.target.value; renderTxListOnly(); });
     $("txFilterCategory").addEventListener("change", (e) => { state.txFilterCategory = e.target.value; renderTxListOnly(); });
     $("txSearchInput").addEventListener("input", (e) => { state.txSearch = e.target.value; renderTxListOnly(); });
     refreshIcons();
@@ -1260,7 +1275,7 @@
   // ---------- Insights ----------
   function renderInsights() {
     const l = L();
-    const monthOpts = insightsMonthOptions();
+    const years = availableYears();
     $("screen").innerHTML = `
       <h2 class="screen-title" style="margin-bottom:12px">${escapeHtml(l.financialOverview)}</h2>
       <div class="tabs block" role="radiogroup" style="margin-bottom:14px">
@@ -1270,7 +1285,10 @@
       </div>
       <div class="filter-row" id="insightsMonthRow" style="${state.insightsTab === "trend" ? "display:none" : ""};margin-bottom:18px">
         <select class="input" id="insightsMonthSelect">
-          ${monthOpts.map((m) => `<option value="${m}" ${state.insightsMonth === m ? "selected" : ""}>${monthLabel(m)}</option>`).join("")}
+          ${MONTH_NUMS.map((m) => `<option value="${m}" ${state.insightsMonthNum === m ? "selected" : ""}>${monthOnlyLabel(m)}</option>`).join("")}
+        </select>
+        <select class="input" id="insightsYearSelect">
+          ${years.map((y) => `<option value="${y}" ${state.insightsYear === y ? "selected" : ""}>${yearLabel(y)}</option>`).join("")}
         </select>
       </div>
       <div id="insightsBody"></div>
@@ -1281,13 +1299,15 @@
       $("insightsMonthRow").style.display = state.insightsTab === "trend" ? "none" : "";
       renderInsightsBody();
     }));
-    $("insightsMonthSelect").addEventListener("change", (e) => { state.insightsMonth = e.target.value; renderInsightsBody(); });
+    $("insightsMonthSelect").addEventListener("change", (e) => { state.insightsMonthNum = e.target.value; renderInsightsBody(); });
+    $("insightsYearSelect").addEventListener("change", (e) => { state.insightsYear = e.target.value; renderInsightsBody(); });
   }
   function renderInsightsBody() {
     const l = L();
     const body = $("insightsBody");
+    const targetMonthKey = state.insightsYear + "-" + state.insightsMonthNum;
     if (state.insightsTab === "budgets") {
-      const rows = computeBudgets(state.insightsMonth);
+      const rows = computeBudgets(targetMonthKey);
       body.innerHTML = `<div class="insight-cards">${rows.map((b) => `
         <div class="insight-card">
           <div class="head"><span class="cat">${escapeHtml(b.category)}</span><span class="badge ${b.badgeClass}">${escapeHtml(b.statusLabel)}</span></div>
@@ -1295,8 +1315,8 @@
           <div class="foot"><span>${b.spentFmt} ${escapeHtml(l.spentSoFar)}</span><span>${escapeHtml(l.budgetOf)} ${b.limitFmt}</span></div>
         </div>`).join("")}</div>`;
     } else if (state.insightsTab === "breakdown") {
-      const rows = computeBreakdown(state.insightsMonth);
-      const monthLbl = monthLabel(state.insightsMonth);
+      const rows = computeBreakdown(targetMonthKey);
+      const monthLbl = monthLabel(targetMonthKey);
       const listHtml = rows.map((d) => `
           <div class="breakdown-row">
             <div class="row1"><span><span class="legend-dot" style="background:${d.color}"></span>${escapeHtml(d.category)}</span><span class="right">${d.totalFmt} · ${Math.round(d.sharePct)}%</span></div>
