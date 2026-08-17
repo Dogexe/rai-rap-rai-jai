@@ -56,6 +56,12 @@
   .screen { flex: 1; max-width: 480px; margin: 0 auto; width: 100%; padding: 20px 20px 100px; box-sizing: border-box; }
   .screen-title { font-size: 22px; margin: 4px 0 16px; }
 
+  /* — shared card base (list/insight/goal/stat/etc. cards all sit on this) — */
+  .card, .list-card, .insight-card, .trend-chart-card, .sync-box, .goal-card,
+  .stat-card, .today-spend-card, .inline-form {
+    background: var(--color-card); border-radius: var(--radius-lg); box-shadow: var(--shadow-sm);
+  }
+
   /* — buttons — */
   .btn {
     display: inline-flex; align-items: center; justify-content: center; gap: 7px;
@@ -118,8 +124,7 @@
   /* — icon avatar + list rows — */
   .icon-avatar { width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
   .icon-avatar.sm { width: 30px; height: 30px; }
-  .card { background: var(--color-card); border-radius: var(--radius-lg); box-shadow: var(--shadow-sm); }
-  .list-card { background: var(--color-card); border-radius: var(--radius-lg); box-shadow: var(--shadow-sm); padding: 4px 14px; }
+  .list-card { padding: 4px 14px; }
 
   /* — home — */
   .today-label { font-size: 13px; color: var(--color-muted); }
@@ -131,13 +136,13 @@
   .hero-card .delta-pill { font-size: 13px; font-weight: 600; background: rgba(255,255,255,0.18); border-radius: var(--radius-pill); padding: 6px 12px; white-space: nowrap; }
 
   .stat-row { display: flex; gap: 12px; margin-top: 12px; }
-  .stat-card { flex: 1; background: var(--color-card); border-radius: var(--radius-lg); box-shadow: var(--shadow-sm); padding: 14px 16px; min-width: 0; }
+  .stat-card { flex: 1; padding: 14px 16px; min-width: 0; }
   .stat-card .head { display: flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 600; color: var(--color-muted); }
   .stat-card .head .icon { width: 15px; height: 15px; }
   .stat-card .value { font-size: 20px; font-weight: 700; margin-top: 6px; letter-spacing: -0.02em; }
   .stat-card .delta { font-size: 12px; font-weight: 600; margin-top: 4px; }
 
-  .today-spend-card { display: flex; align-items: center; gap: 12px; background: var(--color-card); border-radius: var(--radius-lg); box-shadow: var(--shadow-sm); padding: 12px 16px; margin-top: 12px; }
+  .today-spend-card { display: flex; align-items: center; gap: 12px; padding: 12px 16px; margin-top: 12px; }
   .today-spend-card .label { font-size: 14px; font-weight: 500; color: var(--color-text); }
   .today-spend-card .value { margin-left: auto; font-size: 16px; font-weight: 700; flex-shrink: 0; }
 
@@ -173,7 +178,7 @@
 
   /* — insights — */
   .insight-cards { display: flex; flex-direction: column; gap: 14px; padding-bottom: 16px; }
-  .insight-card { background: var(--color-card); border-radius: var(--radius-lg); box-shadow: var(--shadow-sm); padding: 16px; }
+  .insight-card { padding: 16px; }
   .insight-card .head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; gap: 8px; }
   .insight-card .head .cat { font-weight: 600; font-size: 14px; }
   .insight-card .foot { display: flex; justify-content: space-between; font-size: 12px; color: var(--color-muted); margin-top: 8px; }
@@ -186,7 +191,7 @@
 
   .trend-legend { display: flex; gap: 16px; font-size: 12px; color: var(--color-muted); margin-bottom: 14px; }
   .trend-legend .swatch { display: inline-block; width: 8px; height: 8px; border-radius: 2px; margin-right: 6px; vertical-align: middle; }
-  .trend-chart-card { background: var(--color-card); border-radius: var(--radius-lg); box-shadow: var(--shadow-sm); padding: 20px 16px 8px; }
+  .trend-chart-card { padding: 20px 16px 8px; }
   .trend-chart { display: flex; align-items: flex-end; gap: 12px; height: 140px; }
   .trend-col { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 4px; height: 100%; justify-content: flex-end; }
   .trend-bars { display: flex; gap: 4px; align-items: flex-end; height: 100%; }
@@ -208,7 +213,7 @@
   .toggle-row { display: flex; align-items: center; gap: 12px; padding: 12px 4px; }
   .toggle-row .label { flex: 1; font-size: 15px; font-weight: 500; }
 
-  .sync-box { background: var(--color-card); border-radius: var(--radius-lg); box-shadow: var(--shadow-sm); padding: 16px; display: flex; flex-direction: column; gap: 10px; }
+  .sync-box { padding: 16px; display: flex; flex-direction: column; gap: 10px; }
   #syncStatus { font-size: 12.5px; color: var(--color-muted); display: flex; align-items: center; gap: 6px; }
   #syncStatus.ok { color: var(--color-income); }
   #syncStatus.err { color: var(--color-expense); }
@@ -224,11 +229,11 @@
   .manage-row .amt { font-size: 14px; font-weight: 600; flex-shrink: 0; }
   .row-actions { display: flex; gap: 4px; flex-shrink: 0; }
   .section-add-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
-  .inline-form { display: flex; flex-direction: column; gap: 12px; background: var(--color-card); border-radius: var(--radius-lg); box-shadow: var(--shadow-sm); padding: 16px; margin-bottom: 12px; }
+  .inline-form { display: flex; flex-direction: column; gap: 12px; padding: 16px; margin-bottom: 12px; }
   .inline-form .actions-row { display: flex; gap: 8px; }
   .inline-form .actions-row .btn { flex: 1; }
 
-  .goal-card { background: var(--color-card); border-radius: var(--radius-lg); box-shadow: var(--shadow-sm); padding: 16px; }
+  .goal-card { padding: 16px; }
   .goal-card .top { display: flex; align-items: center; gap: 12px; }
   .goal-card .name { font-weight: 700; font-size: 15px; }
   .goal-card .progress-label { font-size: 13px; color: var(--color-muted); margin-top: 2px; }
@@ -365,86 +370,84 @@
     { bg: "var(--color-warning-tint)", color: "var(--color-warning-text)" }
   ];
 
-  const LANGS = {
-    th: {
-      appTitle: "รายรับ-รายจ่าย",
-      darkModeBtn: "โหมดมืด", overview: "ภาพรวม", balanceLabel: "คงเหลือ", incomeLabel: "รายรับ", expenseLabel: "รายจ่าย",
-      recentTx: "รายการล่าสุด", addShort: "+ เพิ่มรายการ", budgetsThisMonth: "งบประมาณเดือนนี้", seeAll: "ดูทั้งหมด",
-      allTransactions: "รายการทั้งหมด", filterAll: "ทั้งหมด", allMonths: "ทุกเดือน", allYears: "ทุกปี", allCategories: "ทุกหมวดหมู่",
-      searchPlaceholder: "ค้นหารายละเอียด...", noResults: "ไม่พบรายการ", editAria: "แก้ไข", deleteAria: "ลบ",
-      addTitle: "เพิ่มรายการ", editTitle: "แก้ไขรายการ", saveBtn: "บันทึกรายการ", saveEditBtn: "บันทึกการแก้ไข",
-      typeLabel: "ประเภท", dateLabel: "วันที่", categoryLabel: "หมวดหมู่", amountLabel: "จำนวนเงิน (บาท)",
-      noteLabel: "รายละเอียด (ถ้ามี)", notePlaceholder: "เช่น ค่าข้าวกลางวัน", cancelEditBtn: "ยกเลิกการแก้ไข",
-      financialOverview: "ภาพรวมการเงิน", budgetsTab: "งบประมาณ", categoryTab: "หมวดหมู่", trendTab: "แนวโน้ม",
-      spentSoFar: "ใช้ไปแล้ว", budgetOf: "งบ", overBudget: "เกินงบ", expenseByCategory: "รายจ่ายตามหมวดหมู่",
-      noExpensesMonth: "ยังไม่มีรายจ่ายในเดือนนี้", settingsTitle: "ตั้งค่า",
-      personalAccount: "บัญชีส่วนตัว", languageSection: "ภาษา", displaySection: "การแสดงผล",
-      syncSection: "ซิงค์ข้ามอุปกรณ์", dataSection: "ข้อมูล",
-      exportCsvBtn: "ส่งออก CSV", exportJsonBtn: "ส่งออกข้อมูล (JSON)", billsSection: "รายการที่ต้องจ่ายประจำ",
-      dueOn: "ทุกวันที่ ", footerNote: "ข้อมูลจะถูกบันทึกไว้ในอุปกรณ์นี้เสมอ เข้าสู่ระบบด้วย Google เพื่อซิงค์ข้ามอุปกรณ์โดยอัตโนมัติ แนะนำให้ส่งออกข้อมูลเก็บเป็นไฟล์สำรองเป็นระยะ",
-      tabHome: "หน้าแรก", tabTx: "รายการ", tabAdd: "เพิ่ม", tabInsights: "ภาพรวม", tabSettings: "ตั้งค่า",
-      toastInvalidAmount: "กรุณากรอกจำนวนเงินให้ถูกต้อง", toastEdited: "บันทึกการแก้ไขแล้ว", toastAdded: "เพิ่มรายการแล้ว",
-      toastDeleted: "ลบรายการแล้ว", toastCsv: "ส่งออก CSV แล้ว", toastJson: "ส่งออกข้อมูลแล้ว", undoBtn: "เลิกทำ",
-      toastBudgetOver: "เกินงบ {cat} แล้ว", toastBudgetNear: "ใกล้ถึงงบ {cat} แล้ว (เกิน 80%)",
-      upcomingBillsSection: "รายการที่ใกล้ถึงกำหนด", markPaidBtn: "จ่ายแล้ว",
-      dueToday: "ถึงกำหนดวันนี้", dueTomorrow: "ถึงกำหนดพรุ่งนี้", dueInDays: "อีก {n} วัน",
-      goalsSection: "เป้าหมายการออม", addGoalBtn: "+ เพิ่มเป้าหมาย", goalNameLabel: "ชื่อเป้าหมาย",
-      targetLabel: "จำนวนเงินเป้าหมาย (บาท)", savedLabel: "จำนวนที่ออมแล้ว (บาท)", saveGoalBtn: "บันทึกเป้าหมาย",
-      noGoals: "ยังไม่มีเป้าหมายการออม", toastGoalSaved: "บันทึกเป้าหมายแล้ว", toastGoalDeleted: "ลบเป้าหมายแล้ว",
-      contributeAria: "เพิ่มเงินออม", contributeAmountLabel: "จำนวนเงินที่เพิ่ม (บาท)", addFundsBtn: "เพิ่มเงิน",
-      goalComplete: "ถึงเป้าหมายแล้ว!", toastFundsAdded: "เพิ่มเงินออมแล้ว", installAppBtn: "ติดตั้งแอปลงเครื่อง",
-      notSignedIn: "ยังไม่ได้เข้าสู่ระบบ", signInGoogle: "เข้าสู่ระบบด้วย Google", signOutBtn: "ออกจากระบบ",
-      syncNowBtn: "ซิงค์เดี๋ยวนี้", syncHelp: "เข้าสู่ระบบด้วย Google ด้านบนเพื่อซิงค์ข้อมูลข้ามอุปกรณ์โดยอัตโนมัติ — ไม่ต้องใช้รหัสอีกต่อไป",
-      syncSignedOut: "เข้าสู่ระบบด้วย Google เพื่อซิงค์ข้อมูลข้ามอุปกรณ์", syncSyncing: "กำลังซิงค์...",
-      syncOffline: "ออฟไลน์อยู่ — จะซิงค์อัตโนมัติเมื่อกลับมามีเน็ต", syncPartial: "ซิงค์ไม่สำเร็จบางส่วน — จะลองใหม่อัตโนมัติ",
-      syncLatest: "ซิงค์ล่าสุด: ",
-      budgetsSection: "งบประมาณ", addBudgetBtn: "+ เพิ่มงบประมาณ", limitLabel: "วงเงิน (บาท)", saveBudgetBtn: "บันทึกงบประมาณ",
-      cancelBtn: "ยกเลิก", noBudgets: "ยังไม่มีงบประมาณ", allBudgeted: "ตั้งงบประมาณครบทุกหมวดหมู่รายจ่ายแล้ว",
-      toastBudgetSaved: "บันทึกงบประมาณแล้ว", toastBudgetDeleted: "ลบงบประมาณแล้ว",
-      addBillBtn: "+ เพิ่มรายการ", billNameLabel: "ชื่อรายการ", billDayLabel: "วันที่ต้องจ่าย (1-31)", saveBillBtn: "บันทึกรายการ",
-      noBills: "ยังไม่มีรายการที่ต้องจ่ายประจำ", toastBillSaved: "บันทึกรายการแล้ว", toastBillDeleted: "ลบรายการแล้ว",
-      vsLastMonth: "จากเดือนที่แล้ว", ofLabel: "จาก", spentToday: "ใช้จ่ายวันนี้"
-    },
-    en: {
-      appTitle: "Income & Expenses",
-      darkModeBtn: "Dark mode", overview: "Overview", balanceLabel: "Balance", incomeLabel: "Income", expenseLabel: "Expense",
-      recentTx: "Recent activity", addShort: "+ Add transaction", budgetsThisMonth: "This month's budgets", seeAll: "See all",
-      allTransactions: "All Transactions", filterAll: "All", allMonths: "All months", allYears: "All years", allCategories: "All categories",
-      searchPlaceholder: "Search notes...", noResults: "No transactions found", editAria: "Edit", deleteAria: "Delete",
-      addTitle: "Add transaction", editTitle: "Edit transaction", saveBtn: "Save transaction", saveEditBtn: "Save changes",
-      typeLabel: "Type", dateLabel: "Date", categoryLabel: "Category", amountLabel: "Amount (THB)",
-      noteLabel: "Note (optional)", notePlaceholder: "e.g. Lunch", cancelEditBtn: "Cancel edit",
-      financialOverview: "Insights", budgetsTab: "Budgets", categoryTab: "Categories", trendTab: "Trend",
-      spentSoFar: "spent", budgetOf: "Budget", overBudget: "Over", expenseByCategory: "Expenses by category",
-      noExpensesMonth: "No expenses yet this month", settingsTitle: "Settings",
-      personalAccount: "Personal account", languageSection: "Language", displaySection: "Display",
-      syncSection: "Cross-device sync", dataSection: "Data",
-      exportCsvBtn: "Export CSV", exportJsonBtn: "Export data (JSON)", billsSection: "Recurring bills",
-      dueOn: "Due on day ", footerNote: "Data always stays on this device. Sign in with Google to sync across devices automatically. Export a backup periodically.",
-      tabHome: "Home", tabTx: "Transactions", tabAdd: "Add", tabInsights: "Insights", tabSettings: "Settings",
-      toastInvalidAmount: "Please enter a valid amount", toastEdited: "Changes saved", toastAdded: "Transaction added",
-      toastDeleted: "Transaction deleted", toastCsv: "CSV exported", toastJson: "Data exported", undoBtn: "Undo",
-      toastBudgetOver: "Over budget for {cat}", toastBudgetNear: "Nearing budget for {cat} (80%+)",
-      upcomingBillsSection: "Upcoming bills", markPaidBtn: "Mark paid",
-      dueToday: "Due today", dueTomorrow: "Due tomorrow", dueInDays: "Due in {n} days",
-      goalsSection: "Savings goals", addGoalBtn: "+ Add goal", goalNameLabel: "Goal name",
-      targetLabel: "Target amount (THB)", savedLabel: "Saved so far (THB)", saveGoalBtn: "Save goal",
-      noGoals: "No savings goals yet", toastGoalSaved: "Goal saved", toastGoalDeleted: "Goal deleted",
-      contributeAria: "Add funds", contributeAmountLabel: "Amount to add (THB)", addFundsBtn: "Add",
-      goalComplete: "Goal reached!", toastFundsAdded: "Funds added", installAppBtn: "Install app",
-      notSignedIn: "Not signed in", signInGoogle: "Sign in with Google", signOutBtn: "Sign out",
-      syncNowBtn: "Sync now", syncHelp: "Sign in with Google above to sync your data across devices automatically — no code needed.",
-      syncSignedOut: "Sign in with Google to sync across devices", syncSyncing: "Syncing...",
-      syncOffline: "Offline — will sync automatically when back online", syncPartial: "Sync partially failed — will retry automatically",
-      syncLatest: "Last synced: ",
-      budgetsSection: "Budgets", addBudgetBtn: "+ Add budget", limitLabel: "Limit (THB)", saveBudgetBtn: "Save budget",
-      cancelBtn: "Cancel", noBudgets: "No budgets yet", allBudgeted: "All expense categories already have a budget",
-      toastBudgetSaved: "Budget saved", toastBudgetDeleted: "Budget deleted",
-      addBillBtn: "+ Add bill", billNameLabel: "Bill name", billDayLabel: "Due day (1-31)", saveBillBtn: "Save bill",
-      noBills: "No recurring bills yet", toastBillSaved: "Bill saved", toastBillDeleted: "Bill deleted",
-      vsLastMonth: "vs last month", ofLabel: "of", spentToday: "Spent today"
-    }
+  // ---------- i18n ----------
+  // Each entry is [th, en]; LANGS.th / LANGS.en are derived below so every
+  // other place in the app just reads L().someKey same as before.
+  const STRINGS = {
+    appTitle: ["รายรับ-รายจ่าย", "Income & Expenses"],
+    darkModeBtn: ["โหมดมืด", "Dark mode"], overview: ["ภาพรวม", "Overview"], balanceLabel: ["คงเหลือ", "Balance"],
+    incomeLabel: ["รายรับ", "Income"], expenseLabel: ["รายจ่าย", "Expense"],
+    recentTx: ["รายการล่าสุด", "Recent activity"], addShort: ["+ เพิ่มรายการ", "+ Add transaction"],
+    budgetsThisMonth: ["งบประมาณเดือนนี้", "This month's budgets"], seeAll: ["ดูทั้งหมด", "See all"],
+    allTransactions: ["รายการทั้งหมด", "All Transactions"], filterAll: ["ทั้งหมด", "All"],
+    allDays: ["ทุกวัน", "All days"], allMonths: ["ทุกเดือน", "All months"], allYears: ["ทุกปี", "All years"],
+    allCategories: ["ทุกหมวดหมู่", "All categories"],
+    searchPlaceholder: ["ค้นหารายละเอียด...", "Search notes..."], noResults: ["ไม่พบรายการ", "No transactions found"],
+    editAria: ["แก้ไข", "Edit"], deleteAria: ["ลบ", "Delete"],
+    addTitle: ["เพิ่มรายการ", "Add transaction"], editTitle: ["แก้ไขรายการ", "Edit transaction"],
+    saveBtn: ["บันทึกรายการ", "Save transaction"], saveEditBtn: ["บันทึกการแก้ไข", "Save changes"],
+    typeLabel: ["ประเภท", "Type"], dateLabel: ["วันที่", "Date"], categoryLabel: ["หมวดหมู่", "Category"],
+    amountLabel: ["จำนวนเงิน (บาท)", "Amount (THB)"],
+    noteLabel: ["รายละเอียด (ถ้ามี)", "Note (optional)"], notePlaceholder: ["เช่น ค่าข้าวกลางวัน", "e.g. Lunch"],
+    cancelEditBtn: ["ยกเลิกการแก้ไข", "Cancel edit"],
+    financialOverview: ["ภาพรวมการเงิน", "Insights"], budgetsTab: ["งบประมาณ", "Budgets"],
+    categoryTab: ["หมวดหมู่", "Categories"], trendTab: ["แนวโน้ม", "Trend"],
+    spentSoFar: ["ใช้ไปแล้ว", "spent"], budgetOf: ["งบ", "Budget"], overBudget: ["เกินงบ", "Over"],
+    expenseByCategory: ["รายจ่ายตามหมวดหมู่", "Expenses by category"],
+    noExpensesMonth: ["ยังไม่มีรายจ่ายในเดือนนี้", "No expenses yet this month"], settingsTitle: ["ตั้งค่า", "Settings"],
+    personalAccount: ["บัญชีส่วนตัว", "Personal account"], languageSection: ["ภาษา", "Language"],
+    displaySection: ["การแสดงผล", "Display"],
+    syncSection: ["ซิงค์ข้ามอุปกรณ์", "Cross-device sync"], dataSection: ["ข้อมูล", "Data"],
+    exportCsvBtn: ["ส่งออก CSV", "Export CSV"], exportJsonBtn: ["ส่งออกข้อมูล (JSON)", "Export data (JSON)"],
+    billsSection: ["รายการที่ต้องจ่ายประจำ", "Recurring bills"],
+    dueOn: ["ทุกวันที่ ", "Due on day "],
+    footerNote: [
+      "ข้อมูลจะถูกบันทึกไว้ในอุปกรณ์นี้เสมอ เข้าสู่ระบบด้วย Google เพื่อซิงค์ข้ามอุปกรณ์โดยอัตโนมัติ แนะนำให้ส่งออกข้อมูลเก็บเป็นไฟล์สำรองเป็นระยะ",
+      "Data always stays on this device. Sign in with Google to sync across devices automatically. Export a backup periodically."
+    ],
+    tabHome: ["หน้าแรก", "Home"], tabTx: ["รายการ", "Transactions"], tabAdd: ["เพิ่ม", "Add"],
+    tabInsights: ["ภาพรวม", "Insights"], tabSettings: ["ตั้งค่า", "Settings"],
+    toastInvalidAmount: ["กรุณากรอกจำนวนเงินให้ถูกต้อง", "Please enter a valid amount"],
+    toastEdited: ["บันทึกการแก้ไขแล้ว", "Changes saved"], toastAdded: ["เพิ่มรายการแล้ว", "Transaction added"],
+    toastDeleted: ["ลบรายการแล้ว", "Transaction deleted"], toastCsv: ["ส่งออก CSV แล้ว", "CSV exported"],
+    toastJson: ["ส่งออกข้อมูลแล้ว", "Data exported"], undoBtn: ["เลิกทำ", "Undo"],
+    toastBudgetOver: ["เกินงบ {cat} แล้ว", "Over budget for {cat}"],
+    toastBudgetNear: ["ใกล้ถึงงบ {cat} แล้ว (เกิน 80%)", "Nearing budget for {cat} (80%+)"],
+    upcomingBillsSection: ["รายการที่ใกล้ถึงกำหนด", "Upcoming bills"], markPaidBtn: ["จ่ายแล้ว", "Mark paid"],
+    dueToday: ["ถึงกำหนดวันนี้", "Due today"], dueTomorrow: ["ถึงกำหนดพรุ่งนี้", "Due tomorrow"],
+    dueInDays: ["อีก {n} วัน", "Due in {n} days"],
+    goalsSection: ["เป้าหมายการออม", "Savings goals"], addGoalBtn: ["+ เพิ่มเป้าหมาย", "+ Add goal"],
+    goalNameLabel: ["ชื่อเป้าหมาย", "Goal name"],
+    targetLabel: ["จำนวนเงินเป้าหมาย (บาท)", "Target amount (THB)"], savedLabel: ["จำนวนที่ออมแล้ว (บาท)", "Saved so far (THB)"],
+    saveGoalBtn: ["บันทึกเป้าหมาย", "Save goal"],
+    noGoals: ["ยังไม่มีเป้าหมายการออม", "No savings goals yet"], toastGoalSaved: ["บันทึกเป้าหมายแล้ว", "Goal saved"],
+    toastGoalDeleted: ["ลบเป้าหมายแล้ว", "Goal deleted"],
+    contributeAria: ["เพิ่มเงินออม", "Add funds"], contributeAmountLabel: ["จำนวนเงินที่เพิ่ม (บาท)", "Amount to add (THB)"],
+    addFundsBtn: ["เพิ่มเงิน", "Add"],
+    goalComplete: ["ถึงเป้าหมายแล้ว!", "Goal reached!"], toastFundsAdded: ["เพิ่มเงินออมแล้ว", "Funds added"],
+    installAppBtn: ["ติดตั้งแอปลงเครื่อง", "Install app"],
+    notSignedIn: ["ยังไม่ได้เข้าสู่ระบบ", "Not signed in"], signInGoogle: ["เข้าสู่ระบบด้วย Google", "Sign in with Google"],
+    signOutBtn: ["ออกจากระบบ", "Sign out"],
+    syncNowBtn: ["ซิงค์เดี๋ยวนี้", "Sync now"],
+    syncHelp: ["เข้าสู่ระบบด้วย Google ด้านบนเพื่อซิงค์ข้อมูลข้ามอุปกรณ์โดยอัตโนมัติ — ไม่ต้องใช้รหัสอีกต่อไป", "Sign in with Google above to sync your data across devices automatically — no code needed."],
+    syncSignedOut: ["เข้าสู่ระบบด้วย Google เพื่อซิงค์ข้อมูลข้ามอุปกรณ์", "Sign in with Google to sync across devices"],
+    syncSyncing: ["กำลังซิงค์...", "Syncing..."],
+    syncOffline: ["ออฟไลน์อยู่ — จะซิงค์อัตโนมัติเมื่อกลับมามีเน็ต", "Offline — will sync automatically when back online"],
+    syncPartial: ["ซิงค์ไม่สำเร็จบางส่วน — จะลองใหม่อัตโนมัติ", "Sync partially failed — will retry automatically"],
+    syncLatest: ["ซิงค์ล่าสุด: ", "Last synced: "],
+    budgetsSection: ["งบประมาณ", "Budgets"], addBudgetBtn: ["+ เพิ่มงบประมาณ", "+ Add budget"],
+    limitLabel: ["วงเงิน (บาท)", "Limit (THB)"], saveBudgetBtn: ["บันทึกงบประมาณ", "Save budget"],
+    cancelBtn: ["ยกเลิก", "Cancel"], noBudgets: ["ยังไม่มีงบประมาณ", "No budgets yet"],
+    allBudgeted: ["ตั้งงบประมาณครบทุกหมวดหมู่รายจ่ายแล้ว", "All expense categories already have a budget"],
+    toastBudgetSaved: ["บันทึกงบประมาณแล้ว", "Budget saved"], toastBudgetDeleted: ["ลบงบประมาณแล้ว", "Budget deleted"],
+    addBillBtn: ["+ เพิ่มรายการ", "+ Add bill"], billNameLabel: ["ชื่อรายการ", "Bill name"],
+    billDayLabel: ["วันที่ต้องจ่าย (1-31)", "Due day (1-31)"], saveBillBtn: ["บันทึกรายการ", "Save bill"],
+    noBills: ["ยังไม่มีรายการที่ต้องจ่ายประจำ", "No recurring bills yet"], toastBillSaved: ["บันทึกรายการแล้ว", "Bill saved"],
+    toastBillDeleted: ["ลบรายการแล้ว", "Bill deleted"],
+    vsLastMonth: ["จากเดือนที่แล้ว", "vs last month"], ofLabel: ["จาก", "of"], spentToday: ["ใช้จ่ายวันนี้", "Spent today"]
   };
+  const LANGS = { th: {}, en: {} };
+  for (const k in STRINGS) { LANGS.th[k] = STRINGS[k][0]; LANGS.en[k] = STRINGS[k][1]; }
   function L() { return LANGS[state.lang]; }
 
   const $ = (id) => document.getElementById(id);
@@ -471,17 +474,26 @@
   function monthLabel(key) { return new Date(key + "-01T00:00:00").toLocaleDateString(state.lang === "en" ? "en-US" : "th-TH", { month: "short", year: "2-digit" }); }
   function escapeHtml(s) { return String(s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c])); }
   function icon(name, attrs) { return `<i class="icon" data-lucide="${name}"${attrs ? " " + attrs : ""}></i>`; }
+  function iconAvatar(name, bg, color, sizeClass, iconAttrs) {
+    return `<div class="icon-avatar${sizeClass ? " " + sizeClass : ""}" style="background:${bg};color:${color}">${icon(name, iconAttrs)}</div>`;
+  }
   const EDIT_ICON = icon("pencil");
   const DELETE_ICON = icon("trash-2");
   const PLUS_ICON = icon("plus");
   function refreshIcons() { if (window.lucide) window.lucide.createIcons(); }
+  // Builds <option> tags for a plain list of value strings. `labelFn` maps a
+  // value to display text (defaults to the value itself); pass null as
+  // `selected` when nothing should be pre-selected.
+  function optionsHtml(values, selected, labelFn) {
+    return values.map((v) => `<option value="${escapeHtml(v)}"${v === selected ? " selected" : ""}>${escapeHtml(labelFn ? labelFn(v) : v)}</option>`).join("");
+  }
 
   // ---------- state ----------
   const state = {
     lang: "th", dark: false,
     tab: "home", insightsTab: "budgets",
     insightsMonthNum: new Date().toISOString().slice(5, 7), insightsYear: String(new Date().getFullYear()),
-    txFilterType: "all", txFilterMonthNum: "all", txFilterYear: "all", txFilterCategory: "all", txSearch: "",
+    txFilterType: "all", txFilterDay: "all", txFilterMonthNum: "all", txFilterYear: "all", txFilterCategory: "all", txSearch: "",
     formType: "expense", formDate: new Date().toISOString().slice(0, 10),
     formCategory: CATEGORIES.expense[0], editingId: null, categoryManual: false,
     budgetEditId: null, billEditId: null, goalEditId: null, goalContributeId: null
@@ -893,7 +905,8 @@
     }).join("");
     return `<svg width="140" height="140" viewBox="0 0 140 140">${circles}</svg>`;
   }
-  const MONTH_NUMS = ["01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12"];
+  const DAY_NUMS = Array.from({ length: 31 }, (_, i) => String(i + 1).padStart(2, "0"));
+  const MONTH_NUMS = Array.from({ length: 12 }, (_, i) => String(i + 1).padStart(2, "0"));
   function monthOnlyLabel(mm) {
     return new Date(2000, parseInt(mm, 10) - 1, 1).toLocaleDateString(state.lang === "en" ? "en-US" : "th-TH", { month: "short" });
   }
@@ -1004,7 +1017,7 @@
           </div>
 
           <div class="today-spend-card">
-            <div class="icon-avatar sm" style="background:var(--color-expense-tint);color:var(--color-expense-700)">${icon("wallet")}</div>
+            ${iconAvatar("wallet", "var(--color-expense-tint)", "var(--color-expense-700)", "sm")}
             <span class="label">${escapeHtml(l.spentToday)}</span>
             <span class="value">${fmtMoney(spentToday)}</span>
           </div>
@@ -1025,7 +1038,7 @@
           <div class="list-card">
             ${dueSoon.map((b) => `
               <div class="manage-row">
-                <div class="icon-avatar" style="background:var(--color-warning-tint);color:var(--color-warning-text)">${icon("calendar-clock")}</div>
+                ${iconAvatar("calendar-clock", "var(--color-warning-tint)", "var(--color-warning-text)")}
                 <div class="info">
                   <div class="name">${escapeHtml(b.name)}</div>
                   <div class="sub">${escapeHtml(dueSoonLabel(b.daysUntil))}</div>
@@ -1061,7 +1074,7 @@
     const sign = t.type === "income" ? "+" : "−";
     return `
       <div class="tx-row" data-tx-actions data-id="${t.id}">
-        <div class="icon-avatar" style="background:${tone.bg};color:${tone.color}">${icon(iconFor(t.category))}</div>
+        ${iconAvatar(iconFor(t.category), tone.bg, tone.color)}
         <div class="info">
           <div class="cat">${escapeHtml(t.category)}</div>
           <div class="meta">${dateLabel(t.date)}${t.note ? " · " + escapeHtml(t.note) : ""}</div>
@@ -1083,6 +1096,7 @@
   function filteredTxList() {
     let rows = transactions.slice();
     if (state.txFilterType !== "all") rows = rows.filter((t) => t.type === state.txFilterType);
+    if (state.txFilterDay !== "all") rows = rows.filter((t) => t.date.slice(8, 10) === state.txFilterDay);
     if (state.txFilterMonthNum !== "all") rows = rows.filter((t) => t.date.slice(5, 7) === state.txFilterMonthNum);
     if (state.txFilterYear !== "all") rows = rows.filter((t) => t.date.slice(0, 4) === state.txFilterYear);
     if (state.txFilterCategory !== "all") rows = rows.filter((t) => t.category === state.txFilterCategory);
@@ -1111,19 +1125,23 @@
         <label class="tab-opt"><input type="radio" name="tx-type-filter" value="expense" ${state.txFilterType === "expense" ? "checked" : ""}>${escapeHtml(l.expenseLabel)}</label>
       </div>
       <div class="filter-row">
+        <select class="input" id="txFilterDay">
+          <option value="all">${escapeHtml(l.allDays)}</option>
+          ${optionsHtml(DAY_NUMS, state.txFilterDay)}
+        </select>
         <select class="input" id="txFilterMonth">
           <option value="all">${escapeHtml(l.allMonths)}</option>
-          ${MONTH_NUMS.map((m) => `<option value="${m}" ${state.txFilterMonthNum === m ? "selected" : ""}>${monthOnlyLabel(m)}</option>`).join("")}
+          ${optionsHtml(MONTH_NUMS, state.txFilterMonthNum, monthOnlyLabel)}
         </select>
         <select class="input" id="txFilterYear">
           <option value="all">${escapeHtml(l.allYears)}</option>
-          ${years.map((y) => `<option value="${y}" ${state.txFilterYear === y ? "selected" : ""}>${yearLabel(y)}</option>`).join("")}
+          ${optionsHtml(years, state.txFilterYear, yearLabel)}
         </select>
       </div>
       <div class="filter-row">
         <select class="input" id="txFilterCategory">
           <option value="all">${escapeHtml(l.allCategories)}</option>
-          ${allCats.map((c) => `<option value="${escapeHtml(c)}" ${state.txFilterCategory === c ? "selected" : ""}>${escapeHtml(c)}</option>`).join("")}
+          ${optionsHtml(allCats, state.txFilterCategory)}
         </select>
       </div>
       <input class="input" style="margin-bottom:12px" id="txSearchInput" placeholder="${escapeHtml(l.searchPlaceholder)}" value="${escapeHtml(state.txSearch)}">
@@ -1131,6 +1149,7 @@
     `;
     renderTxListOnly();
     document.querySelectorAll('input[name="tx-type-filter"]').forEach((r) => r.addEventListener("change", (e) => { state.txFilterType = e.target.value; renderTxListOnly(); }));
+    $("txFilterDay").addEventListener("change", (e) => { state.txFilterDay = e.target.value; renderTxListOnly(); });
     $("txFilterMonth").addEventListener("change", (e) => { state.txFilterMonthNum = e.target.value; renderTxListOnly(); });
     $("txFilterYear").addEventListener("change", (e) => { state.txFilterYear = e.target.value; renderTxListOnly(); });
     $("txFilterCategory").addEventListener("change", (e) => { state.txFilterCategory = e.target.value; renderTxListOnly(); });
@@ -1175,7 +1194,7 @@
   }
   function renderFormCategoryOptions(select) {
     const opts = state.formType === "income" ? CATEGORIES.income : CATEGORIES.expense;
-    select.innerHTML = opts.map((c) => `<option value="${escapeHtml(c)}" ${c === state.formCategory ? "selected" : ""}>${escapeHtml(c)}</option>`).join("");
+    select.innerHTML = optionsHtml(opts, state.formCategory);
   }
   function renderAdd() {
     const l = L();
@@ -1284,12 +1303,8 @@
         <label class="tab-opt"><input type="radio" name="insights-tab" value="trend" ${state.insightsTab === "trend" ? "checked" : ""}>${escapeHtml(l.trendTab)}</label>
       </div>
       <div class="filter-row" id="insightsMonthRow" style="${state.insightsTab === "trend" ? "display:none" : ""};margin-bottom:18px">
-        <select class="input" id="insightsMonthSelect">
-          ${MONTH_NUMS.map((m) => `<option value="${m}" ${state.insightsMonthNum === m ? "selected" : ""}>${monthOnlyLabel(m)}</option>`).join("")}
-        </select>
-        <select class="input" id="insightsYearSelect">
-          ${years.map((y) => `<option value="${y}" ${state.insightsYear === y ? "selected" : ""}>${yearLabel(y)}</option>`).join("")}
-        </select>
+        <select class="input" id="insightsMonthSelect">${optionsHtml(MONTH_NUMS, state.insightsMonthNum, monthOnlyLabel)}</select>
+        <select class="input" id="insightsYearSelect">${optionsHtml(years, state.insightsYear, yearLabel)}</select>
       </div>
       <div id="insightsBody"></div>
     `;
@@ -1348,19 +1363,43 @@
     refreshIcons();
   }
 
-  // ---------- Budgets management ----------
-  function budgetRowHtml(b) {
+  // ---------- Budgets / Bills management ----------
+  // Both are simple named lists edited inline in Settings; share one row/CRUD shape.
+  function manageRowHtml(name, sub, amt, editAttr, deleteAttr) {
     return `
       <div class="manage-row">
-        <div class="info">
-          <div class="name">${escapeHtml(b.category)}</div>
-          <div class="sub">${escapeHtml(L().budgetOf)} ${fmtMoney(b.limit)}</div>
-        </div>
+        <div class="info"><div class="name">${escapeHtml(name)}</div><div class="sub">${escapeHtml(sub)}</div></div>
+        ${amt ? `<div class="amt">${amt}</div>` : ""}
         <div class="row-actions">
-          <button type="button" class="btn btn-icon" data-edit-budget="${b.id}" aria-label="${escapeHtml(L().editAria)}">${EDIT_ICON}</button>
-          <button type="button" class="btn btn-icon" style="color:var(--color-expense-700)" data-delete-budget="${b.id}" aria-label="${escapeHtml(L().deleteAria)}">${DELETE_ICON}</button>
+          <button type="button" class="btn btn-icon" ${editAttr} aria-label="${escapeHtml(L().editAria)}">${EDIT_ICON}</button>
+          <button type="button" class="btn btn-icon" style="color:var(--color-expense-700)" ${deleteAttr} aria-label="${escapeHtml(L().deleteAria)}">${DELETE_ICON}</button>
         </div>
       </div>`;
+  }
+  // Wraps a set of field inputs with the standard Save/Cancel action row used
+  // by every inline add/edit form (budgets, bills, goals, goal contributions).
+  function inlineForm(fieldsHtml, saveId, saveLabel, cancelId, extraStyle) {
+    return `<div class="inline-form"${extraStyle ? ` style="${extraStyle}"` : ""}>${fieldsHtml}<div class="actions-row"><button type="button" class="btn btn-primary" id="${saveId}">${escapeHtml(saveLabel)}</button><button type="button" class="btn btn-secondary" id="${cancelId}">${escapeHtml(L().cancelBtn)}</button></div></div>`;
+  }
+  // Wires the add/edit/delete/save/cancel buttons shared by the Budgets,
+  // Bills, and Goals sections in Settings. `prefix` (capitalized) matches the
+  // element ids (e.g. "Budget" -> addBudgetBtn/saveBudgetFormBtn/data-edit-budget).
+  function wireInlineCrud(prefix, stateKey, deleteFn, saveFn, onOpen) {
+    const tag = prefix.toLowerCase();
+    const addBtn = $("add" + prefix + "Btn");
+    if (addBtn) addBtn.addEventListener("click", () => { state[stateKey] = "new"; if (onOpen) onOpen(); renderSettings(); });
+    document.querySelectorAll(`[data-edit-${tag}]`).forEach((btn) => btn.addEventListener("click", () => {
+      state[stateKey] = btn.getAttribute(`data-edit-${tag}`); if (onOpen) onOpen(); renderSettings();
+    }));
+    document.querySelectorAll(`[data-delete-${tag}]`).forEach((btn) => btn.addEventListener("click", () => deleteFn(btn.getAttribute(`data-delete-${tag}`))));
+    const saveBtn = $("save" + prefix + "FormBtn");
+    if (saveBtn) saveBtn.addEventListener("click", saveFn);
+    const cancelBtn = $("cancel" + prefix + "FormBtn");
+    if (cancelBtn) cancelBtn.addEventListener("click", () => { state[stateKey] = null; renderSettings(); });
+  }
+
+  function budgetRowHtml(b) {
+    return manageRowHtml(b.category, L().budgetOf + " " + fmtMoney(b.limit), null, `data-edit-budget="${b.id}"`, `data-delete-budget="${b.id}"`);
   }
   function budgetFormHtml() {
     const l = L();
@@ -1373,22 +1412,11 @@
     if (isNew && !availableCats.length) {
       return `<div class="inline-form"><div class="empty-note" style="padding:8px 0">${escapeHtml(l.allBudgeted)}</div><button type="button" class="btn btn-secondary" id="cancelBudgetFormBtn">${escapeHtml(l.cancelBtn)}</button></div>`;
     }
-    return `
-      <div class="inline-form">
-        ${isNew
-          ? `<div class="field"><label>${escapeHtml(l.categoryLabel)}</label>
-              <select class="input" id="budgetCategorySelect">${availableCats.map((c) => `<option value="${escapeHtml(c)}">${escapeHtml(c)}</option>`).join("")}</select>
-            </div>`
-          : `<div style="font-size:14px;font-weight:600">${escapeHtml(editing.category)}</div>`}
-        <div class="field">
-          <label>${escapeHtml(l.limitLabel)}</label>
-          <input class="input" type="number" id="budgetLimitInput" min="0" step="1" value="${isNew ? "" : editing.limit}">
-        </div>
-        <div class="actions-row">
-          <button type="button" class="btn btn-primary" id="saveBudgetFormBtn">${escapeHtml(l.saveBudgetBtn)}</button>
-          <button type="button" class="btn btn-secondary" id="cancelBudgetFormBtn">${escapeHtml(l.cancelBtn)}</button>
-        </div>
-      </div>`;
+    const fields = (isNew
+      ? `<div class="field"><label>${escapeHtml(l.categoryLabel)}</label><select class="input" id="budgetCategorySelect">${optionsHtml(availableCats, null)}</select></div>`
+      : `<div style="font-size:14px;font-weight:600">${escapeHtml(editing.category)}</div>`)
+      + `<div class="field"><label>${escapeHtml(l.limitLabel)}</label><input class="input" type="number" id="budgetLimitInput" min="0" step="1" value="${isNew ? "" : editing.limit}"></div>`;
+    return inlineForm(fields, "saveBudgetFormBtn", l.saveBudgetBtn, "cancelBudgetFormBtn");
   }
   function saveBudgetForm() {
     const isNew = state.budgetEditId === "new";
@@ -1432,20 +1460,8 @@
     });
   }
 
-  // ---------- Bills management ----------
   function billRowHtml(b) {
-    return `
-      <div class="manage-row">
-        <div class="info">
-          <div class="name">${escapeHtml(b.name)}</div>
-          <div class="sub">${escapeHtml(L().dueOn)}${b.day}</div>
-        </div>
-        <div class="amt">${fmtMoney(b.amount)}</div>
-        <div class="row-actions">
-          <button type="button" class="btn btn-icon" data-edit-bill="${b.id}" aria-label="${escapeHtml(L().editAria)}">${EDIT_ICON}</button>
-          <button type="button" class="btn btn-icon" style="color:var(--color-expense-700)" data-delete-bill="${b.id}" aria-label="${escapeHtml(L().deleteAria)}">${DELETE_ICON}</button>
-        </div>
-      </div>`;
+    return manageRowHtml(b.name, L().dueOn + b.day, fmtMoney(b.amount), `data-edit-bill="${b.id}"`, `data-delete-bill="${b.id}"`);
   }
   function billFormHtml() {
     const l = L();
@@ -1454,31 +1470,13 @@
     const editing = !isNew ? bills.find((b) => b.id === state.billEditId) : null;
     if (!isNew && !editing) return "";
     const curCategory = isNew ? CATEGORIES.expense[0] : editing.category;
-    return `
-      <div class="inline-form">
-        <div class="field">
-          <label>${escapeHtml(l.billNameLabel)}</label>
-          <input class="input" type="text" id="billNameInput" value="${isNew ? "" : escapeHtml(editing.name)}">
-        </div>
-        <div class="field">
-          <label>${escapeHtml(l.categoryLabel)}</label>
-          <select class="input" id="billCategorySelect">
-            ${CATEGORIES.expense.map((c) => `<option value="${escapeHtml(c)}" ${c === curCategory ? "selected" : ""}>${escapeHtml(c)}</option>`).join("")}
-          </select>
-        </div>
-        <div class="field">
-          <label>${escapeHtml(l.amountLabel)}</label>
-          <input class="input" type="number" id="billAmountInput" min="0" step="0.01" value="${isNew ? "" : editing.amount}">
-        </div>
-        <div class="field">
-          <label>${escapeHtml(l.billDayLabel)}</label>
-          <input class="input" type="number" id="billDayInput" min="1" max="31" step="1" value="${isNew ? "" : editing.day}">
-        </div>
-        <div class="actions-row">
-          <button type="button" class="btn btn-primary" id="saveBillFormBtn">${escapeHtml(l.saveBillBtn)}</button>
-          <button type="button" class="btn btn-secondary" id="cancelBillFormBtn">${escapeHtml(l.cancelBtn)}</button>
-        </div>
-      </div>`;
+    const fields = `
+      <div class="field"><label>${escapeHtml(l.billNameLabel)}</label><input class="input" type="text" id="billNameInput" value="${isNew ? "" : escapeHtml(editing.name)}"></div>
+      <div class="field"><label>${escapeHtml(l.categoryLabel)}</label><select class="input" id="billCategorySelect">${optionsHtml(CATEGORIES.expense, curCategory)}</select></div>
+      <div class="field"><label>${escapeHtml(l.amountLabel)}</label><input class="input" type="number" id="billAmountInput" min="0" step="0.01" value="${isNew ? "" : editing.amount}"></div>
+      <div class="field"><label>${escapeHtml(l.billDayLabel)}</label><input class="input" type="number" id="billDayInput" min="1" max="31" step="1" value="${isNew ? "" : editing.day}"></div>
+    `;
+    return inlineForm(fields, "saveBillFormBtn", l.saveBillBtn, "cancelBillFormBtn");
   }
   function saveBillForm() {
     const isNew = state.billEditId === "new";
@@ -1531,7 +1529,7 @@
     return `
       <div class="goal-card">
         <div class="top">
-          <div class="icon-avatar" style="background:${tone.bg};color:${tone.color}">${icon(gIcon)}</div>
+          ${iconAvatar(gIcon, tone.bg, tone.color)}
           <div style="flex:1;min-width:0">
             <div class="name">${escapeHtml(g.name)}</div>
             <div class="progress-label">${fmtMoney(g.saved)} ${escapeHtml(l.ofLabel || "/")} ${fmtMoney(g.target)}</div>
@@ -1544,22 +1542,13 @@
           </div>
         </div>
         <div class="bar-track"><div class="bar-fill" style="width:${pct}%;background:${complete ? "var(--color-income)" : tone.color}"></div></div>
-        ${state.goalContributeId === g.id ? goalContributeFormHtml(g) : ""}
+        ${state.goalContributeId === g.id ? goalContributeFormHtml() : ""}
       </div>`;
   }
   function goalContributeFormHtml() {
     const l = L();
-    return `
-      <div class="inline-form" style="margin:14px 0 0">
-        <div class="field">
-          <label>${escapeHtml(l.contributeAmountLabel)}</label>
-          <input class="input" type="number" id="goalContributeInput" min="0" step="0.01">
-        </div>
-        <div class="actions-row">
-          <button type="button" class="btn btn-primary" id="saveContributeBtn">${escapeHtml(l.addFundsBtn)}</button>
-          <button type="button" class="btn btn-secondary" id="cancelContributeBtn">${escapeHtml(l.cancelBtn)}</button>
-        </div>
-      </div>`;
+    const fields = `<div class="field"><label>${escapeHtml(l.contributeAmountLabel)}</label><input class="input" type="number" id="goalContributeInput" min="0" step="0.01"></div>`;
+    return inlineForm(fields, "saveContributeBtn", l.addFundsBtn, "cancelContributeBtn", "margin:14px 0 0");
   }
   function goalFormHtml() {
     const l = L();
@@ -1567,25 +1556,12 @@
     const isNew = state.goalEditId === "new";
     const editing = !isNew ? goals.find((g) => g.id === state.goalEditId) : null;
     if (!isNew && !editing) return "";
-    return `
-      <div class="inline-form">
-        <div class="field">
-          <label>${escapeHtml(l.goalNameLabel)}</label>
-          <input class="input" type="text" id="goalNameInput" value="${isNew ? "" : escapeHtml(editing.name)}">
-        </div>
-        <div class="field">
-          <label>${escapeHtml(l.targetLabel)}</label>
-          <input class="input" type="number" id="goalTargetInput" min="0" step="0.01" value="${isNew ? "" : editing.target}">
-        </div>
-        <div class="field">
-          <label>${escapeHtml(l.savedLabel)}</label>
-          <input class="input" type="number" id="goalSavedInput" min="0" step="0.01" value="${isNew ? "0" : editing.saved}">
-        </div>
-        <div class="actions-row">
-          <button type="button" class="btn btn-primary" id="saveGoalFormBtn">${escapeHtml(l.saveGoalBtn)}</button>
-          <button type="button" class="btn btn-secondary" id="cancelGoalFormBtn">${escapeHtml(l.cancelBtn)}</button>
-        </div>
-      </div>`;
+    const fields = `
+      <div class="field"><label>${escapeHtml(l.goalNameLabel)}</label><input class="input" type="text" id="goalNameInput" value="${isNew ? "" : escapeHtml(editing.name)}"></div>
+      <div class="field"><label>${escapeHtml(l.targetLabel)}</label><input class="input" type="number" id="goalTargetInput" min="0" step="0.01" value="${isNew ? "" : editing.target}"></div>
+      <div class="field"><label>${escapeHtml(l.savedLabel)}</label><input class="input" type="number" id="goalSavedInput" min="0" step="0.01" value="${isNew ? "0" : editing.saved}"></div>
+    `;
+    return inlineForm(fields, "saveGoalFormBtn", l.saveGoalBtn, "cancelGoalFormBtn");
   }
   function saveGoalForm() {
     const isNew = state.goalEditId === "new";
@@ -1673,7 +1649,7 @@
               <div class="settings-section-label">${escapeHtml(l.displaySection)}</div>
               <div class="list-card">
                 <div class="toggle-row">
-                  <div class="icon-avatar sm" style="background:var(--color-accent-tint);color:var(--color-accent)">${icon("moon", 'width="15" height="15"')}</div>
+                  ${iconAvatar("moon", "var(--color-accent-tint)", "var(--color-accent)", "sm", 'width="15" height="15"')}
                   <span class="label">${escapeHtml(l.darkModeBtn)}</span>
                   <button type="button" class="switch ${state.dark ? "on" : ""}" id="darkSwitch"><span class="thumb"></span></button>
                 </div>
@@ -1780,24 +1756,10 @@
       showToast(L().toastJson);
     });
 
-    $("addBudgetBtn").addEventListener("click", () => { state.budgetEditId = "new"; renderSettings(); });
-    document.querySelectorAll("[data-edit-budget]").forEach((btn) => btn.addEventListener("click", () => { state.budgetEditId = btn.getAttribute("data-edit-budget"); renderSettings(); }));
-    document.querySelectorAll("[data-delete-budget]").forEach((btn) => btn.addEventListener("click", () => deleteBudget(btn.getAttribute("data-delete-budget"))));
-    if ($("saveBudgetFormBtn")) $("saveBudgetFormBtn").addEventListener("click", saveBudgetForm);
-    if ($("cancelBudgetFormBtn")) $("cancelBudgetFormBtn").addEventListener("click", () => { state.budgetEditId = null; renderSettings(); });
-
-    $("addBillBtn").addEventListener("click", () => { state.billEditId = "new"; renderSettings(); });
-    document.querySelectorAll("[data-edit-bill]").forEach((btn) => btn.addEventListener("click", () => { state.billEditId = btn.getAttribute("data-edit-bill"); renderSettings(); }));
-    document.querySelectorAll("[data-delete-bill]").forEach((btn) => btn.addEventListener("click", () => deleteBill(btn.getAttribute("data-delete-bill"))));
-    if ($("saveBillFormBtn")) $("saveBillFormBtn").addEventListener("click", saveBillForm);
-    if ($("cancelBillFormBtn")) $("cancelBillFormBtn").addEventListener("click", () => { state.billEditId = null; renderSettings(); });
-
-    $("addGoalBtn").addEventListener("click", () => { state.goalEditId = "new"; state.goalContributeId = null; renderSettings(); });
-    document.querySelectorAll("[data-edit-goal]").forEach((btn) => btn.addEventListener("click", () => { state.goalEditId = btn.getAttribute("data-edit-goal"); state.goalContributeId = null; renderSettings(); }));
-    document.querySelectorAll("[data-delete-goal]").forEach((btn) => btn.addEventListener("click", () => deleteGoal(btn.getAttribute("data-delete-goal"))));
+    wireInlineCrud("Budget", "budgetEditId", deleteBudget, saveBudgetForm);
+    wireInlineCrud("Bill", "billEditId", deleteBill, saveBillForm);
+    wireInlineCrud("Goal", "goalEditId", deleteGoal, saveGoalForm, () => { state.goalContributeId = null; });
     document.querySelectorAll("[data-contribute-goal]").forEach((btn) => btn.addEventListener("click", () => { state.goalContributeId = btn.getAttribute("data-contribute-goal"); state.goalEditId = null; renderSettings(); }));
-    if ($("saveGoalFormBtn")) $("saveGoalFormBtn").addEventListener("click", saveGoalForm);
-    if ($("cancelGoalFormBtn")) $("cancelGoalFormBtn").addEventListener("click", () => { state.goalEditId = null; renderSettings(); });
     if ($("saveContributeBtn")) $("saveContributeBtn").addEventListener("click", saveContribution);
     if ($("cancelContributeBtn")) $("cancelContributeBtn").addEventListener("click", () => { state.goalContributeId = null; renderSettings(); });
     refreshIcons();
