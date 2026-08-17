@@ -52,14 +52,8 @@
   .icon { width: 18px; height: 18px; flex-shrink: 0; }
 
   .app { display: flex; flex-direction: column; min-height: 100vh; }
-  .app-header {
-    text-align: center; display: flex; flex-direction: column; gap: 8px; align-items: center;
-    max-width: 480px; margin: 0 auto; width: 100%; padding: 26px 20px 6px;
-  }
-  .app-header h1 { font-size: 24px; }
-  .app-header p { margin: 0; color: var(--color-muted); font-size: 13px; line-height: 1.5; max-width: 380px; }
 
-  .screen { flex: 1; max-width: 480px; margin: 0 auto; width: 100%; padding: 8px 20px 100px; box-sizing: border-box; }
+  .screen { flex: 1; max-width: 480px; margin: 0 auto; width: 100%; padding: 20px 20px 100px; box-sizing: border-box; }
   .screen-title { font-size: 22px; margin: 4px 0 16px; }
 
   /* — buttons — */
@@ -142,6 +136,10 @@
   .stat-card .head .icon { width: 15px; height: 15px; }
   .stat-card .value { font-size: 20px; font-weight: 700; margin-top: 6px; letter-spacing: -0.02em; }
   .stat-card .delta { font-size: 12px; font-weight: 600; margin-top: 4px; }
+
+  .today-spend-card { display: flex; align-items: center; gap: 12px; background: var(--color-card); border-radius: var(--radius-lg); box-shadow: var(--shadow-sm); padding: 12px 16px; margin-top: 12px; }
+  .today-spend-card .label { font-size: 14px; font-weight: 500; color: var(--color-text); }
+  .today-spend-card .value { margin-left: auto; font-size: 16px; font-weight: 700; flex-shrink: 0; }
 
   .section-head { margin: 22px 0 6px; display: flex; align-items: center; justify-content: space-between; gap: 10px; }
   .section-head h3 { font-size: 15px; font-weight: 700; }
@@ -265,14 +263,14 @@
   }
 
   @media (min-width: 560px) {
-    .app-header, .screen, .tabbar { max-width: 480px; }
+    .screen, .tabbar { max-width: 480px; }
     .app { background: var(--color-surface); }
-    .screen, .app-header { background: var(--color-bg); }
+    .screen { background: var(--color-bg); }
   }
 
   /* — desktop: same bottom bar, just a wider stage with multi-column screens — */
   @media (min-width: 880px) {
-    .app-header, .screen { max-width: 1120px; }
+    .screen { max-width: 1120px; }
     .add-form { max-width: 480px; }
     .home-columns { display: grid; grid-template-columns: 1.4fr 1fr; gap: 32px; align-items: start; }
     .home-columns .hero-card { margin-top: 0; }
@@ -284,11 +282,6 @@
 </head>
 <body>
 <div class="app">
-
-  <header class="app-header">
-    <h1 id="appTitle"></h1>
-    <p id="appSubtitle"></p>
-  </header>
 
   <main class="screen" id="screen"></main>
 
@@ -374,7 +367,7 @@
 
   const LANGS = {
     th: {
-      appTitle: "รายรับ-รายจ่าย", appSubtitle: "แอปติดตามรายรับ-รายจ่ายส่วนบุคคล",
+      appTitle: "รายรับ-รายจ่าย",
       darkModeBtn: "โหมดมืด", overview: "ภาพรวม", balanceLabel: "คงเหลือ", incomeLabel: "รายรับ", expenseLabel: "รายจ่าย",
       recentTx: "รายการล่าสุด", addShort: "+ เพิ่มรายการ", budgetsThisMonth: "งบประมาณเดือนนี้", seeAll: "ดูทั้งหมด",
       allTransactions: "รายการทั้งหมด", filterAll: "ทั้งหมด", allMonths: "ทุกเดือน", allCategories: "ทุกหมวดหมู่",
@@ -410,10 +403,10 @@
       toastBudgetSaved: "บันทึกงบประมาณแล้ว", toastBudgetDeleted: "ลบงบประมาณแล้ว",
       addBillBtn: "+ เพิ่มรายการ", billNameLabel: "ชื่อรายการ", billDayLabel: "วันที่ต้องจ่าย (1-31)", saveBillBtn: "บันทึกรายการ",
       noBills: "ยังไม่มีรายการที่ต้องจ่ายประจำ", toastBillSaved: "บันทึกรายการแล้ว", toastBillDeleted: "ลบรายการแล้ว",
-      vsLastMonth: "จากเดือนที่แล้ว", ofLabel: "จาก"
+      vsLastMonth: "จากเดือนที่แล้ว", ofLabel: "จาก", spentToday: "ใช้จ่ายวันนี้"
     },
     en: {
-      appTitle: "Income & Expenses", appSubtitle: "Personal income & expense tracker",
+      appTitle: "Income & Expenses",
       darkModeBtn: "Dark mode", overview: "Overview", balanceLabel: "Balance", incomeLabel: "Income", expenseLabel: "Expense",
       recentTx: "Recent activity", addShort: "+ Add transaction", budgetsThisMonth: "This month's budgets", seeAll: "See all",
       allTransactions: "All Transactions", filterAll: "All", allMonths: "All months", allCategories: "All categories",
@@ -449,7 +442,7 @@
       toastBudgetSaved: "Budget saved", toastBudgetDeleted: "Budget deleted",
       addBillBtn: "+ Add bill", billNameLabel: "Bill name", billDayLabel: "Due day (1-31)", saveBillBtn: "Save bill",
       noBills: "No recurring bills yet", toastBillSaved: "Bill saved", toastBillDeleted: "Bill deleted",
-      vsLastMonth: "vs last month", ofLabel: "of"
+      vsLastMonth: "vs last month", ofLabel: "of", spentToday: "Spent today"
     }
   };
   function L() { return LANGS[state.lang]; }
@@ -830,6 +823,14 @@
     today.setHours(0, 0, 0, 0);
     return Math.round((due - today) / 86400000);
   }
+  // Sorts newest-first: primarily by transaction date, but same-day entries
+  // are broken by actual insert/edit recency (updatedAt) so the one you just
+  // added always lands above ones you added earlier the same day.
+  function byRecency(a, b) {
+    const byDate = b.date.localeCompare(a.date);
+    if (byDate !== 0) return byDate;
+    return (b.updatedAt || 0) - (a.updatedAt || 0);
+  }
   function monthKeyOf(date) { return date.getFullYear() + "-" + String(date.getMonth() + 1).padStart(2, "0"); }
   function billDueCycle(day) { return monthKeyOf(nextBillDueDate(day)); }
   function dueSoonLabel(n) {
@@ -942,8 +943,6 @@
 
   // ---------- header / tabbar ----------
   function renderChrome() {
-    $("appTitle").textContent = L().appTitle;
-    $("appSubtitle").textContent = L().appSubtitle;
     document.title = L().appTitle;
     document.documentElement.lang = state.lang;
     document.querySelectorAll("#tabbar span[data-l]").forEach((el) => { el.textContent = L()[el.getAttribute("data-l")]; });
@@ -955,7 +954,7 @@
     const l = L();
     const income = transactions.filter((t) => t.type === "income").reduce((a, t) => a + t.amount, 0);
     const expense = transactions.filter((t) => t.type === "expense").reduce((a, t) => a + t.amount, 0);
-    const recent = transactions.slice().sort((a, b) => b.date.localeCompare(a.date)).slice(0, 5);
+    const recent = transactions.slice().sort(byRecency).slice(0, 5);
     const budgetsPreview = computeBudgets().slice(0, 2);
     const dueSoon = upcomingBills();
     const today = new Date().toLocaleDateString(state.lang === "en" ? "en-US" : "th-TH", { month: "long", year: "numeric" });
@@ -968,6 +967,8 @@
     const incomeDelta = pctDeltaLabel(curIncome, prevIncome);
     const expenseDelta = pctDeltaLabel(curExpense, prevExpense);
     const sparkline = sparklineSvg(computeSparklinePoints(), "#ffffff", 150, 34, 2.5);
+    const todayIso = new Date().toISOString().slice(0, 10);
+    const spentToday = transactions.filter((t) => t.type === "expense" && t.date === todayIso).reduce((a, t) => a + t.amount, 0);
 
     $("screen").innerHTML = `
       <div class="today-label">${escapeHtml(today)}</div>
@@ -993,6 +994,12 @@
               <div class="value">${fmtMoney(expense)}</div>
               <div class="delta" style="color:var(--color-expense)">${escapeHtml(expenseDelta)} ${escapeHtml(l.vsLastMonth)}</div>
             </div>
+          </div>
+
+          <div class="today-spend-card">
+            <div class="icon-avatar sm" style="background:var(--color-expense-tint);color:var(--color-expense-700)">${icon("wallet")}</div>
+            <span class="label">${escapeHtml(l.spentToday)}</span>
+            <span class="value">${fmtMoney(spentToday)}</span>
           </div>
 
           <div class="section-head">
@@ -1073,7 +1080,7 @@
     if (state.txFilterCategory !== "all") rows = rows.filter((t) => t.category === state.txFilterCategory);
     const q = state.txSearch.trim().toLowerCase();
     if (q) rows = rows.filter((t) => (t.note || "").toLowerCase().includes(q) || t.category.toLowerCase().includes(q));
-    return rows.sort((a, b) => b.date.localeCompare(a.date));
+    return rows.sort(byRecency);
   }
   function renderTxListOnly() {
     const l = L();
@@ -1819,6 +1826,16 @@
 
   if ("serviceWorker" in navigator) {
     window.addEventListener("load", () => { navigator.serviceWorker.register("sw.js").catch(() => {}); });
+    // When a newly-deployed service worker takes over an already-open tab
+    // (e.g. the tab that was sitting open before/during a Google sign-in
+    // redirect), reload once so the page picks up the new app shell instead
+    // of silently continuing to render whatever version it was loaded with.
+    let swRefreshing = false;
+    navigator.serviceWorker.addEventListener("controllerchange", () => {
+      if (swRefreshing) return;
+      swRefreshing = true;
+      window.location.reload();
+    });
   }
   window.addEventListener("beforeinstallprompt", (e) => {
     e.preventDefault();
