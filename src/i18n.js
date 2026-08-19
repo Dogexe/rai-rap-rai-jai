@@ -40,6 +40,8 @@ export const STRINGS = {
   toastEdited: ["บันทึกการแก้ไขแล้ว", "Changes saved"], toastAdded: ["เพิ่มรายการแล้ว", "Transaction added"],
   toastDeleted: ["ลบรายการแล้ว", "Transaction deleted"], toastCsv: ["ส่งออก CSV แล้ว", "CSV exported"],
   toastJson: ["ส่งออกข้อมูลแล้ว", "Data exported"], undoBtn: ["เลิกทำ", "Undo"],
+  toastStorageUnavailable: ["ไม่สามารถบันทึกข้อมูลในอุปกรณ์นี้ได้ ข้อมูลจะหายไปเมื่อปิดแอป", "Can't save data on this device — it will be lost when you close the app"],
+  toastSaveFailed: ["บันทึกการเปลี่ยนแปลงล่าสุดไม่สำเร็จ (พื้นที่จัดเก็บในเครื่องเต็มหรือไม่พร้อมใช้งาน)", "Couldn't save your last change (device storage full or unavailable)"],
   toastBudgetOver: ["เกินงบ {cat} แล้ว", "Over budget for {cat}"],
   toastBudgetNear: ["ใกล้ถึงงบ {cat} แล้ว (เกิน 80%)", "Nearing budget for {cat} (80%+)"],
   upcomingBillsSection: ["รายการที่ใกล้ถึงกำหนด", "Upcoming bills"], markPaidBtn: ["จ่ายแล้ว", "Mark paid"],

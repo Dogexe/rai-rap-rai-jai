@@ -1,4 +1,6 @@
 import { state, transactions, budgets, bills, goals, setTransactions, setBudgets, setBills, setGoals } from "./state.js";
+import { showToast } from "./toast.js";
+import { L } from "./i18n.js";
 
 export const STORAGE_KEY = "expense_tracker_transactions_v1";
 export const SETTINGS_KEY = "expense_tracker_settings_v1";
@@ -34,11 +36,28 @@ export function loadFromStorage() {
     }
   } catch (e) { /* ignore */ }
 }
+// Fires at most once per session: storageAvailable is set once at module
+// load and effectively never changes, so warning on every save attempt
+// after the first would just spam the same message on every add/edit/delete.
+let warnedUnavailable = false;
+function warnUnavailable() {
+  if (warnedUnavailable) return;
+  warnedUnavailable = true;
+  showToast(L().toastStorageUnavailable);
+}
+// The toast this shows on failure is deferred to a microtask rather than
+// shown synchronously here, because callers don't have a consistent order
+// (some show their own "saved"/"added" toast before calling this, some
+// after) -- a synchronous call here could get silently overwritten by a
+// caller's success toast that fires right after. Deferring guarantees this
+// one is always the last to run, so it's the one the user actually sees.
 export function saveToStorage() {
-  if (!storageAvailable) return;
-  try { window.localStorage.setItem(STORAGE_KEY, JSON.stringify(transactions)); } catch (e) { /* quota */ }
+  if (!storageAvailable) { warnUnavailable(); return; }
+  try { window.localStorage.setItem(STORAGE_KEY, JSON.stringify(transactions)); }
+  catch (e) { queueMicrotask(() => showToast(L().toastSaveFailed)); }
 }
 export function saveSettings() {
-  if (!storageAvailable) return;
-  try { window.localStorage.setItem(SETTINGS_KEY, JSON.stringify({ lang: state.lang, dark: state.dark, budgets, bills, goals })); } catch (e) { /* quota */ }
+  if (!storageAvailable) { warnUnavailable(); return; }
+  try { window.localStorage.setItem(SETTINGS_KEY, JSON.stringify({ lang: state.lang, dark: state.dark, budgets, bills, goals })); }
+  catch (e) { queueMicrotask(() => showToast(L().toastSaveFailed)); }
 }
