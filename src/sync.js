@@ -154,6 +154,10 @@ export function hasLiveInputRisk() {
   return false;
 }
 
+// Tracks whether the last genuine sync attempt (online, signed in, actually
+// reached the push/pull calls) failed, so a failure toast fires once when
+// sync *starts* failing rather than on every 25s retry while it stays down.
+let lastSyncFailed = false;
 let syncInFlight = false;
 export async function syncNow() {
   if (!sb) { setSyncStatus("cloud sync unavailable", false); return; }
@@ -179,9 +183,12 @@ export async function syncNow() {
   const pushGoalOk = await pushRows("goals", goals.map((g) => goalToRow(g, false)));
   if (pushTxOk && pushBudgetOk && pushBillOk && pushGoalOk && pullTxOk && pullBudgetOk && pullBillOk && pullGoalOk) {
     setSyncStatus(L().syncLatest + new Date().toLocaleTimeString(state.lang === "en" ? "en-US" : "th-TH"), true);
+    lastSyncFailed = false;
     if (!hasLiveInputRisk()) onSyncRerender();
   } else {
     setSyncStatus(L().syncPartial, false);
+    if (!lastSyncFailed) showToast(L().syncPartial);
+    lastSyncFailed = true;
   }
   syncInFlight = false;
 }
