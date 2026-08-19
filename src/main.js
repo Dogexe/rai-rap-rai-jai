@@ -7,6 +7,7 @@ import {
   sb, setCurrentUser, currentUser, hasLiveInputRisk, syncNow, setSyncStatus, setSyncRerenderCallback
 } from "./sync.js";
 import { setDeferredInstallPrompt } from "./pwa-install.js";
+import { initErrorReporting } from "./error-report.js";
 import { setTab, renderScreen, registerRenderers } from "./screens/router.js";
 import { renderHome } from "./screens/home.js";
 import { renderTransactions } from "./screens/transactions.js";
@@ -22,6 +23,7 @@ registerRenderers({
   settings: renderSettings
 });
 
+initErrorReporting();
 setSyncRerenderCallback(renderScreen);
 loadFromStorage();
 applyTheme();
