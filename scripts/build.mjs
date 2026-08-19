@@ -22,6 +22,7 @@ await build({
 });
 
 cpSync("index.html", "dist/index.html");
+cpSync("privacy.html", "dist/privacy.html");
 cpSync("styles.css", "dist/styles.css");
 cpSync("manifest.json", "dist/manifest.json");
 cpSync("sw.js", "dist/sw.js");
