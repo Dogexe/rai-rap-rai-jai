@@ -3,6 +3,7 @@ import { $, escapeHtml } from "./utils.js";
 import { state, transactions, budgets, bills, goals, setTransactions, setBudgets, setBills, setGoals } from "./state.js";
 import { saveToStorage, saveSettings } from "./storage.js";
 import { L } from "./i18n.js";
+import { showToast } from "./toast.js";
 
 // Set once by main.js at boot (see setSyncRerenderCallback) -- avoids sync.js
 // importing renderScreen from main.js, which would make the two modules
@@ -187,12 +188,22 @@ export async function syncNow() {
 
 export async function signInWithGoogle() {
   if (!sb) return;
-  const cleanUrl = window.location.origin + window.location.pathname;
-  await sb.auth.signInWithOAuth({ provider: "google", options: { redirectTo: cleanUrl } });
+  try {
+    const cleanUrl = window.location.origin + window.location.pathname;
+    const { error } = await sb.auth.signInWithOAuth({ provider: "google", options: { redirectTo: cleanUrl } });
+    if (error) throw error;
+  } catch (e) {
+    showToast(L().toastSignInFailed);
+  }
 }
 export async function signOutUser() {
   if (!sb) return;
-  await sb.auth.signOut();
+  try {
+    const { error } = await sb.auth.signOut();
+    if (error) throw error;
+  } catch (e) {
+    showToast(L().toastSignOutFailed);
+  }
 }
 
 // Reassigning an imported `let` binding from another module isn't allowed in
