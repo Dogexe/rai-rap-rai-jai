@@ -374,6 +374,7 @@ export function renderSettings() {
       </div>
 
       <p class="footer-note">${escapeHtml(l.footerNote)}</p>
+      <p class="footer-note"><a href="./privacy.html" target="_blank" rel="noopener">${escapeHtml(l.privacyPolicyLink)}</a></p>
     </div>
   `;
 

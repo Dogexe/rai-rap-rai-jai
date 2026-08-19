@@ -31,6 +31,7 @@ export const STRINGS = {
   exportCsvBtn: ["ส่งออก CSV", "Export CSV"], exportJsonBtn: ["ส่งออกข้อมูล (JSON)", "Export data (JSON)"],
   billsSection: ["รายการที่ต้องจ่ายประจำ", "Recurring bills"],
   dueOn: ["ทุกวันที่ ", "Due on day "],
+  privacyPolicyLink: ["นโยบายความเป็นส่วนตัว", "Privacy Policy"],
   footerNote: [
     "ข้อมูลจะถูกบันทึกไว้ในอุปกรณ์นี้เสมอ เข้าสู่ระบบด้วย Google เพื่อซิงค์ข้ามอุปกรณ์โดยอัตโนมัติ แนะนำให้ส่งออกข้อมูลเก็บเป็นไฟล์สำรองเป็นระยะ",
     "Data always stays on this device. Sign in with Google to sync across devices automatically. Export a backup periodically."
