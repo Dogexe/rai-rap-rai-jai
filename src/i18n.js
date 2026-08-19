@@ -57,6 +57,8 @@ export const STRINGS = {
   installAppBtn: ["ติดตั้งแอปลงเครื่อง", "Install app"],
   notSignedIn: ["ยังไม่ได้เข้าสู่ระบบ", "Not signed in"], signInGoogle: ["เข้าสู่ระบบด้วย Google", "Sign in with Google"],
   signOutBtn: ["ออกจากระบบ", "Sign out"],
+  toastSignInFailed: ["เข้าสู่ระบบไม่สำเร็จ ลองอีกครั้ง", "Sign-in failed. Try again."],
+  toastSignOutFailed: ["ออกจากระบบไม่สำเร็จ ลองอีกครั้ง", "Sign-out failed. Try again."],
   syncNowBtn: ["ซิงค์เดี๋ยวนี้", "Sync now"],
   syncHelp: ["เข้าสู่ระบบด้วย Google ด้านบนเพื่อซิงค์ข้อมูลข้ามอุปกรณ์โดยอัตโนมัติ — ไม่ต้องใช้รหัสอีกต่อไป", "Sign in with Google above to sync your data across devices automatically — no code needed."],
   syncSignedOut: ["เข้าสู่ระบบด้วย Google เพื่อซิงค์ข้อมูลข้ามอุปกรณ์", "Sign in with Google to sync across devices"],
