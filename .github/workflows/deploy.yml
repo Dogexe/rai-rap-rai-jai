@@ -2,7 +2,7 @@ name: Deploy to GitHub Pages
 
 on:
   push:
-    branches: [main]
+    branches: [main, build-tooling-stage1] # TEMP: testing this workflow before merge, remove build-tooling-stage1 before merging to main
   workflow_dispatch:
 
 permissions:
