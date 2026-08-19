@@ -91,7 +91,7 @@ export function renderHome() {
           <button type="button" class="btn btn-ghost" id="goAddBtn">${escapeHtml(l.addShort)}</button>
         </div>
         <div class="list-card">
-          ${recent.map((t) => txRowHtml(t)).join("") || `<div class="empty-note">${escapeHtml(l.noResults)}</div>`}
+          ${recent.map((t) => txRowHtml(t)).join("") || `<div class="empty-note">${escapeHtml(l.noTransactionsYet)}</div>`}
         </div>
       </div>
       <div class="home-col-side">

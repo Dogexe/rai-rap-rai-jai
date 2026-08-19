@@ -12,6 +12,7 @@ export const STRINGS = {
   allDays: ["ทุกวัน", "All days"], allMonths: ["ทุกเดือน", "All months"], allYears: ["ทุกปี", "All years"],
   allCategories: ["ทุกหมวดหมู่", "All categories"],
   searchPlaceholder: ["ค้นหารายละเอียด...", "Search notes..."], noResults: ["ไม่พบรายการ", "No transactions found"],
+  noTransactionsYet: ["ยังไม่มีรายการ เริ่มเพิ่มรายการแรกของคุณกันเลย", "No transactions yet — add your first one to get started"],
   editAria: ["แก้ไข", "Edit"], deleteAria: ["ลบ", "Delete"],
   addTitle: ["เพิ่มรายการ", "Add transaction"], editTitle: ["แก้ไขรายการ", "Edit transaction"],
   saveBtn: ["บันทึกรายการ", "Save transaction"], saveEditBtn: ["บันทึกการแก้ไข", "Save changes"],
